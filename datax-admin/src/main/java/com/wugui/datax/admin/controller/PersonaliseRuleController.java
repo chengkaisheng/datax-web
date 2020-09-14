@@ -42,7 +42,7 @@ public class PersonaliseRuleController extends BaseController{
         return ReturnT.SUCCESS;
     }
 
-    @GetMapping("/info")
+    @GetMapping("/info/{id}")
     @ApiOperation("个性化规则详情")
     public ReturnT<Map<String,Object>> info(@PathVariable(value = "id")Integer id){
         Map<String,Object> map = personaliseRuleService.info(id);
@@ -56,7 +56,7 @@ public class PersonaliseRuleController extends BaseController{
         return ReturnT.SUCCESS;
     }
 
-    @PostMapping("/delete")
+    @PostMapping("/delete/{id}")
     @ApiOperation("删除个性化规则")
     public ReturnT<String> delete(@PathVariable(value = "id")Integer id){
         personaliseRuleService.delete(id);
