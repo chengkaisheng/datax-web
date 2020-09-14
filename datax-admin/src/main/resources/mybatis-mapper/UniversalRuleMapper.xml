@@ -10,21 +10,18 @@
         <result property="code" column="code"/>
         <result property="description" column="description"/>
         <result property="type" column="type"/>
-        <result property="personaliseId" column="personalise_id"/>
+        <result property="personaliseType" column="personalise_type"/>
         <result property="isDelete" column="is_delete"/>
         <result property="createUserId" column="create_user_id"/>
-        <result property="createUserName" column="create_user_name"/>
         <result property="createTime" column="create_time"/>
-        <result property="updateUserId" column="update_user_id"/>
-        <result property="updateUserName" column="update_user_name"/>
-        <result property="updateTime" column="update_time"/>
     </resultMap>
+    <update id="updateIsDelete">
+        update universal_rule set is_delete=1 where id = #{id}
+    </update>
 
     <select id="pageList" resultType="com.wugui.datax.admin.entity.UniversalRule">
-        select a.id,a.name,a.code,a.description,a.type,b.join_type as personaliseJoinType,b.code as personaliseCode
+        select a.id,a.name,a.code,a.description,a.type,a.personalise_type
         from universal_rule as a
-        left join personalise_rule as b
-        on a.personalise_id = b.id
         where a.is_delete = 0
         <if test="name != null and name != '' ">
             and a.name like CONCAT(CONCAT('%', #{name}), '%')
@@ -32,15 +29,18 @@
         order by a.create_time desc
         limit #{offset}, #{pageSize}
     </select>
+
     <select id="pageListCount" resultType="java.lang.Integer">
         select count(1) from universal_rule as a
-        left join personalise_rule as b
-        on a.personalise_id = b.id
         where a.is_delete = 0
         <if test="name != null and name != '' ">
             and a.name like CONCAT(CONCAT('%', #{name}), '%')
         </if>
     </select>
-
+    <select id="selectUniversalNameByType" resultType="com.wugui.datax.admin.entity.UniversalRule">
+        select id,name from universal_rule
+        where is_delete = 0
+        and type = #{type}
+    </select>
 
 </mapper>

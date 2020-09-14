@@ -1,5 +1,6 @@
 package com.wugui.datax.admin.controller;
 
+import com.fasterxml.jackson.databind.ser.Serializers;
 import com.wugui.datatx.core.biz.model.ReturnT;
 import com.wugui.datax.admin.entity.UniversalRule;
 import com.wugui.datax.admin.service.UniversalRuleService;
@@ -19,7 +20,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/universal")
 @Api(tags = "通用规则接口")
-public class UniversalRuleController {
+public class UniversalRuleController extends BaseController {
 
     @Resource
     private UniversalRuleService universalRuleService;
@@ -36,9 +37,37 @@ public class UniversalRuleController {
     @PostMapping("/add")
     @ApiOperation("添加")
     public ReturnT<String> add(@RequestBody UniversalRule universalRule, HttpServletRequest request){
-
-        universalRuleService.add(universalRule,request);
+        universalRule.setCreateUserId(getCurrentUserId(request));
+        universalRuleService.add(universalRule);
         return ReturnT.SUCCESS;
+    }
+
+    @PostMapping("/delete/{id}")
+    @ApiOperation("删除通用规则")
+    public ReturnT<String> delete(@PathVariable(value = "id")Integer id){
+        universalRuleService.delete(id);
+        return ReturnT.SUCCESS;
+    }
+
+    @PostMapping("/update")
+    @ApiOperation("修改通用规则")
+    public ReturnT<String> update(@RequestBody UniversalRule universalRule){
+        universalRuleService.update(universalRule);
+        return ReturnT.SUCCESS;
+    }
+
+    @GetMapping("/info/{id}")
+    @ApiOperation("通用规则详情")
+    public ReturnT<Map<String,Object>> info(@PathVariable(value = "id")Integer id){
+        Map<String,Object> map = universalRuleService.info(id);
+        return new ReturnT<>(map);
+    }
+
+    @GetMapping("/universalName/{type}")
+    @ApiOperation("根据规则大类查询规则小类")
+    public ReturnT<Map<String,Object>> universalName(@PathVariable(value = "type")Integer type){
+        Map<String,Object> map = universalRuleService.getUniversalNameByType(type);
+        return new ReturnT<>(map);
     }
 
 }

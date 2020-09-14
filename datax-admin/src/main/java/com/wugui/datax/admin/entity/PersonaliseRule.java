@@ -49,26 +49,9 @@ public class PersonaliseRule implements Serializable {
 	 */
 	private Integer createUserId;
 	/**
-	 * 创建人姓名
-	 */
-	private String createUserName;
-	/**
 	 * 创建时间
 	 */
 	private Date createTime;
-	/**
-	 * 更新人ID
-	 */
-	private Integer updateUserId;
-	/**
-	 * 更新人姓名
-	 */
-	private String updateUserName;
-	/**
-	 * 更新时间
-	 */
-	private Date updateTime;
-
 	/**
 	 *  是否被删除  0未删  1已删
 	 */

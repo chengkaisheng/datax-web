@@ -3,6 +3,9 @@ package com.wugui.datax.admin.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.wugui.datax.admin.entity.PersonaliseRule;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * 个性化规则表
@@ -13,5 +16,10 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface PersonaliseRuleMapper extends BaseMapper<PersonaliseRule> {
-	
+
+    List<PersonaliseRule> pageList(@Param("offSet")int offSet, @Param("pageSize") int pageSize, @Param("type") Integer type, @Param("name") String name,@Param("joinType") Integer joinType);
+
+    int pageListCount(@Param("name") String name, @Param("type") Integer type,@Param("joinType") Integer joinType);
+
+    void updateIsDelete(@Param("id") Integer id);
 }

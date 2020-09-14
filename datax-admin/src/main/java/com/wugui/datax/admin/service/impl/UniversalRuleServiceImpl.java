@@ -1,4 +1,7 @@
 package com.wugui.datax.admin.service.impl;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wugui.datax.admin.controller.BaseController;
+import com.wugui.datax.admin.entity.LoginUser;
 import com.wugui.datax.admin.entity.UniversalRule;
 import com.wugui.datax.admin.mapper.UniversalRuleMapper;
 import com.wugui.datax.admin.service.UniversalRuleService;
@@ -8,6 +11,8 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,14 +39,36 @@ public class UniversalRuleServiceImpl  implements UniversalRuleService {
     }
 
     @Override
-    public void add(UniversalRule universalRuleEntity, HttpServletRequest request){
+    public void add(UniversalRule universalRule){
+        universalRule.setIsDelete(0);
+        universalRule.setCreateTime(new Date());
+        universalRuleMapper.insert(universalRule);
 
-        /*//获取当前登录用户
-        try {
-            LoginUser loginUser = new ObjectMapper().readValue(request.getInputStream(), LoginUser.class);
-            logger.info(loginUser.getUsername());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
+    }
+
+    @Override
+    public void delete(Integer id) {
+        universalRuleMapper.updateIsDelete(id);
+    }
+
+    @Override
+    public void update(UniversalRule universalRule) {
+        universalRuleMapper.updateById(universalRule);
+    }
+
+    @Override
+    public Map<String, Object> info(Integer id) {
+        Map<String,Object> map = new HashMap<>();
+        UniversalRule universalRule = universalRuleMapper.selectById(id);
+        map.put("data",universalRule);
+        return map;
+    }
+
+    @Override
+    public Map<String, Object> getUniversalNameByType(Integer type) {
+        Map<String,Object> map = new HashMap<>();
+        List<UniversalRule> list = universalRuleMapper.selectUniversalNameByType(type);
+        map.put("data",list);
+        return map;
     }
 }

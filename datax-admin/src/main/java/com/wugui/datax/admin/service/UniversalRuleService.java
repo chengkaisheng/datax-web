@@ -24,8 +24,33 @@ public interface UniversalRuleService{
     /**
      * 添加通用规则
      * @param universalRule
-     * @param request
      */
-    void add(UniversalRule universalRule, HttpServletRequest request);
+    void add(UniversalRule universalRule);
+
+    /**
+     * 删除通用规则
+     * @param id
+     */
+    void delete(Integer id);
+
+    /**
+     * 修改通用规则
+     * @param universalRule
+     */
+    void update(UniversalRule universalRule);
+
+    /**
+     * 通用规则详情
+     * @param id
+     * @return
+     */
+    Map<String, Object> info(Integer id);
+
+    /**
+     * 根据规则类别获取规则名称
+     * @param type
+     * @return
+     */
+    Map<String, Object> getUniversalNameByType(Integer type);
 }
 

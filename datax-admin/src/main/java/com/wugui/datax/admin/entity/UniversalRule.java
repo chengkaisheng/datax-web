@@ -38,13 +38,13 @@ public class UniversalRule implements Serializable {
 	 */
 	private String description;
 	/**
-	 * 规则类别 1完整 2准确 3规范 4唯一 5一致 6关联性
+	 * 规则大类 1完整 2准确 3规范 4唯一 5一致 6关联性
 	 */
 	private Integer type;
 	/**
-	 * 个性化规则ID
+	 * 个性化规则类型
 	 */
-	private Integer personaliseId;
+	private Integer personaliseType;
 	/**
 	 *  是否被删除  0未删  1已删
 	 */
@@ -54,31 +54,9 @@ public class UniversalRule implements Serializable {
 	 */
 	private Integer createUserId;
 	/**
-	 * 创建人姓名
-	 */
-	private String createUserName;
-	/**
 	 * 创建时间
 	 */
 	private Date createTime;
-	/**
-	 * 更新人ID
-	 */
-	private Integer updateUserId;
-	/**
-	 * 更新人姓名
-	 */
-	private String updateUserName;
-	/**
-	 * 更新时间
-	 */
-	private Date updateTime;
-
-	@TableField(exist = false)
-	private Integer personaliseJoinType;
-
-	@TableField(exist = false)
-	private String personaliseCode;
 
 
 }

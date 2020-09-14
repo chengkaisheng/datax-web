@@ -20,4 +20,8 @@ public interface UniversalRuleMapper extends BaseMapper<UniversalRule> {
     List<UniversalRule> pageList(@Param("offset") int offset, @Param("pageSize") int pageSize, @Param("name") String name);
 
     int pageListCount(@Param("name") String name);
+
+    void updateIsDelete(@Param("id") Integer id);
+
+    List<UniversalRule> selectUniversalNameByType(@Param("type")Integer type);
 }
