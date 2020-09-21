@@ -53,4 +53,18 @@ public class PersonaliseRuleServiceImpl implements PersonaliseRuleService {
     public void delete(Integer id) {
         personaliseRuleMapper.updateIsDelete(id);
     }
+
+    @Override
+    public Map<String,Object> check(String code) {
+        Map<String,Object> map = new HashMap<>();
+        int count = personaliseRuleMapper.selectCountByCode(code);
+        if(count > 0){
+            map.put("code",500);
+            map.put("msg","编码已存在");
+        }else {
+            map.put("code",200);
+            map.put("msg","编码可以使用");
+        }
+        return map;
+    }
 }

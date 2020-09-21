@@ -48,5 +48,7 @@ public interface PersonaliseRuleService{
      * @param id
      */
     void delete(Integer id);
+
+    Map<String,Object> check(String code);
 }
 

@@ -2,7 +2,6 @@ package com.wugui.datax.admin.service;
 
 import com.wugui.datax.admin.entity.UniversalRule;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 /**
@@ -52,5 +51,18 @@ public interface UniversalRuleService{
      * @return
      */
     Map<String, Object> getUniversalNameByType(Integer type);
+
+    /**
+     * 查询关联的通用规则和个性化规则
+     * @return
+     */
+    Map<String, Object> getUniverToPerson();
+
+    /**
+     * 检查code是否存在
+     * @param code
+     * @return
+     */
+    Map<String,Object> check(String code);
 }
 

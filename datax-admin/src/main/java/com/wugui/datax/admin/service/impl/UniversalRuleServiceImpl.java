@@ -1,7 +1,4 @@
 package com.wugui.datax.admin.service.impl;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.wugui.datax.admin.controller.BaseController;
-import com.wugui.datax.admin.entity.LoginUser;
 import com.wugui.datax.admin.entity.UniversalRule;
 import com.wugui.datax.admin.mapper.UniversalRuleMapper;
 import com.wugui.datax.admin.service.UniversalRuleService;
@@ -10,8 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -69,6 +64,30 @@ public class UniversalRuleServiceImpl  implements UniversalRuleService {
         Map<String,Object> map = new HashMap<>();
         List<UniversalRule> list = universalRuleMapper.selectUniversalNameByType(type);
         map.put("data",list);
+        return map;
+    }
+
+    @Override
+    public Map<String, Object> getUniverToPerson() {
+        Map<String,Object> map = new HashMap<>();
+        //先根据规则大类找到对应的通用规则
+
+        List<UniversalRule> list = universalRuleMapper.selectUniverToPerson();
+        map.put("data",list);
+        return map;
+    }
+
+    @Override
+    public Map<String,Object> check(String code) {
+        int count = universalRuleMapper.selectCountByCode(code);
+        Map<String,Object> map = new HashMap<>();
+        if(count > 0){
+            map.put("code",500);
+            map.put("msg","编码已存在");
+        }else {
+            map.put("code",200);
+            map.put("msg","编码可以使用");
+        }
         return map;
     }
 }

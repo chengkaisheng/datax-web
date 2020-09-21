@@ -63,4 +63,11 @@ public class PersonaliseRuleController extends BaseController{
         return ReturnT.SUCCESS;
     }
 
+    @GetMapping("/check")
+    @ApiOperation("检查code是否重复")
+    public Map<String,Object> check(String code){
+        Map<String,Object> map = personaliseRuleService.check(code);
+        return map;
+    }
+
 }

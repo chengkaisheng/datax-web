@@ -22,4 +22,8 @@ public interface PersonaliseRuleMapper extends BaseMapper<PersonaliseRule> {
     int pageListCount(@Param("name") String name, @Param("type") Integer type,@Param("joinType") Integer joinType);
 
     void updateIsDelete(@Param("id") Integer id);
+
+    int selectCountByCode(@Param("code") String code);
+
+    PersonaliseRule selectByCode(@Param("code") String codeTemp);
 }

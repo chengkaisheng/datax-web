@@ -24,4 +24,8 @@ public interface UniversalRuleMapper extends BaseMapper<UniversalRule> {
     void updateIsDelete(@Param("id") Integer id);
 
     List<UniversalRule> selectUniversalNameByType(@Param("type")Integer type);
+
+    List<UniversalRule> selectUniverToPerson();
+
+    int selectCountByCode(@Param("code") String code);
 }

@@ -70,4 +70,18 @@ public class UniversalRuleController extends BaseController {
         return new ReturnT<>(map);
     }
 
+    @GetMapping("/univerToPerson")
+    @ApiOperation("查询关联的通用规则和个性化规则")
+    public ReturnT<Map<String,Object>> universalToPersonalise(){
+        Map<String,Object> map = universalRuleService.getUniverToPerson();
+        return new ReturnT<>(map);
+    }
+
+    @GetMapping("/check")
+    @ApiOperation("检查code是否重复")
+    public Map<String,Object> check(String code){
+        Map<String,Object> map = universalRuleService.check(code);
+        return map;
+    }
+
 }

@@ -47,5 +47,13 @@
             and name like CONCAT(CONCAT('%', #{name}), '%') or code like CONCAT(CONCAT('%', #{name}), '%')
         </if>
     </select>
+    <select id="selectCountByCode" resultType="java.lang.Integer">
+        select count(1) from personalise_rule
+        where is_delete=0 and code = #{code}
+    </select>
+    <select id="selectByCode" resultType="com.wugui.datax.admin.entity.PersonaliseRule">
+        select * from personalise_rule
+        where code = #{code}
+    </select>
 
 </mapper>
