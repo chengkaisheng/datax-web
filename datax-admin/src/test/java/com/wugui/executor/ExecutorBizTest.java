@@ -22,10 +22,10 @@ public class ExecutorBizTest {
     public static void main(String[] args) throws Exception {
 
         // param
-        String jobHandler = "demoJobHandler";
+        /*String jobHandler = "demoJobHandler";
         String params = "";
 
-        runTest(jobHandler, params);
+        runTest(jobHandler, params);*/
     }
 
     /**

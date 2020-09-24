@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wugui.datax.admin.mapper.SearchMapper">
+  <resultMap id="BaseResultMap" type="com.wugui.datax.admin.entity.Search">
+      <id column="id" property="id" />
+      <result column="task_name" property="taskName" />
+      <result column="table_name" property="tableName" />
+      <result column="intro" property="intro" />
+      <result column="description" property="description" />
+      <result column="image_url" property="imageUrl"/>
+      <result column="jdbc_datasource_id" property="jdbcDatasourceId" />
+  </resultMap>
+
+    <insert id="saveSearch">
+        INSERT INTO job_search(task_name,`table_name`,intro,description,image_url,jdbc_datasource_id) VALUES (#{taskName},#{tableName},#{intro},#{description},#{imageUrl},#{jdbcDatasourceId})
+    </insert>
+
+    <select id="listSearch" resultMap="BaseResultMap">
+        SELECT s.id,s.task_name,s.`table_name`,s.intro,s.description,s.image_url,s.jdbc_datasource_id,sd.`rows`,sd.size
+        FROM job_search s LEFT JOIN job_search_detail sd ON s.id=sd.search_id
+    </select>
+
+    <select id="getCountByTableName" resultType="long">
+        SELECT count(id) FROM ${tableName}
+    </select>
+
+    <select id="getSearchById" resultType="com.wugui.datax.admin.entity.Search">
+        SELECT s.id,s.task_name,s.`table_name`,s.intro,s.description,s.image_url,s.jdbc_datasource_id,sd.`rows`,sd.size
+        FROM job_search s JOIN job_search_detail sd ON s.id=sd.search_id AND s.id=#{id}
+    </select>
+</mapper>

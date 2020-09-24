@@ -10,12 +10,14 @@ import com.wugui.datax.admin.tool.query.MongoDBQueryTool;
 import com.wugui.datax.admin.tool.query.QueryToolFactory;
 import com.wugui.datax.admin.util.AESUtil;
 import com.wugui.datax.admin.util.JdbcConstants;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by jingwk on 2020/01/30
@@ -26,6 +28,11 @@ public class JobDatasourceServiceImpl extends ServiceImpl<JobDatasourceMapper, J
 
     @Resource
     private JobDatasourceMapper datasourceMapper;
+    @Override
+    public List<JobDatasource> listDataSource(String username) {
+        List<JobDatasource> datasources = datasourceMapper.listDataSourceByUsername(username);
+        return datasources;
+    }
 
     @Override
     public Boolean  dataSourceTest(JobDatasource jobDatasource) throws IOException {

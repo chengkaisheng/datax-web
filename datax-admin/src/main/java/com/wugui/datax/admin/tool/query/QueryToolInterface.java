@@ -1,5 +1,6 @@
 package com.wugui.datax.admin.tool.query;
 
+import com.wugui.datax.admin.entity.ColumnMsg;
 import com.wugui.datax.admin.tool.database.ColumnInfo;
 import com.wugui.datax.admin.tool.database.TableInfo;
 
@@ -84,4 +85,7 @@ public interface QueryToolInterface {
      */
     long getMaxIdVal(String tableName,String primaryKey);
 
+    List<ColumnMsg> getColumnSchema(String tableName, String tableSchema);
+
+    String getDBName();
 }

@@ -2,6 +2,7 @@ package com.wugui.datax.admin.service.impl;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.google.common.collect.Lists;
+import com.wugui.datax.admin.entity.ColumnMsg;
 import com.wugui.datax.admin.entity.JobDatasource;
 import com.wugui.datax.admin.service.DatasourceQueryService;
 import com.wugui.datax.admin.service.JobDatasourceService;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * datasource query
@@ -111,5 +113,37 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
         }
         BaseQueryTool queryTool = QueryToolFactory.getByDbType(jdbcDatasource);
         return queryTool.getColumnsByQuerySql(querySql);
+    }
+
+    public Long getRows(Long datasourceId,String tableName){
+        JobDatasource jdbcDatasource = jobDatasourceService.getById(datasourceId);
+        if (ObjectUtil.isNull(jdbcDatasource)) {
+            return 0L;
+        }
+        BaseQueryTool queryTool = QueryToolFactory.getByDbType(jdbcDatasource);
+        return queryTool.getRows(tableName);
+    }
+
+    public List<Map<String,Object>> listAll(Long datasourceId,String tableName) throws IOException {
+        JobDatasource jdbcDatasource = jobDatasourceService.getById(datasourceId);
+        List<String> columns = this.getColumns(datasourceId, tableName);
+        if (ObjectUtil.isNull(jdbcDatasource)) {
+            return Lists.newArrayList();
+        }
+        BaseQueryTool queryTool = QueryToolFactory.getByDbType(jdbcDatasource);
+        return queryTool.listAll(columns,tableName);
+    }
+
+    public List<ColumnMsg> getColumnSchema(Long datasourceId, String tableName){
+        JobDatasource jdbcDatasource = jobDatasourceService.getById(datasourceId);
+        if (ObjectUtil.isNull(jdbcDatasource)) {
+            return Lists.newArrayList();
+        }
+        BaseQueryTool queryTool = QueryToolFactory.getByDbType(jdbcDatasource);
+        String tableSchema="";
+        if(queryTool.getClass()==MySQLQueryTool.class){
+            tableSchema=queryTool.getDBName();
+        }
+        return queryTool.getColumnSchema(tableName,tableSchema);
     }
 }

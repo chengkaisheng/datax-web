@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8082
   #port: ${server.port}
 spring:
   #数据源
@@ -111,7 +111,3 @@ datax:
 datasource:
   aes:
     key: AD42F6697B035B75
-
-upload:
-  url: /tmp/img/
-  service-url: http://127.0.0.1:8080/image

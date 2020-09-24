@@ -68,4 +68,25 @@ public class OracleDatabaseMeta extends BaseDatabaseMeta implements DatabaseInte
     public String getSQLQueryColumns(String... args) {
         return "select table_name,comments from user_tab_comments where table_name = ?";
     }
+
+    @Override
+    public String getDBName(){
+        return "select name from v$database";
+    }
+
+    @Override
+    public String getColumnSchema(String tableName, String tableSchema) {
+        return "select a.column_name, u.comments,a.data_type from (select column_name,data_type from all_tab_cols WHERE table_name = '"+tableName+"') a left join user_col_comments u on a.COLUMN_NAME=u.COLUMN_NAME where u.TABLE_NAME='"+tableName+"'";
+    }
+
+    @Override
+    public String getStringStatistics(String name, String tableName) {
+        return String.format("select count(%s) from(SELECT DISTINCT %s from %s)",name,name,tableName);
+    }
+
+    @Override
+    public String getDateStatistics(String name, String tableName) {
+        return String.format("select minv+floor((b.%s - a.minv)/step)*step as start,(floor((b.%s - a.minv)/step)+1)*step+minv as end,count(1) from %s b left join (select min(a.%s) minv, (max(a.%s) - min(a.%s))/3 step from %s a) a on 1 = 1 group by floor((b.%s - a.minv)/step),minv,step order by start asc",
+                name,name,tableName,name,name,name,tableName,name);
+    }
 }
