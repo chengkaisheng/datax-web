@@ -4,6 +4,7 @@ import cn.hutool.core.util.ObjectUtil;
 import com.google.common.collect.Lists;
 import com.wugui.datax.admin.entity.ColumnMsg;
 import com.wugui.datax.admin.entity.JobDatasource;
+import com.wugui.datax.admin.entity.Search;
 import com.wugui.datax.admin.service.DatasourceQueryService;
 import com.wugui.datax.admin.service.JobDatasourceService;
 import com.wugui.datax.admin.tool.query.*;
@@ -16,7 +17,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
-
 /**
  * datasource query
  *
@@ -115,6 +115,7 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
         return queryTool.getColumnsByQuerySql(querySql);
     }
 
+    //获取表的记录数
     public Long getRows(Long datasourceId,String tableName){
         JobDatasource jdbcDatasource = jobDatasourceService.getById(datasourceId);
         if (ObjectUtil.isNull(jdbcDatasource)) {
@@ -124,16 +125,19 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
         return queryTool.getRows(tableName);
     }
 
-    public List<Map<String,Object>> listAll(Long datasourceId,String tableName) throws IOException {
+    //获取表的所有数据
+    public List<List<Map<String,Object>>> listAll(Long datasourceId,String tableName,Integer pageNumber,Integer pageSize) throws IOException {
         JobDatasource jdbcDatasource = jobDatasourceService.getById(datasourceId);
         List<String> columns = this.getColumns(datasourceId, tableName);
         if (ObjectUtil.isNull(jdbcDatasource)) {
             return Lists.newArrayList();
         }
         BaseQueryTool queryTool = QueryToolFactory.getByDbType(jdbcDatasource);
-        return queryTool.listAll(columns,tableName);
+        List<List<Map<String,Object>>> maps = queryTool.listAll(columns,tableName,pageNumber,pageSize);
+        return maps;
     }
 
+    //获取表所有字段的统计值
     public List<ColumnMsg> getColumnSchema(Long datasourceId, String tableName){
         JobDatasource jdbcDatasource = jobDatasourceService.getById(datasourceId);
         if (ObjectUtil.isNull(jdbcDatasource)) {
@@ -145,5 +149,19 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
             tableSchema=queryTool.getDBName();
         }
         return queryTool.getColumnSchema(tableName,tableSchema);
+    }
+
+    //根据数据源id和表名获取表数据大小
+    public Search getTableSize(Long datasourceId, String tableName){
+        JobDatasource jdbcDatasource = jobDatasourceService.getById(datasourceId);
+        if (ObjectUtil.isNull(jdbcDatasource)) {
+            return null;
+        }
+        BaseQueryTool queryTool = QueryToolFactory.getByDbType(jdbcDatasource);
+        String tableSchema="";
+        if(queryTool.getClass()==MySQLQueryTool.class){
+            tableSchema=queryTool.getDBName();
+        }
+        return queryTool.getTableSize(tableName,tableSchema);
     }
 }

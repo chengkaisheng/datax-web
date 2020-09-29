@@ -8,6 +8,7 @@ import com.wugui.datax.admin.core.util.LocalCacheUtil;
 import com.wugui.datax.admin.entity.Chart;
 import com.wugui.datax.admin.entity.ColumnMsg;
 import com.wugui.datax.admin.entity.JobDatasource;
+import com.wugui.datax.admin.entity.Search;
 import com.wugui.datax.admin.tool.database.ColumnInfo;
 import com.wugui.datax.admin.tool.database.DasColumn;
 import com.wugui.datax.admin.tool.database.TableInfo;
@@ -536,22 +537,24 @@ public abstract class BaseQueryTool implements QueryToolInterface {
         return rows;
     }
 
-    public List<Map<String,Object>> listAll(List<String> columns, String tableName) {
-        List<Map<String,Object>> datas = new ArrayList<>();
+    public List<List<Map<String,Object>>> listAll(List<String> columns, String tableName,Integer pageNumber,Integer pageSize) {
+        List<List<Map<String,Object>>> datas = new ArrayList<>();
         Statement stmt = null;
         ResultSet rs = null;
         try {
             stmt = connection.createStatement();
             //获取sql
-            String sql = sqlBuilder.getListAll(tableName);
+            String sql = sqlBuilder.getListAll(tableName, pageNumber, pageSize);
             rs = stmt.executeQuery(sql);
             while (rs.next()) {
+                List<Map<String,Object>> colList=new ArrayList<>();
                 for (int i=1;i<=columns.size();i++) {
                     Map<String,Object> map=new HashMap<>();
                     Object value = rs.getObject(i);
                     map.put(columns.get(i-1),value);
-                    datas.add(map);
+                    colList.add(map);
                 }
+                datas.add(colList);
             }
         } catch (SQLException e) {
             logger.error("[getTableNames Exception] --> "
@@ -719,5 +722,27 @@ public abstract class BaseQueryTool implements QueryToolInterface {
             return "numberType";
         }
         return "stringType";
+    }
+
+    public Search getTableSize(String tableName, String tableSchema){
+        Search search=new Search();
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = connection.createStatement();
+            //获取sql
+            String sql = sqlBuilder.getTableSize(tableName,tableSchema);
+            rs = stmt.executeQuery(sql);
+            if(rs.next()){
+                search.setSize(String.valueOf(rs.getLong(1)));
+            }
+        } catch (SQLException e) {
+            logger.error("[getTableNames Exception] --> "
+                    + "the exception message is:" + e.getMessage());
+        } finally {
+            JdbcUtils.close(rs);
+            JdbcUtils.close(stmt);
+        }
+        return search;
     }
 }

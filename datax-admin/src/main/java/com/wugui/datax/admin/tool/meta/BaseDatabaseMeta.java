@@ -66,8 +66,8 @@ public abstract class BaseDatabaseMeta implements DatabaseInterface {
     }
 
     @Override
-    public String getListAll(String tableName){
-        return "select * from "+tableName;
+    public String getListAll(String tableName,Integer pageNumber,Integer pageSize){
+        return "select * from "+tableName+" limit "+pageNumber+","+pageSize;
     }
 
     @Override
@@ -94,5 +94,10 @@ public abstract class BaseDatabaseMeta implements DatabaseInterface {
     @Override
     public String getDateStatistics(String name, String tableName) {
         return "select from_unixtime(UNIX_TIMESTAMP(minv)+floor((UNIX_TIMESTAMP(b."+name+") - UNIX_TIMESTAMP(a.minv))/step)*step,'%Y-%m-%d %H:%i:%S'),from_unixtime((floor((UNIX_TIMESTAMP(b."+name+") - UNIX_TIMESTAMP(a.minv))/step)+1)*step+UNIX_TIMESTAMP(minv),'%Y-%m-%d %H:%i:%S'),count(1) from "+tableName+" b left join (select UNIX_TIMESTAMP(min(a."+name+")) minv, (UNIX_TIMESTAMP(max(a."+name+")) - UNIX_TIMESTAMP(min(a."+name+")))/3 step from "+tableName+" a) a on 1 = 1 group by floor((UNIX_TIMESTAMP(b."+name+") - UNIX_TIMESTAMP(a.minv))/step),minv,step";
+    }
+
+    @Override
+    public String getTableSize(String tableName, String tableSchema) {
+        return String.format("SELECT DATA_LENGTH FROM information_schema.`TABLES` where TABLE_SCHEMA='%s' AND TABLE_NAME='%s'",tableSchema,tableName);
     }
 }

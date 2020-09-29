@@ -31,17 +31,32 @@ public class SearchController {
         return new ReturnT<>(jobDatasources);
 }
 
+    /**
+     * 新增探查数据
+     * @param search
+     * @param multipartFile
+     * @return
+     */
     @RequestMapping("/create")
     public ReturnT<Map<String,Object>> createSearch(Search search, MultipartFile multipartFile){
         return new ReturnT<>(searchService.createSearch(search,multipartFile));
     }
 
+    /**
+     * 查询所有探查列表
+     * @return
+     */
     @RequestMapping("/list")
     public ReturnT<List<Search>> listSearch(){
         List<Search> searches=searchService.listSearchs();
         return new ReturnT<>(searches);
     }
 
+    /**
+     * 根据探查数据id获取探查数据
+     * @param id 探查数据id
+     * @return 探查数据详细信息
+     */
     @RequestMapping("/getSearchById")
     public ReturnT<Search> getSearchById(Long id){
         Search search=searchService.getSearchById(id);

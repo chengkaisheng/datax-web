@@ -33,7 +33,7 @@ import static com.wugui.datatx.core.util.Constants.SPLIT_COMMA;
 @Slf4j
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
-    private ThreadLocal<Integer> rememberMe = new ThreadLocal<>();
+    /*private ThreadLocal<Integer> rememberMe = new ThreadLocal<>();
     private AuthenticationManager authenticationManager;
 
     public JWTAuthenticationFilter(AuthenticationManager authenticationManager) {
@@ -88,5 +88,5 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write(JSON.toJSON(new ReturnT<>(ReturnT.FAIL_CODE,I18nUtil.getString("login_param_invalid"))).toString());
-    }
+    }*/
 }

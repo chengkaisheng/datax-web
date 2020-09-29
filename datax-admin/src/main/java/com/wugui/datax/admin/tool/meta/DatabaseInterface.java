@@ -66,7 +66,7 @@ public interface DatabaseInterface {
 
     String getRows(String tableName);
 
-    String getListAll(String tableName);
+    String getListAll(String tableName,Integer pageNumber,Integer pageSize);
 
     String getColumnSchema(String tableName,String tableSchema);
 
@@ -77,4 +77,6 @@ public interface DatabaseInterface {
     String getStringStatistics(String name, String tableName);
 
     String getDateStatistics(String name, String tableName);
+
+    String getTableSize(String tableName,String tableSchema);
 }

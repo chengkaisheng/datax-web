@@ -25,7 +25,7 @@
     </select>
 
     <select id="getSearchById" resultType="com.wugui.datax.admin.entity.Search">
-        SELECT s.id,s.task_name,s.`table_name`,s.intro,s.description,s.image_url,s.jdbc_datasource_id,sd.`rows`,sd.size
-        FROM job_search s JOIN job_search_detail sd ON s.id=sd.search_id AND s.id=#{id}
+        SELECT s.id,s.task_name,s.`table_name`,s.intro,s.description,s.image_url,s.jdbc_datasource_id
+        FROM job_search s where s.id=#{id}
     </select>
 </mapper>

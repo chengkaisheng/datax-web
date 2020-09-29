@@ -5,6 +5,7 @@ import com.wugui.datax.admin.entity.JobDatasource;
 import com.wugui.datax.admin.entity.Search;
 import com.wugui.datax.admin.mapper.JobDatasourceMapper;
 import com.wugui.datax.admin.mapper.SearchMapper;
+import com.wugui.datax.admin.service.DatasourceQueryService;
 import com.wugui.datax.admin.service.ISearchService;
 import com.wugui.datax.admin.util.JdbcUtils;
 import com.wugui.datax.admin.util.UploadUtils;
@@ -27,7 +28,8 @@ public class SearchServiceImpl implements ISearchService {
 
     @Autowired
     private SearchMapper searchMapper;
-    private JobDatasourceMapper jobDatasourceMapper;
+    @Autowired
+    private DatasourceQueryService datasourceQueryService;
     @Value("${upload.url}")
     private String url;
     @Value("${upload.service-url}")
@@ -50,7 +52,14 @@ public class SearchServiceImpl implements ISearchService {
         return searches;
     }
 
+    //根据探查数据id获取探查信息
     public Search getSearchById(Long id){
-        return searchMapper.getSearchById(id);
+        Search search=searchMapper.getSearchById(id);
+        Long datasourceId=search.getJdbcDatasourceId();
+        String tableName=search.getTableName();
+        datasourceQueryService.getRows(datasourceId,tableName);
+        search.setRows(datasourceQueryService.getRows(datasourceId,tableName));
+        search.setSize(datasourceQueryService.getTableSize(datasourceId,tableName).getSize());
+        return search;
     }
 }
