@@ -130,6 +130,49 @@ public class DataxJsonHelper implements DataxJsonInterface {
         }
     }
 
+    public void initQualityReader(DataXJsonBuildDto dataxJsonDto, JobDatasource readerDatasource) {
+
+        this.readerDatasource = readerDatasource;
+        this.readerTables = dataxJsonDto.getReaderTables();
+        this.readerColumns = dataxJsonDto.getReaderColumns();
+        this.hiveReaderDto = dataxJsonDto.getHiveReader();
+        this.rdbmsReaderDto = dataxJsonDto.getRdbmsReader();
+        this.hbaseReaderDto = dataxJsonDto.getHbaseReader();
+        // reader 插件
+        String datasource = readerDatasource.getDatasource();
+
+        this.readerColumns = convertKeywordsColumns(datasource, this.readerColumns);
+        if (MYSQL.equals(datasource)) {
+            readerPlugin = new MysqlReader();
+            buildReader = buildReader();
+        } else if (ORACLE.equals(datasource)) {
+            readerPlugin = new OracleReader();
+            buildReader = buildReader();
+        } else if (SQL_SERVER.equals(datasource)) {
+            readerPlugin = new SqlServerReader();
+            buildReader = buildReader();
+        } else if (POSTGRESQL.equals(datasource) || GREENPLUM.equals(datasource)) {
+            readerPlugin = new PostgresqlReader();
+            buildReader = buildReader();
+        } else if (CLICKHOUSE.equals(datasource)) {
+            readerPlugin = new ClickHouseReader();
+            buildReader = buildReader();
+        } else if (HIVE.equals(datasource) || IMPALA.equals(datasource)) {
+            String username = readerDatasource.getJdbcUsername();
+            String password = readerDatasource.getJdbcPassword();
+            readerDatasource.setJdbcUsername((username != null && !"".equals(username)) ? username : "default");
+            readerDatasource.setJdbcPassword((password != null && !"".equals(password)) ? password : "default");
+            readerPlugin = new RdbmsReader();
+            buildReader = buildReader();
+        } else if (HBASE.equals(datasource)) {
+            readerPlugin = new HBaseReader();
+            buildReader = buildHBaseReader();
+        } else if (MONGODB.equals(datasource)) {
+            readerPlugin = new MongoDBReader();
+            buildReader = buildMongoDBReader();
+        }
+    }
+
     public void initWriter(DataXJsonBuildDto dataxJsonDto, JobDatasource readerDatasource) {
         this.writerDatasource = readerDatasource;
         this.writerTables = dataxJsonDto.getWriterTables();
@@ -150,7 +193,7 @@ public class DataxJsonHelper implements DataxJsonInterface {
         } else if (JdbcConstants.SQL_SERVER.equals(datasource)) {
             writerPlugin = new SqlServerlWriter();
             buildWriter = this.buildWriter();
-        } else if (POSTGRESQL.equals(datasource)) {
+        } else if (POSTGRESQL.equals(datasource) || GREENPLUM.equals(datasource)) {
             writerPlugin = new PostgresqllWriter();
             buildWriter = this.buildWriter();
         } else if (JdbcConstants.CLICKHOUSE.equals(datasource)) {
@@ -165,6 +208,13 @@ public class DataxJsonHelper implements DataxJsonInterface {
         } else if (JdbcConstants.MONGODB.equals(datasource)) {
             writerPlugin = new MongoDBWriter();
             buildWriter = this.buildMongoDBWriter();
+        }else if(IMPALA.equals(datasource)){
+            String username = readerDatasource.getJdbcUsername();
+            String password = readerDatasource.getJdbcPassword();
+            readerDatasource.setJdbcUsername((username != null && !"".equals(username)) ? username : "default");
+            readerDatasource.setJdbcPassword((password != null && !"".equals(password)) ? password : "default");
+            writerPlugin = new ImpalaWriter();
+            buildWriter = this.buildWriter();
         }
     }
 

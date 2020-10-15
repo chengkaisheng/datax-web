@@ -29,6 +29,9 @@ public interface JdbcConstants {
     String POSTGRESQL                 = "postgresql";
     String POSTGRESQL_DRIVER          = "org.postgresql.Driver";
 
+    String GREENPLUM                  = "greenplum";
+    String GREENPLUM_DRIVER           = "org.postgresql.Driver";
+
     String SYBASE                     = "sybase";
 
     String SQL_SERVER                 = "sqlserver";
@@ -57,6 +60,9 @@ public interface JdbcConstants {
 
     String HIVE                       = "hive";
     String HIVE_DRIVER                = "org.apache.hive.jdbc.HiveDriver";
+
+    String IMPALA                     = "impala";
+    String IMPALA_DRIVER              = "com.cloudera.impala.jdbc41.Driver";
 
     String H2                         = "h2";
     String H2_DRIVER                  = "org.h2.Driver";

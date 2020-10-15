@@ -39,7 +39,7 @@ public abstract class BaseReaderPlugin extends BaseDataxPlugin {
 
         //判断是否是 querySql
         if (StrUtil.isNotBlank(plugin.getQuerySql())) {
-            connectionObj.put("querySql", ImmutableList.of(plugin.getQuerySql()));
+                connectionObj.put("querySql", ImmutableList.of(plugin.getQuerySql()));
         } else {
             parameterObj.put("column", plugin.getRdbmsColumns());
             //判断是否有where

@@ -13,6 +13,8 @@ public enum DBUtilErrorCode implements ErrorCode {
     ORACLE_CONN_IPPORT_ERROR("ORACLEErrCode-02","数据库服务的IP地址或者Port错误，请检查填写的IP地址和Port或者联系DBA确认IP地址和Port是否正确。如果是同步中心用户请联系DBA确认idb上录入的IP和PORT信息和数据库的当前实际信息是一致的"),
     ORACLE_CONN_DB_ERROR("ORACLEErrCode-03","数据库名称错误，请检查数据库实例名称或者联系DBA确认该实例是否存在并且在正常服务"),
 
+    IMPALA_CONN_ERROR("IMPALAErrorCode-01","数据库连接错误，请检查数据库用户名，密码，服务的IP地址或者Port"),
+
     //execute query错误
     MYSQL_QUERY_TABLE_NAME_ERROR("MYSQLErrCode-04","表不存在，请检查表名或者联系DBA确认该表是否存在"),
     MYSQL_QUERY_SQL_ERROR("MYSQLErrCode-05","SQL语句执行出错，请检查Where条件是否存在拼写或语法错误"),

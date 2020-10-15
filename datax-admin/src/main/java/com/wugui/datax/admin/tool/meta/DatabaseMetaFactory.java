@@ -18,7 +18,7 @@ public class DatabaseMetaFactory {
             return MySQLDatabaseMeta.getInstance();
         } else if (JdbcConstants.ORACLE.equals(dbType)) {
             return OracleDatabaseMeta.getInstance();
-        } else if (JdbcConstants.POSTGRESQL.equals(dbType)) {
+        } else if (JdbcConstants.POSTGRESQL.equals(dbType) || JdbcConstants.GREENPLUM.equals(dbType)) {
             return PostgresqlDatabaseMeta.getInstance();
         } else if (JdbcConstants.SQL_SERVER.equals(dbType)) {
             return SqlServerDatabaseMeta.getInstance();
@@ -28,7 +28,10 @@ public class DatabaseMetaFactory {
             return ClickHouseDataBaseMeta.getInstance();
         } else if(JdbcConstants.HBASE20XSQL.equals(dbType)) {
             return Hbase20xsqlMeta.getInstance();
-        } else {
+        }else if(JdbcConstants.IMPALA.equalsIgnoreCase(dbType)){
+            return ImpalaDatabaseMeta.getInstance();
+        }
+        else {
             throw new UnsupportedOperationException("暂不支持的类型：".concat(dbType));
         }
     }
