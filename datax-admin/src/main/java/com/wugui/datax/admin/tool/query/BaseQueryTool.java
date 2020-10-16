@@ -538,13 +538,14 @@ public abstract class BaseQueryTool implements QueryToolInterface {
     }
 
     public List<List<Map<String,Object>>> listAll(List<String> columns, String tableName,Integer pageNumber,Integer pageSize) {
+        logger.info("*****************************columns: "+columns);
         List<List<Map<String,Object>>> datas = new ArrayList<>();
         Statement stmt = null;
         ResultSet rs = null;
         try {
             stmt = connection.createStatement();
             //获取sql
-            String sql = sqlBuilder.getListAll(tableName, pageNumber, pageSize);
+            String sql = sqlBuilder.getListAll(tableName, pageNumber, pageSize,columns.get(0));
             rs = stmt.executeQuery(sql);
             while (rs.next()) {
                 List<Map<String,Object>> colList=new ArrayList<>();
@@ -606,6 +607,7 @@ public abstract class BaseQueryTool implements QueryToolInterface {
                 columnMsg.setName(name);
                 columnMsg.setComment(comment);
                 String showType=this.judgeShowType(type);
+                logger.info("*************************showType: "+showType);
                 if("dateType".equals(showType)){
                     columnMsg.setType("date");
                     columnMsg.setStatistics(this.getDateChart(name,tableName));
@@ -679,25 +681,27 @@ public abstract class BaseQueryTool implements QueryToolInterface {
         return ret;
     }
 
-    private List<Chart<Long>> getChart(String name,String tableName) {
-        List<Chart<Long>> charts = new ArrayList<>();
+    private List<Chart<Float>> getChart(String name,String tableName) {
+        List<Chart<Float>> charts = new ArrayList<>();
         Statement stmt = null;
         ResultSet rs = null;
         try {
             stmt = connection.createStatement();
             //获取sql
             String sql = sqlBuilder.getNumberStatistics(name,tableName);
+            logger.info("********************sql: "+sql);
             rs = stmt.executeQuery(sql);
             while (rs.next()) {
-                Chart<Long> chart=new Chart();
-                Long min = rs.getLong(1);
-                Long max=rs.getLong(2);
+                Chart<Float> chart=new Chart();
+                Float min = rs.getFloat(1);
+                Float max=rs.getFloat(2);
                 Long number=rs.getLong(3);
                 charts.add(chart);
                 chart.setMin(min);
                 chart.setMax(max);
                 chart.setNumber(number);
             }
+            logger.info("****************************number-charts: "+charts);
         } catch (SQLException e) {
             logger.error("[getTableNames Exception] --> "
                     + "the exception message is:" + e.getMessage());
@@ -714,11 +718,11 @@ public abstract class BaseQueryTool implements QueryToolInterface {
         String[] stringType={"CHAR","VARCHAR","TINYBLOB","TINYTEXT","BLOB","TEXT","MEDIUMBLOB","MEDIUMTEXT","LONGBLOB","LONGTEXT","VARCHAR2"};
         String[] dateType={"DATE","TIME","YEAR","DATETIME","TIMESTAMP"};
         String[] numberType={"TINYINT","SMALLINT","MEDIUMINT","INT","INTEGER","BIGINT","FLOAT","DOUBLE","DECIMAL","NUMBER"};
-        if (Arrays.asList(stringType).contains(type)){
+        if (Arrays.asList(stringType).contains(type.toUpperCase())){
             return "stringType";
-        }else if(Arrays.asList(dateType).contains(type)){
+        }else if(Arrays.asList(dateType).contains(type.toUpperCase())){
             return "dateType";
-        }else if(Arrays.asList(numberType).contains(type)){
+        }else if(Arrays.asList(numberType).contains(type.toUpperCase())){
             return "numberType";
         }
         return "stringType";

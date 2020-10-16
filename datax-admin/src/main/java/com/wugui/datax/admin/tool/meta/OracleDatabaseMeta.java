@@ -89,4 +89,9 @@ public class OracleDatabaseMeta extends BaseDatabaseMeta implements DatabaseInte
         return String.format("select minv+floor((b.%s - a.minv)/step)*step as start,(floor((b.%s - a.minv)/step)+1)*step+minv as end,count(1) from %s b left join (select min(a.%s) minv, (max(a.%s) - min(a.%s))/3 step from %s a) a on 1 = 1 group by floor((b.%s - a.minv)/step),minv,step order by start asc",
                 name,name,tableName,name,name,name,tableName,name);
     }
+
+    @Override
+    public String getListAll(String tableName, Integer pageNumber, Integer pageSize,String columnName) {
+        return String.format("select * from (select ROWNUM AS rowno,t.* from %s t) where rowno > (%s-1)*%s and rowno<=%s*%s",tableName,pageNumber,pageSize,pageNumber,pageSize);
+    }
 }

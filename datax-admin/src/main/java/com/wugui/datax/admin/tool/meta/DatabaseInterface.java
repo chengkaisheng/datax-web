@@ -66,7 +66,7 @@ public interface DatabaseInterface {
 
     String getRows(String tableName);
 
-    String getListAll(String tableName,Integer pageNumber,Integer pageSize);
+    String getListAll(String tableName,Integer pageNumber,Integer pageSize,String columnName);
 
     String getColumnSchema(String tableName,String tableSchema);
 

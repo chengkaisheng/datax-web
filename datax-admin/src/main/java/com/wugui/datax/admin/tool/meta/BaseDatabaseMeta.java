@@ -66,8 +66,8 @@ public abstract class BaseDatabaseMeta implements DatabaseInterface {
     }
 
     @Override
-    public String getListAll(String tableName,Integer pageNumber,Integer pageSize){
-        return "select * from "+tableName+" limit "+pageNumber+","+pageSize;
+    public String getListAll(String tableName,Integer pageNumber,Integer pageSize,String columnName){
+        return "select * from "+tableName+" limit "+(pageNumber-1)*pageSize+","+pageSize;
     }
 
     @Override
@@ -82,7 +82,7 @@ public abstract class BaseDatabaseMeta implements DatabaseInterface {
 
     @Override
     public String getNumberStatistics(String name,String tableName){
-        return String.format("select minv+floor((b.%s - a.minv)/step)*step as start,(floor((b.%s - a.minv)/step)+1)*step+minv as end,count(1) from %s b left join (select min(a.%s) minv, (max(a.%s) - min(a.%s))/3 step from %s a) a on 1 = 1 group by floor((b.%s - a.minv)/step),minv,step order by start asc"
+        return String.format("select minv+floor((b.%s - a.minv)/step)*step as start_bound,(floor((b.%s - a.minv)/step)+1)*step+minv as end_bound,count(1) from %s b left join (select min(a.%s) minv, (max(a.%s) - min(a.%s))/2 step from %s a) a on 1 = 1 group by floor((b.%s - a.minv)/step),minv,step order by start_bound asc"
                 ,name,name,tableName,name,name,name,tableName,name);
     }
 
