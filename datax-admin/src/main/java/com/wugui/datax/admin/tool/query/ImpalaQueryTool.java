@@ -42,4 +42,29 @@ public class ImpalaQueryTool{
         }
     }
 
+    public Boolean dataSourceTest(String databaseName) {
+        ResultSet rs = null;
+        PreparedStatement ps = null;
+        try {
+            ps = connection.prepareStatement("show databases");
+            rs = ps.executeQuery();
+            return rs.next();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }finally {
+            try {
+                if(rs != null){
+                    rs.close();
+                }
+                if(ps != null){
+                    ps.close();
+                }
+            }catch (SQLException e){
+                logger.error("关闭连接出错");
+            }
+
+        }
+        return false;
+    }
+
 }
