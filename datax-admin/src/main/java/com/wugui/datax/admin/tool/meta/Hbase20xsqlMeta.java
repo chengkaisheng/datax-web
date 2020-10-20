@@ -1,10 +1,10 @@
 package com.wugui.datax.admin.tool.meta;
 
 /**
- * MySQL数据库 meta信息查询
+ * HBase数据库 meta信息查询
  *
  * @author zhouhongfa@gz-yibo.com
- * @ClassName MySQLDatabaseMeta
+ * @ClassName Hbase20xsqlMeta
  * @Version 1.0
  * @since 2019/7/17 15:48
  */
