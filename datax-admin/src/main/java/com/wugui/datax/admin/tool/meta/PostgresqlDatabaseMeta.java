@@ -57,4 +57,19 @@ public class PostgresqlDatabaseMeta extends BaseDatabaseMeta implements Database
     public String getSQLQueryComment(String schemaName, String tableName, String columnName) {
         return null;
     }
+
+    @Override
+    public String getListAll(String tableName, Integer pageNumber, Integer pageSize, String columnName) {
+        return String.format("select * from %s limit %s offset (%s-1)*%s"
+                ,tableName,pageSize,pageNumber,pageSize);
+    }
+
+    @Override
+    public String getColumnSchema(String tableName, String tableSchema) {
+        return String.format("SELECT pa.attname as name,\n" +
+                "col_description(pa.attrelid, pa.attnum) as comment,\n" +
+                "\tformat_type(pa.atttypid, pa.atttypmod) as type\n" +
+                " from pg_class pc,pg_attribute pa \n" +
+                "where pa.attrelid = pc.oid and pc.relname = '%s' and pa.attnum>0;",tableName);
+    }
 }

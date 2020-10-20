@@ -18,4 +18,7 @@
         WHERE id = #{id}
     </update>
 
+    <select id="listDataSourceByUsername" resultType="com.wugui.datax.admin.entity.JobDatasource">
+        SELECT id,datasource_name FROM job_jdbc_datasource WHERE create_by=#{username}
+    </select>
 </mapper>

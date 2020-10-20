@@ -1,15 +1,18 @@
 package com.wugui.datax.admin.controller;
 
 import com.baomidou.mybatisplus.extension.api.R;
+import com.wugui.datax.admin.entity.ColumnMsg;
 import com.wugui.datax.admin.service.DatasourceQueryService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.logging.log4j.core.config.plugins.validation.constraints.Required;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 查询数据库表名，字段的控制器
@@ -114,4 +117,46 @@ public class MetadataController extends BaseController {
     public R<List<String>> getColumnsByQuerySql(Long datasourceId, String querySql) throws SQLException {
         return success(datasourceQueryService.getColumnsByQuerySql(datasourceId, querySql));
     }
+
+    /**
+     * 根据数据源id和表名获取记录数
+     * @param datasourceId 数据源id
+     * @param tableName 表名
+     * @return
+     * @throws SQLException
+     */
+    @GetMapping("/getRows")
+    @ApiOperation("根据数据源id和表名获取记录数")
+    public R<Long> getRowsByTableName(Long datasourceId, String tableName) throws SQLException {
+        return success(datasourceQueryService.getRows(datasourceId,tableName));
+    }
+
+    /**
+     * 根据数据源id和表名获取表所有数据
+     * @param datasourceId 数据源id
+     * @param tableName 表名
+     * @param pageNumber 当前页数
+     * @param pageSize 每页显示的记录数
+     * @return
+     * @throws Exception
+     */
+    @GetMapping("/listAll")
+    @ApiOperation("根据数据源id和表名获取表所有数据")
+    public R<List<List<Map<String,Object>>>> listALLByTableName(Long datasourceId, String tableName, @RequestParam(required = false,defaultValue ="1") Integer pageNumber, @RequestParam(required = false,defaultValue = "10") Integer pageSize) throws Exception {
+        return success(datasourceQueryService.listAll(datasourceId,tableName,pageNumber,pageSize));
+    }
+
+    /**
+     * 根据数据源id和表名获取表所有字段名和字段类型以及字段统计结果
+     * @param datasourceId 数据源id
+     * @param tableName 表名
+     * @return
+     * @throws Exception
+     */
+    @GetMapping("/getColumnSchema")
+    @ApiOperation("根据数据源id和表名获取表所有字段名和字段类型以及字段统计结果")
+    public R<List<ColumnMsg>> getColumnSchema(Long datasourceId, String tableName) throws Exception {
+        return success(datasourceQueryService.getColumnSchema(datasourceId,tableName));
+    }
+
 }

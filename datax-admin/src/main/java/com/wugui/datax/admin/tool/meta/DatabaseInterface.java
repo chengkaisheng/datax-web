@@ -63,4 +63,20 @@ public interface DatabaseInterface {
      * @return
      */
     String getMaxId(String tableName,String primaryKey);
+
+    String getRows(String tableName);
+
+    String getListAll(String tableName,Integer pageNumber,Integer pageSize,String columnName);
+
+    String getColumnSchema(String tableName,String tableSchema);
+
+    String getDBName();
+
+    String getNumberStatistics(String name,String tableName);
+
+    String getStringStatistics(String name, String tableName);
+
+    String getDateStatistics(String name, String tableName);
+
+    String getTableSize(String tableName,String tableSchema);
 }

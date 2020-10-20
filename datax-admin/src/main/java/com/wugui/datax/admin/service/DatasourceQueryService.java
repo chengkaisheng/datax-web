@@ -1,8 +1,12 @@
 package com.wugui.datax.admin.service;
 
+import com.wugui.datax.admin.entity.ColumnMsg;
+import com.wugui.datax.admin.entity.Search;
+
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 数据库查询服务
@@ -68,4 +72,25 @@ public interface DatasourceQueryService {
      * @return
      */
     List<String> getTableSchema(Long id);
+
+    /**
+     * 根据数据源id和表名获取记录数
+     * @param datasourceId
+     * @param tableName
+     * @return
+     */
+    Long getRows(Long datasourceId,String tableName);
+
+    /**
+     * 根据数据源id和表名获取表所有数据
+     * @param datasourceId
+     * @param tableName
+     * @return
+     * @throws IOException
+     */
+    List<List<Map<String,Object>>> listAll(Long datasourceId, String tableName,Integer pageNumber,Integer pageSize)throws IOException;
+
+    List<ColumnMsg> getColumnSchema(Long datasourceId, String tableName);
+
+    Search getTableSize(Long datasourceId, String tableName);
 }

@@ -1,0 +1,7 @@
+com\wugui\datax\search\service\impl\SearchServiceImpl.class
+com\wugui\datax\search\domain\Search.class
+com\wugui\datax\search\service\ISearchService.class
+com\wugui\datax\search\mapper\SearchMapper.class
+com\wugui\datax\search\DataXSearchApplication.class
+com\wugui\datax\search\controller\SearchController.class
+com\wugui\datax\search\filter\JWTAuthenticationFilter.class

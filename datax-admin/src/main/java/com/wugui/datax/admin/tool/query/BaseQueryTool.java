@@ -8,9 +8,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.wugui.datatx.core.util.Constants;
 import com.wugui.datax.admin.core.util.LocalCacheUtil;
-import com.wugui.datax.admin.datashare.tools.ConnectUtil;
-import com.wugui.datax.admin.datashare.tools.ResultToJsonUtil;
 import com.wugui.datax.admin.entity.JobDatasource;
+import com.wugui.datax.admin.entity.Search;
 import com.wugui.datax.admin.tool.database.ColumnInfo;
 import com.wugui.datax.admin.tool.database.DasColumn;
 import com.wugui.datax.admin.tool.database.TableInfo;
@@ -23,13 +22,17 @@ import com.zaxxer.hikari.HikariDataSource;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import com.wugui.datax.admin.entity.Chart;
+import com.wugui.datax.admin.entity.ColumnMsg;
 import javax.sql.DataSource;
 import java.sql.*;
 import java.util.*;
+import java.util.Date;
+import java.util.*;
 
 import static com.wugui.datax.admin.datashare.tools.ResultToJsonUtil.resultSetToJSON;
-
+import com.wugui.datax.admin.datashare.tools.ConnectUtil;
+import com.wugui.datax.admin.datashare.tools.ResultToJsonUtil;
 /**
  * 抽象查询工具
  *
@@ -321,6 +324,7 @@ public abstract class BaseQueryTool implements QueryToolInterface {
                 } else {
                     res.add(columnName);
                 }
+
             }
         } catch (SQLException e) {
             logger.error("[getColumnNames Exception] --> "
@@ -578,5 +582,240 @@ public abstract class BaseQueryTool implements QueryToolInterface {
             ConnectUtil.CloseConn(connection, ps, rs);//关闭连接
         }
         return map;
+    }
+
+    public Long getRows(String tableName) {
+        Long rows=null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = connection.createStatement();
+            //获取sql
+            String sql = sqlBuilder.getRows(tableName);
+            rs = stmt.executeQuery(sql);
+            if(rs.next()){
+                rows = rs.getLong(1);
+            }
+        } catch (SQLException e) {
+            logger.error("[getTableNames Exception] --> "
+                    + "the exception message is:" + e.getMessage());
+        } finally {
+            JdbcUtils.close(rs);
+            JdbcUtils.close(stmt);
+        }
+        return rows;
+    }
+
+    public List<List<Map<String,Object>>> listAll(List<String> columns, String tableName,Integer pageNumber,Integer pageSize) {
+        logger.info("*****************************columns: "+columns);
+        List<List<Map<String,Object>>> datas = new ArrayList<>();
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = connection.createStatement();
+            //获取sql
+            String sql = sqlBuilder.getListAll(tableName, pageNumber, pageSize,columns.get(0));
+            rs = stmt.executeQuery(sql);
+            while (rs.next()) {
+                List<Map<String,Object>> colList=new ArrayList<>();
+                for (int i=1;i<=columns.size();i++) {
+                    Map<String,Object> map=new HashMap<>();
+                    Object value = rs.getObject(i);
+                    map.put(columns.get(i-1),value);
+                    colList.add(map);
+                }
+                datas.add(colList);
+            }
+        } catch (SQLException e) {
+            logger.error("[getTableNames Exception] --> "
+                    + "the exception message is:" + e.getMessage());
+        } finally {
+            JdbcUtils.close(rs);
+            JdbcUtils.close(stmt);
+        }
+        return datas;
+    }
+
+    public String getDBName(){
+        String dbName=null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = connection.createStatement();
+            //获取sql
+            String sql = sqlBuilder.getDBName();
+            rs = stmt.executeQuery(sql);
+            if(rs.next()){
+                dbName = rs.getString(1);
+            }
+        } catch (SQLException e) {
+            logger.error("[getTableNames Exception] --> "
+                    + "the exception message is:" + e.getMessage());
+        } finally {
+            JdbcUtils.close(rs);
+            JdbcUtils.close(stmt);
+        }
+        return dbName;
+    }
+
+    public List<ColumnMsg> getColumnSchema(String tableName, String tableSchema){
+        List<ColumnMsg> columnMsgs = new ArrayList<>();
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = connection.createStatement();
+            //获取sql
+            String sql = sqlBuilder.getColumnSchema(tableName,tableSchema);
+            rs = stmt.executeQuery(sql);
+            while (rs.next()) {
+                ColumnMsg columnMsg=new ColumnMsg();
+                String name = rs.getString(1);
+                String comment=rs.getString(2);
+                String type=rs.getString(3);
+                columnMsgs.add(columnMsg);
+                columnMsg.setName(name);
+                columnMsg.setComment(comment);
+                String showType=this.judgeShowType(type);
+                logger.info("*************************showType: "+showType);
+                if("dateType".equals(showType)){
+                    columnMsg.setType("date");
+                    columnMsg.setStatistics(this.getDateChart(name,tableName));
+                }else if("numberType".equals(showType)){
+                    columnMsg.setType("number");
+                    columnMsg.setStatistics(this.getChart(name,tableName));
+                }else {
+                    columnMsg.setType("string");
+                    columnMsg.setStatistics(this.getUnique(name,tableName));
+                }
+
+            }
+        } catch (SQLException e) {
+            logger.error("[getTableNames Exception] --> "
+                    + "the exception message is:" + e.getMessage());
+        } finally {
+            JdbcUtils.close(rs);
+            JdbcUtils.close(stmt);
+        }
+        return columnMsgs;
+    }
+
+    private List<Chart<Date>> getDateChart(String name,String tableName) {
+        List<Chart<Date>> charts = new ArrayList<>();
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = connection.createStatement();
+            //获取sql
+            String sql = sqlBuilder.getDateStatistics(name,tableName);
+            rs = stmt.executeQuery(sql);
+            while (rs.next()) {
+                Chart<Date> chart=new Chart();
+                Date min = rs.getDate(1);
+                Date max=rs.getDate(2);
+                Long number=rs.getLong(3);
+                charts.add(chart);
+                chart.setMin(min);
+                chart.setMax(max);
+                chart.setNumber(number);
+            }
+        } catch (SQLException e) {
+            logger.error("[getTableNames Exception] --> "
+                    + "the exception message is:" + e.getMessage());
+        } finally {
+            JdbcUtils.close(rs);
+            JdbcUtils.close(stmt);
+        }
+        return charts;
+    }
+
+    private Long getUnique(String name,String tableName) {
+        Long ret = 0L;
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = connection.createStatement();
+            //获取sql
+            String sql = sqlBuilder.getStringStatistics(name,tableName);
+            rs = stmt.executeQuery(sql);
+            if (rs.next()) {
+                ret = rs.getLong(1);
+            }
+        } catch (SQLException e) {
+            logger.error("[getTableNames Exception] --> "
+                    + "the exception message is:" + e.getMessage());
+        } finally {
+            JdbcUtils.close(rs);
+            JdbcUtils.close(stmt);
+        }
+        return ret;
+    }
+
+    private List<Chart<Float>> getChart(String name,String tableName) {
+        List<Chart<Float>> charts = new ArrayList<>();
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = connection.createStatement();
+            //获取sql
+            String sql = sqlBuilder.getNumberStatistics(name,tableName);
+            logger.info("********************sql: "+sql);
+            rs = stmt.executeQuery(sql);
+            while (rs.next()) {
+                Chart<Float> chart=new Chart();
+                Float min = rs.getFloat(1);
+                Float max=rs.getFloat(2);
+                Long number=rs.getLong(3);
+                charts.add(chart);
+                chart.setMin(min);
+                chart.setMax(max);
+                chart.setNumber(number);
+            }
+            logger.info("****************************number-charts: "+charts);
+        } catch (SQLException e) {
+            logger.error("[getTableNames Exception] --> "
+                    + "the exception message is:" + e.getMessage());
+        } finally {
+            JdbcUtils.close(rs);
+            JdbcUtils.close(stmt);
+        }
+        return charts;
+    }
+
+    private String judgeShowType(String type) {
+        type=type.toUpperCase();
+        //加入oracle特有的字段类型：VARCHAR2，NUMBER
+        String[] stringType={"CHAR","VARCHAR","TINYBLOB","TINYTEXT","BLOB","TEXT","MEDIUMBLOB","MEDIUMTEXT","LONGBLOB","LONGTEXT","VARCHAR2"};
+        String[] dateType={"DATE","TIME","YEAR","DATETIME","TIMESTAMP"};
+        String[] numberType={"TINYINT","SMALLINT","MEDIUMINT","INT","INTEGER","BIGINT","FLOAT","DOUBLE","DECIMAL","NUMBER"};
+        if (Arrays.asList(stringType).contains(type.toUpperCase())){
+            return "stringType";
+        }else if(Arrays.asList(dateType).contains(type.toUpperCase())){
+            return "dateType";
+        }else if(Arrays.asList(numberType).contains(type.toUpperCase())){
+            return "numberType";
+        }
+        return "stringType";
+    }
+
+    public Search getTableSize(String tableName, String tableSchema){
+        Search search=new Search();
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = connection.createStatement();
+            //获取sql
+            String sql = sqlBuilder.getTableSize(tableName,tableSchema);
+            rs = stmt.executeQuery(sql);
+            if(rs.next()){
+                search.setSize(String.valueOf(rs.getLong(1)));
+            }
+        } catch (SQLException e) {
+            logger.error("[getTableNames Exception] --> "
+                    + "the exception message is:" + e.getMessage());
+        } finally {
+            JdbcUtils.close(rs);
+            JdbcUtils.close(stmt);
+        }
+        return search;
     }
 }
