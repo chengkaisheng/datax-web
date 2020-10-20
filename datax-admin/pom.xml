@@ -797,6 +797,7 @@
         </dependency>
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 
         <!--=================================================================================-->
@@ -878,6 +879,8 @@
             <version>4.5.5</version>
         </dependency>
 =======
+=======
+>>>>>>> 44f141c4a3bb9973cd71f5a8a8fa0ea88fc6e4f5
         <!-- impala -->
         <dependency>
             <groupId>com.cloudera.impala.jdbc</groupId>
@@ -918,6 +921,9 @@
 
         <!-- impala end -->
 
+<<<<<<< HEAD
+>>>>>>> 44f141c4a3bb9973cd71f5a8a8fa0ea88fc6e4f5
+=======
 >>>>>>> 44f141c4a3bb9973cd71f5a8a8fa0ea88fc6e4f5
     </dependencies>
 

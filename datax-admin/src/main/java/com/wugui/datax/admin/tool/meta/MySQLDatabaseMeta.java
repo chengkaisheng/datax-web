@@ -44,11 +44,17 @@ public class MySQLDatabaseMeta extends BaseDatabaseMeta implements DatabaseInter
     }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 =======
+=======
+>>>>>>> 44f141c4a3bb9973cd71f5a8a8fa0ea88fc6e4f5
     @Override
     public String getSQLQueryTableSchema(String... args) {
         return "show databases";
     }
+<<<<<<< HEAD
+>>>>>>> 44f141c4a3bb9973cd71f5a8a8fa0ea88fc6e4f5
+=======
 >>>>>>> 44f141c4a3bb9973cd71f5a8a8fa0ea88fc6e4f5
 }

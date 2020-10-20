@@ -1,7 +1,12 @@
 server:
 <<<<<<< HEAD
+<<<<<<< HEAD
   #port: 8080
   port: ${port:7000}
+=======
+  port: 8080
+  #port: ${server.port}
+>>>>>>> 44f141c4a3bb9973cd71f5a8a8fa0ea88fc6e4f5
 =======
   port: 8080
   #port: ${server.port}
@@ -13,9 +18,15 @@ spring:
     #password: root
     #url: jdbc:mysql://localhost:3306/datax_web?serverTimezone=Asia/Shanghai&useLegacyDatetimeCode=false&useSSL=false&nullNamePatternMatchesAll=true&useUnicode=true&characterEncoding=UTF-8
 <<<<<<< HEAD
+<<<<<<< HEAD
     password: ${DB_PASSWORD:root}
     username: ${DB_USERNAME:root}
     url: jdbc:mysql://${DB_HOST:192.168.72.139}:${DB_PORT:3306}/${DB_DATABASE:datax_web}?serverTimezone=Asia/Shanghai&useLegacyDatetimeCode=false&useSSL=false&nullNamePatternMatchesAll=true&useUnicode=true&characterEncoding=UTF-8
+=======
+    password: 1QAZ@wsxdataxweb
+    username: dataxweb
+    url: jdbc:mysql://47.103.79.104:3307/datax_web?serverTimezone=Asia/Shanghai&useLegacyDatetimeCode=false&useSSL=false&nullNamePatternMatchesAll=true&useUnicode=true&characterEncoding=UTF-8
+>>>>>>> 44f141c4a3bb9973cd71f5a8a8fa0ea88fc6e4f5
 =======
     password: 1QAZ@wsxdataxweb
     username: dataxweb
@@ -42,15 +53,21 @@ spring:
     host: smtp.qq.com
     port: 25
 <<<<<<< HEAD
+<<<<<<< HEAD
     #username: xxx@qq.com
     #password: xxx
     username: ${mail.username:274414334@qq.com}
     password: ${mail.password:578675hf}
 =======
+=======
+>>>>>>> 44f141c4a3bb9973cd71f5a8a8fa0ea88fc6e4f5
     username: xxx@qq.com
     password: xxx
     #username: ${mail.username}
     #password: ${mail.password}
+<<<<<<< HEAD
+>>>>>>> 44f141c4a3bb9973cd71f5a8a8fa0ea88fc6e4f5
+=======
 >>>>>>> 44f141c4a3bb9973cd71f5a8a8fa0ea88fc6e4f5
     properties:
       mail:
@@ -107,7 +124,11 @@ logging:
   level:
     com.wugui.datax.admin.mapper: error
 <<<<<<< HEAD
+<<<<<<< HEAD
     path: ${data.path:./data}/applogs/admin
+=======
+    path: ./data/applogs/admin
+>>>>>>> 44f141c4a3bb9973cd71f5a8a8fa0ea88fc6e4f5
 =======
     path: ./data/applogs/admin
 >>>>>>> 44f141c4a3bb9973cd71f5a8a8fa0ea88fc6e4f5

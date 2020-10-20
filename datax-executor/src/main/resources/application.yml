@@ -1,8 +1,13 @@
 # web port
 server:
 <<<<<<< HEAD
+<<<<<<< HEAD
   port: 8000
   #port: 8081
+=======
+  #port: ${server.port}
+  port: 8081
+>>>>>>> 44f141c4a3bb9973cd71f5a8a8fa0ea88fc6e4f5
 =======
   #port: ${server.port}
   port: 8081
@@ -12,7 +17,11 @@ server:
 logging:
   config: classpath:logback.xml
 <<<<<<< HEAD
+<<<<<<< HEAD
   path: ${data.path:./data}/applogs/executor/jobhandler
+=======
+  path: ./data/applogs/executor/jobhandler
+>>>>>>> 44f141c4a3bb9973cd71f5a8a8fa0ea88fc6e4f5
 =======
   path: ./data/applogs/executor/jobhandler
 >>>>>>> 44f141c4a3bb9973cd71f5a8a8fa0ea88fc6e4f5
@@ -24,7 +33,11 @@ datax:
       ### datax admin address list, such as "http://address" or "http://address01,http://address02"
       #addresses: http://127.0.0.1:8080
 <<<<<<< HEAD
+<<<<<<< HEAD
       addresses: http://127.0.0.1:7000
+=======
+      addresses: http://127.0.0.1:8080
+>>>>>>> 44f141c4a3bb9973cd71f5a8a8fa0ea88fc6e4f5
 =======
       addresses: http://127.0.0.1:8080
 >>>>>>> 44f141c4a3bb9973cd71f5a8a8fa0ea88fc6e4f5
@@ -44,10 +57,17 @@ datax:
   executor:
     #jsonpath: D:\\temp\\executor\\json\\
 <<<<<<< HEAD
+<<<<<<< HEAD
     jsonpath: C:\Users\27441\Desktop\log
 
   #pypath: F:\tools\datax\bin\datax.py
   pypath: D:\work\datax\bin\datax.py
+=======
+    jsonpath: E:\\datax\\datax\\job
+
+  #pypath: F:\tools\datax\bin\datax.py
+  pypath: E:\\datax\\datax\\bin\\datax.py
+>>>>>>> 44f141c4a3bb9973cd71f5a8a8fa0ea88fc6e4f5
 =======
     jsonpath: E:\\datax\\datax\\job
 
