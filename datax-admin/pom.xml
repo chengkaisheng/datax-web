@@ -13,7 +13,6 @@
         <java.version>1.8</java.version>
     </properties>
 
-
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -313,10 +312,6 @@
                     <artifactId>jetty</artifactId>
                     <groupId>org.mortbay.jetty</groupId>
                 </exclusion>
-                <exclusion>
-                    <artifactId>commons-configuration</artifactId>
-                    <groupId>commons-configuration</groupId>
-                </exclusion>
             </exclusions>
         </dependency>
 
@@ -325,7 +320,6 @@
             <artifactId>hive-jdbc</artifactId>
             <version>${hive.jdbc.version}</version>
             <exclusions>
-
                 <exclusion>
                     <artifactId>jsr305</artifactId>
                     <groupId>com.google.code.findbugs</groupId>
@@ -521,7 +515,6 @@
             </exclusions>
         </dependency>
 
-
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-hdfs</artifactId>
@@ -590,7 +583,8 @@
                 <!--<exclusion>
                     <artifactId>hbase-protocol</artifactId>
                     <groupId>org.apache.hbase</groupId>
-                </exclusion>-->
+                </exclusion>
+                -->
                 <exclusion>
                     <artifactId>jackson-mapper-asl</artifactId>
                     <groupId>org.codehaus.jackson</groupId>
@@ -795,11 +789,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-
         <!--=================================================================================-->
 
 
@@ -878,9 +867,7 @@
             <artifactId>httpclient</artifactId>
             <version>4.5.5</version>
         </dependency>
-=======
-=======
->>>>>>> 44f141c4a3bb9973cd71f5a8a8fa0ea88fc6e4f5
+
         <!-- impala -->
         <dependency>
             <groupId>com.cloudera.impala.jdbc</groupId>
@@ -921,10 +908,6 @@
 
         <!-- impala end -->
 
-<<<<<<< HEAD
->>>>>>> 44f141c4a3bb9973cd71f5a8a8fa0ea88fc6e4f5
-=======
->>>>>>> 44f141c4a3bb9973cd71f5a8a8fa0ea88fc6e4f5
     </dependencies>
 
     <build>
