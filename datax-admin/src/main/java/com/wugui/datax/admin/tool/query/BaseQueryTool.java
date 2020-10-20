@@ -317,7 +317,6 @@ public abstract class BaseQueryTool implements QueryToolInterface {
                 } else {
                     res.add(columnName);
                 }
-
             }
         } catch (SQLException e) {
             logger.error("[getColumnNames Exception] --> "
