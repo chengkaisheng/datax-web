@@ -1,0 +1,448 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wugui.datax.admin.datashare.mapper.TResourceExamineMapper" >
+  <resultMap id="BaseResultMap" type="com.wugui.datax.admin.datashare.entity.TResourceExamine" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="res_id" property="resId" jdbcType="VARCHAR" />
+    <result column="user_id" property="userId" jdbcType="VARCHAR" />
+    <result column="department_name" property="departmentName" jdbcType="VARCHAR" />
+    <result column="info_id" property="infoId" jdbcType="VARCHAR" />
+    <result column="info_name" property="infoName" jdbcType="VARCHAR" />
+    <result column="contain_name" property="containName" jdbcType="VARCHAR" />
+    <result column="contacts" property="contacts" jdbcType="VARCHAR" />
+    <result column="telephone" property="telephone" jdbcType="VARCHAR" />
+    <result column="apply_time" property="applyTime" jdbcType="TIMESTAMP" />
+    <result column="res_type" property="resType" jdbcType="VARCHAR" />
+    <result column="apply_img" property="applyImg" jdbcType="VARCHAR" />
+    <result column="use_scene" property="useScene" jdbcType="VARCHAR" />
+    <result column="state" property="state" jdbcType="VARCHAR" />
+    <result column="reviewer" property="reviewer" jdbcType="VARCHAR" />
+    <result column="exa_time" property="exaTime" jdbcType="TIMESTAMP" />
+    <result column="exa_result" property="exaResult" jdbcType="VARCHAR" />
+    <result column="exa_describe" property="exaDescribe" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    id, res_id, user_id, department_name, info_id, info_name, contain_name, contacts, 
+    telephone, apply_time, res_type, apply_img, use_scene, state, reviewer, exa_time, 
+    exa_result, exa_describe, create_time, update_time
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.wugui.datax.admin.datashare.entity.TResourceExamineExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_resource_examine
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_resource_examine
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from t_resource_examine
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.wugui.datax.admin.datashare.entity.TResourceExamineExample" >
+    delete from t_resource_examine
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.wugui.datax.admin.datashare.entity.TResourceExamine" >
+    insert into t_resource_examine (id, res_id, user_id, 
+      department_name, info_id, info_name, 
+      contain_name, contacts, telephone, 
+      apply_time, res_type, apply_img, 
+      use_scene, state, reviewer, 
+      exa_time, exa_result, exa_describe, 
+      create_time, update_time)
+    values (#{id,jdbcType=VARCHAR}, #{resId,jdbcType=VARCHAR}, #{userId,jdbcType=VARCHAR}, 
+      #{departmentName,jdbcType=VARCHAR}, #{infoId,jdbcType=VARCHAR}, #{infoName,jdbcType=VARCHAR}, 
+      #{containName,jdbcType=VARCHAR}, #{contacts,jdbcType=VARCHAR}, #{telephone,jdbcType=VARCHAR}, 
+      #{applyTime,jdbcType=TIMESTAMP}, #{resType,jdbcType=VARCHAR}, #{applyImg,jdbcType=VARCHAR}, 
+      #{useScene,jdbcType=VARCHAR}, #{state,jdbcType=VARCHAR}, #{reviewer,jdbcType=VARCHAR}, 
+      #{exaTime,jdbcType=TIMESTAMP}, #{exaResult,jdbcType=VARCHAR}, #{exaDescribe,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.wugui.datax.admin.datashare.entity.TResourceExamine" >
+    insert into t_resource_examine
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="resId != null" >
+        res_id,
+      </if>
+      <if test="userId != null" >
+        user_id,
+      </if>
+      <if test="departmentName != null" >
+        department_name,
+      </if>
+      <if test="infoId != null" >
+        info_id,
+      </if>
+      <if test="infoName != null" >
+        info_name,
+      </if>
+      <if test="containName != null" >
+        contain_name,
+      </if>
+      <if test="contacts != null" >
+        contacts,
+      </if>
+      <if test="telephone != null" >
+        telephone,
+      </if>
+      <if test="applyTime != null" >
+        apply_time,
+      </if>
+      <if test="resType != null" >
+        res_type,
+      </if>
+      <if test="applyImg != null" >
+        apply_img,
+      </if>
+      <if test="useScene != null" >
+        use_scene,
+      </if>
+      <if test="state != null" >
+        state,
+      </if>
+      <if test="reviewer != null" >
+        reviewer,
+      </if>
+      <if test="exaTime != null" >
+        exa_time,
+      </if>
+      <if test="exaResult != null" >
+        exa_result,
+      </if>
+      <if test="exaDescribe != null" >
+        exa_describe,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="updateTime != null" >
+        update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="resId != null" >
+        #{resId,jdbcType=VARCHAR},
+      </if>
+      <if test="userId != null" >
+        #{userId,jdbcType=VARCHAR},
+      </if>
+      <if test="departmentName != null" >
+        #{departmentName,jdbcType=VARCHAR},
+      </if>
+      <if test="infoId != null" >
+        #{infoId,jdbcType=VARCHAR},
+      </if>
+      <if test="infoName != null" >
+        #{infoName,jdbcType=VARCHAR},
+      </if>
+      <if test="containName != null" >
+        #{containName,jdbcType=VARCHAR},
+      </if>
+      <if test="contacts != null" >
+        #{contacts,jdbcType=VARCHAR},
+      </if>
+      <if test="telephone != null" >
+        #{telephone,jdbcType=VARCHAR},
+      </if>
+      <if test="applyTime != null" >
+        #{applyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="resType != null" >
+        #{resType,jdbcType=VARCHAR},
+      </if>
+      <if test="applyImg != null" >
+        #{applyImg,jdbcType=VARCHAR},
+      </if>
+      <if test="useScene != null" >
+        #{useScene,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null" >
+        #{state,jdbcType=VARCHAR},
+      </if>
+      <if test="reviewer != null" >
+        #{reviewer,jdbcType=VARCHAR},
+      </if>
+      <if test="exaTime != null" >
+        #{exaTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="exaResult != null" >
+        #{exaResult,jdbcType=VARCHAR},
+      </if>
+      <if test="exaDescribe != null" >
+        #{exaDescribe,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.wugui.datax.admin.datashare.entity.TResourceExamineExample" resultType="java.lang.Integer" >
+    select count(*) from t_resource_examine
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update t_resource_examine
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=VARCHAR},
+      </if>
+      <if test="record.resId != null" >
+        res_id = #{record.resId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.userId != null" >
+        user_id = #{record.userId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.departmentName != null" >
+        department_name = #{record.departmentName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.infoId != null" >
+        info_id = #{record.infoId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.infoName != null" >
+        info_name = #{record.infoName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.containName != null" >
+        contain_name = #{record.containName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.contacts != null" >
+        contacts = #{record.contacts,jdbcType=VARCHAR},
+      </if>
+      <if test="record.telephone != null" >
+        telephone = #{record.telephone,jdbcType=VARCHAR},
+      </if>
+      <if test="record.applyTime != null" >
+        apply_time = #{record.applyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.resType != null" >
+        res_type = #{record.resType,jdbcType=VARCHAR},
+      </if>
+      <if test="record.applyImg != null" >
+        apply_img = #{record.applyImg,jdbcType=VARCHAR},
+      </if>
+      <if test="record.useScene != null" >
+        use_scene = #{record.useScene,jdbcType=VARCHAR},
+      </if>
+      <if test="record.state != null" >
+        state = #{record.state,jdbcType=VARCHAR},
+      </if>
+      <if test="record.reviewer != null" >
+        reviewer = #{record.reviewer,jdbcType=VARCHAR},
+      </if>
+      <if test="record.exaTime != null" >
+        exa_time = #{record.exaTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.exaResult != null" >
+        exa_result = #{record.exaResult,jdbcType=VARCHAR},
+      </if>
+      <if test="record.exaDescribe != null" >
+        exa_describe = #{record.exaDescribe,jdbcType=VARCHAR},
+      </if>
+      <if test="record.createTime != null" >
+        create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.updateTime != null" >
+        update_time = #{record.updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update t_resource_examine
+    set id = #{record.id,jdbcType=VARCHAR},
+      res_id = #{record.resId,jdbcType=VARCHAR},
+      user_id = #{record.userId,jdbcType=VARCHAR},
+      department_name = #{record.departmentName,jdbcType=VARCHAR},
+      info_id = #{record.infoId,jdbcType=VARCHAR},
+      info_name = #{record.infoName,jdbcType=VARCHAR},
+      contain_name = #{record.containName,jdbcType=VARCHAR},
+      contacts = #{record.contacts,jdbcType=VARCHAR},
+      telephone = #{record.telephone,jdbcType=VARCHAR},
+      apply_time = #{record.applyTime,jdbcType=TIMESTAMP},
+      res_type = #{record.resType,jdbcType=VARCHAR},
+      apply_img = #{record.applyImg,jdbcType=VARCHAR},
+      use_scene = #{record.useScene,jdbcType=VARCHAR},
+      state = #{record.state,jdbcType=VARCHAR},
+      reviewer = #{record.reviewer,jdbcType=VARCHAR},
+      exa_time = #{record.exaTime,jdbcType=TIMESTAMP},
+      exa_result = #{record.exaResult,jdbcType=VARCHAR},
+      exa_describe = #{record.exaDescribe,jdbcType=VARCHAR},
+      create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      update_time = #{record.updateTime,jdbcType=TIMESTAMP}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.wugui.datax.admin.datashare.entity.TResourceExamine" >
+    update t_resource_examine
+    <set >
+      <if test="resId != null" >
+        res_id = #{resId,jdbcType=VARCHAR},
+      </if>
+      <if test="userId != null" >
+        user_id = #{userId,jdbcType=VARCHAR},
+      </if>
+      <if test="departmentName != null" >
+        department_name = #{departmentName,jdbcType=VARCHAR},
+      </if>
+      <if test="infoId != null" >
+        info_id = #{infoId,jdbcType=VARCHAR},
+      </if>
+      <if test="infoName != null" >
+        info_name = #{infoName,jdbcType=VARCHAR},
+      </if>
+      <if test="containName != null" >
+        contain_name = #{containName,jdbcType=VARCHAR},
+      </if>
+      <if test="contacts != null" >
+        contacts = #{contacts,jdbcType=VARCHAR},
+      </if>
+      <if test="telephone != null" >
+        telephone = #{telephone,jdbcType=VARCHAR},
+      </if>
+      <if test="applyTime != null" >
+        apply_time = #{applyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="resType != null" >
+        res_type = #{resType,jdbcType=VARCHAR},
+      </if>
+      <if test="applyImg != null" >
+        apply_img = #{applyImg,jdbcType=VARCHAR},
+      </if>
+      <if test="useScene != null" >
+        use_scene = #{useScene,jdbcType=VARCHAR},
+      </if>
+      <if test="state != null" >
+        state = #{state,jdbcType=VARCHAR},
+      </if>
+      <if test="reviewer != null" >
+        reviewer = #{reviewer,jdbcType=VARCHAR},
+      </if>
+      <if test="exaTime != null" >
+        exa_time = #{exaTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="exaResult != null" >
+        exa_result = #{exaResult,jdbcType=VARCHAR},
+      </if>
+      <if test="exaDescribe != null" >
+        exa_describe = #{exaDescribe,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.wugui.datax.admin.datashare.entity.TResourceExamine" >
+    update t_resource_examine
+    set res_id = #{resId,jdbcType=VARCHAR},
+      user_id = #{userId,jdbcType=VARCHAR},
+      department_name = #{departmentName,jdbcType=VARCHAR},
+      info_id = #{infoId,jdbcType=VARCHAR},
+      info_name = #{infoName,jdbcType=VARCHAR},
+      contain_name = #{containName,jdbcType=VARCHAR},
+      contacts = #{contacts,jdbcType=VARCHAR},
+      telephone = #{telephone,jdbcType=VARCHAR},
+      apply_time = #{applyTime,jdbcType=TIMESTAMP},
+      res_type = #{resType,jdbcType=VARCHAR},
+      apply_img = #{applyImg,jdbcType=VARCHAR},
+      use_scene = #{useScene,jdbcType=VARCHAR},
+      state = #{state,jdbcType=VARCHAR},
+      reviewer = #{reviewer,jdbcType=VARCHAR},
+      exa_time = #{exaTime,jdbcType=TIMESTAMP},
+      exa_result = #{exaResult,jdbcType=VARCHAR},
+      exa_describe = #{exaDescribe,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+</mapper>

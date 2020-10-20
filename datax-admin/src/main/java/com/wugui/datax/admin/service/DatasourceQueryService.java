@@ -45,6 +45,15 @@ public interface DatasourceQueryService {
     List<String> getColumns(Long id, String tableName) throws IOException;
 
     /**
+     * 根据数据源id，表名查询出该表所有字段
+     *
+     * @param id
+     * @return
+     */
+    Object getTableColumns(Long id, String tableName) throws IOException;
+
+
+    /**
      * 根据 sql 语句获取字段
      *
      * @param datasourceId

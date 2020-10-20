@@ -90,6 +90,19 @@ public class MetadataController extends BaseController {
     }
 
     /**
+     * 根据数据源id和表名获取字段的名称,类型，comment
+     *
+     * @param datasourceId 数据源id
+     * @param tableName    表名
+     * @return
+     */
+    @GetMapping("/getTableColumns")
+    @ApiOperation("根据数据源id和表名获取所有字段名称，类型，comment")
+    public R<Object> getTableColumns(Long datasourceId, String tableName) throws IOException {
+        return success(datasourceQueryService.getTableColumns(datasourceId, tableName));
+    }
+
+    /**
      * 根据数据源id和sql语句获取所有字段
      *
      * @param datasourceId 数据源id

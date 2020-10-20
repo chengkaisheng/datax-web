@@ -46,6 +46,7 @@ public interface QueryToolInterface {
     List<ColumnInfo> getColumns(String tableName);
 
 
+
     /**
      * 根据表名和获取所有字段名称（不包括表名）
      *
@@ -53,6 +54,14 @@ public interface QueryToolInterface {
      * @return2
      */
     List<String> getColumnNames(String tableName,String datasource);
+
+    /**
+     * 根据表名和获取所有字段的名称，类型，comment（不包括表名）
+     *
+     * @param tableName
+     * @return2
+     */
+    Object getTableColumns(String tableName,String datasource,String databaseName);
 
 
     /**

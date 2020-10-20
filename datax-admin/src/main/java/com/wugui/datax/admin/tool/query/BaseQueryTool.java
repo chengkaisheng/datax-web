@@ -1,10 +1,15 @@
 package com.wugui.datax.admin.tool.query;
 
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.wugui.datatx.core.util.Constants;
 import com.wugui.datax.admin.core.util.LocalCacheUtil;
+import com.wugui.datax.admin.datashare.tools.ConnectUtil;
+import com.wugui.datax.admin.datashare.tools.ResultToJsonUtil;
 import com.wugui.datax.admin.entity.JobDatasource;
 import com.wugui.datax.admin.tool.database.ColumnInfo;
 import com.wugui.datax.admin.tool.database.DasColumn;
@@ -21,10 +26,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import static com.wugui.datax.admin.datashare.tools.ResultToJsonUtil.resultSetToJSON;
 
 /**
  * 抽象查询工具
@@ -329,6 +333,47 @@ public abstract class BaseQueryTool implements QueryToolInterface {
     }
 
     @Override
+    public Object getTableColumns(String tableName, String datasource,String databaseName) {
+
+        Map res = new HashMap();
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            String strsql="select database()";
+            stmt = connection.createStatement();
+            rs = stmt.executeQuery(strsql);
+            JSON dataBaseNameJson= resultSetToJSON(rs);
+            JSONArray jsonArray = JSONArray.parseArray(dataBaseNameJson.toJSONString());
+            if(jsonArray.size()>0){
+                JSONObject job = jsonArray.getJSONObject(0);  // 遍历 jsonarray 数组，把每一个对象转成 json 对象
+                databaseName=job.get("database()").toString();  // 得到 每个对象中的属性值
+            }
+
+            //获取查询指定表所有字段的sql语句
+            String querySql = "Select COLUMN_NAME, DATA_TYPE,COLUMN_COMMENT from INFORMATION_SCHEMA.COLUMNS Where " +
+                    "table_name ='" + tableName+"' and TABLE_SCHEMA='"+databaseName+"'";
+            logger.info("querySql: {}", querySql);
+
+            //获取所有字段的名称，类型，comment
+            stmt = connection.createStatement();
+            rs = stmt.executeQuery(querySql);
+            JSON json= resultSetToJSON(rs);
+            res.put("datas",json);
+            res.put("success","true");
+            res.put("error","");
+        } catch (SQLException e) {
+            logger.error("[getTableColumnNames Exception] --> "
+                    + "the exception message is:" + e.getMessage());
+            res.put("error","[getTableColumnNames Exception] --> "
+                    + "the exception message is:" + e.getMessage());
+        } finally {
+            JdbcUtils.close(rs);
+            JdbcUtils.close(stmt);
+        }
+        return res;
+    }
+
+    @Override
     public List<String> getTableNames(String tableSchema) {
         List<String> tables = new ArrayList<String>();
         Statement stmt = null;
@@ -510,5 +555,28 @@ public abstract class BaseQueryTool implements QueryToolInterface {
 
     protected String getSQLQueryTableSchema() {
         return sqlBuilder.getSQLQueryTableSchema();
+    }
+
+    public Map querySucessExamples(String out,String tableName){
+        Map<String, Object> map = new HashMap<>();
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            String sql = "select "+out+" from " + tableName+" limit 1";
+            ps = connection.prepareStatement(sql);
+            rs = ps.executeQuery();
+            JSON json=resultSetToJSON(rs);
+            logger.info(json.toJSONString());
+            map.put("code", "00");
+            map.put("msg", "成功");
+            map.put("datas", json);
+            map.put("dataCount", 1);
+            ConnectUtil.CloseConn(connection, ps, rs);//关闭连接
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }finally {
+            ConnectUtil.CloseConn(connection, ps, rs);//关闭连接
+        }
+        return map;
     }
 }

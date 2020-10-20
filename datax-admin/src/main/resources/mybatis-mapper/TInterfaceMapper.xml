@@ -1,0 +1,686 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wugui.datax.admin.datashare.mapper.TInterfaceMapper" >
+  <resultMap id="BaseResultMap" type="com.wugui.datax.admin.datashare.entity.TInterface" >
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="contacts" property="contacts" jdbcType="VARCHAR" />
+    <result column="telephone" property="telephone" jdbcType="VARCHAR" />
+    <result column="register_company" property="registerCompany" jdbcType="VARCHAR" />
+    <result column="inter_name" property="interName" jdbcType="VARCHAR" />
+    <result column="inter_remark" property="interRemark" jdbcType="VARCHAR" />
+    <result column="inter_state" property="interState" jdbcType="VARCHAR" />
+<!--    <result column="data_range" property="dataRange" jdbcType="VARCHAR" />-->
+<!--    <result column="data_company" property="dataCompany" jdbcType="VARCHAR" />-->
+<!--    <result column="impl_method" property="implMethod" jdbcType="VARCHAR" />-->
+<!--    <result column="business_type" property="businessType" jdbcType="VARCHAR" />-->
+    <result column="response_mode" property="responseMode" jdbcType="VARCHAR" />
+<!--    <result column="deploy_method" property="deployMethod" jdbcType="VARCHAR" />-->
+<!--    <result column="real_name" property="realName" jdbcType="VARCHAR" />-->
+<!--    <result column="is_limit" property="isLimit" jdbcType="VARCHAR" />-->
+<!--    <result column="provide_service" property="provideService" jdbcType="VARCHAR" />-->
+    <result column="info_id" property="infoId" jdbcType="VARCHAR" />
+    <result column="table_english" property="tableEnglish" jdbcType="VARCHAR" />
+    <result column="inter_code" property="interCode" jdbcType="VARCHAR" />
+    <result column="inter_url" property="interUrl" jdbcType="VARCHAR" />
+    <result column="encoding_format" property="encodingFormat" jdbcType="VARCHAR" />
+    <result column="request_method" property="requestMethod" jdbcType="VARCHAR" />
+    <result column="inter_version" property="interVersion" jdbcType="VARCHAR" />
+    <result column="is_apply" property="isApply" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <resultMap id="ResultMapWithBLOBs" type="com.wugui.datax.admin.datashare.entity.TInterfaceWithBLOBs" extends="BaseResultMap" >
+    <result column="example" property="example" jdbcType="LONGVARCHAR" />
+    <result column="register_code" property="registerCode" jdbcType="LONGVARCHAR" />
+    <result column="state_code" property="stateCode" jdbcType="LONGVARCHAR" />
+    <result column="input_param" property="inputParam" jdbcType="LONGVARCHAR" />
+    <result column="output_param" property="outputParam" jdbcType="LONGVARCHAR" />
+    <result column="success" property="success" jdbcType="LONGVARCHAR" />
+    <result column="fail" property="fail" jdbcType="LONGVARCHAR" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    id, contacts, telephone, register_company, inter_name, inter_remark, inter_state,
+     response_mode,
+     info_id, table_english, inter_code, inter_url,
+    encoding_format, request_method, inter_version, is_apply, create_time, update_time
+  </sql>
+  <sql id="Blob_Column_List" >
+    example, register_code, state_code, input_param, output_param, success, fail
+  </sql>
+  <select id="selectByExampleWithBLOBs" resultMap="ResultMapWithBLOBs" parameterType="com.wugui.datax.admin.datashare.entity.TInterfaceExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from t_interface
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.wugui.datax.admin.datashare.entity.TInterfaceExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_interface
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from t_interface
+    where id = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from t_interface
+    where id = #{id,jdbcType=VARCHAR}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.wugui.datax.admin.datashare.entity.TInterfaceExample" >
+    delete from t_interface
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.wugui.datax.admin.datashare.entity.TInterfaceWithBLOBs" >
+    insert into t_interface (id, contacts, telephone,
+      register_company, inter_name, inter_remark,
+      inter_state, response_mode,
+     info_id, table_english,
+      inter_code, inter_url, encoding_format,
+      request_method, inter_version, is_apply,
+      create_time, update_time, example,
+      register_code, state_code, input_param,
+      output_param, success, fail
+      )
+    values (#{id,jdbcType=VARCHAR}, #{contacts,jdbcType=VARCHAR}, #{telephone,jdbcType=VARCHAR},
+      #{registerCompany,jdbcType=VARCHAR}, #{interName,jdbcType=VARCHAR}, #{interRemark,jdbcType=VARCHAR},
+      #{interState,jdbcType=VARCHAR},
+      #{responseMode,jdbcType=VARCHAR},
+      #{infoId,jdbcType=VARCHAR}, #{tableEnglish,jdbcType=VARCHAR},
+      #{interCode,jdbcType=VARCHAR}, #{interUrl,jdbcType=VARCHAR}, #{encodingFormat,jdbcType=VARCHAR},
+      #{requestMethod,jdbcType=VARCHAR}, #{interVersion,jdbcType=VARCHAR}, #{isApply,jdbcType=VARCHAR},
+      #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, #{example,jdbcType=LONGVARCHAR},
+      #{registerCode,jdbcType=LONGVARCHAR}, #{stateCode,jdbcType=LONGVARCHAR}, #{inputParam,jdbcType=LONGVARCHAR},
+      #{outputParam,jdbcType=LONGVARCHAR}, #{success,jdbcType=LONGVARCHAR}, #{fail,jdbcType=LONGVARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.wugui.datax.admin.datashare.entity.TInterfaceWithBLOBs" >
+    insert into t_interface
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="contacts != null" >
+        contacts,
+      </if>
+      <if test="telephone != null" >
+        telephone,
+      </if>
+      <if test="registerCompany != null" >
+        register_company,
+      </if>
+      <if test="interName != null" >
+        inter_name,
+      </if>
+      <if test="interRemark != null" >
+        inter_remark,
+      </if>
+      <if test="interState != null" >
+        inter_state,
+      </if>
+
+      <if test="responseMode != null" >
+        response_mode,
+      </if>
+      <if test="infoId != null" >
+        info_id,
+      </if>
+      <if test="tableEnglish != null" >
+        table_english,
+      </if>
+      <if test="interCode != null" >
+        inter_code,
+      </if>
+      <if test="interUrl != null" >
+        inter_url,
+      </if>
+      <if test="encodingFormat != null" >
+        encoding_format,
+      </if>
+      <if test="requestMethod != null" >
+        request_method,
+      </if>
+      <if test="interVersion != null" >
+        inter_version,
+      </if>
+      <if test="isApply != null" >
+        is_apply,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="updateTime != null" >
+        update_time,
+      </if>
+      <if test="example != null" >
+        example,
+      </if>
+      <if test="registerCode != null" >
+        register_code,
+      </if>
+      <if test="stateCode != null" >
+        state_code,
+      </if>
+      <if test="inputParam != null" >
+        input_param,
+      </if>
+      <if test="outputParam != null" >
+        output_param,
+      </if>
+      <if test="success != null" >
+        success,
+      </if>
+      <if test="fail != null" >
+        fail,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="contacts != null" >
+        #{contacts,jdbcType=VARCHAR},
+      </if>
+      <if test="telephone != null" >
+        #{telephone,jdbcType=VARCHAR},
+      </if>
+      <if test="registerCompany != null" >
+        #{registerCompany,jdbcType=VARCHAR},
+      </if>
+      <if test="interName != null" >
+        #{interName,jdbcType=VARCHAR},
+      </if>
+      <if test="interRemark != null" >
+        #{interRemark,jdbcType=VARCHAR},
+      </if>
+      <if test="interState != null" >
+        #{interState,jdbcType=VARCHAR},
+      </if>
+
+      <if test="responseMode != null" >
+        #{responseMode,jdbcType=VARCHAR},
+      </if>
+
+      <if test="infoId != null" >
+        #{infoId,jdbcType=VARCHAR},
+      </if>
+      <if test="tableEnglish != null" >
+        #{tableEnglish,jdbcType=VARCHAR},
+      </if>
+      <if test="interCode != null" >
+        #{interCode,jdbcType=VARCHAR},
+      </if>
+      <if test="interUrl != null" >
+        #{interUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="encodingFormat != null" >
+        #{encodingFormat,jdbcType=VARCHAR},
+      </if>
+      <if test="requestMethod != null" >
+        #{requestMethod,jdbcType=VARCHAR},
+      </if>
+      <if test="interVersion != null" >
+        #{interVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="isApply != null" >
+        #{isApply,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="example != null" >
+        #{example,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="registerCode != null" >
+        #{registerCode,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="stateCode != null" >
+        #{stateCode,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="inputParam != null" >
+        #{inputParam,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="outputParam != null" >
+        #{outputParam,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="success != null" >
+        #{success,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="fail != null" >
+        #{fail,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.wugui.datax.admin.datashare.entity.TInterfaceExample" resultType="java.lang.Integer" >
+    select count(*) from t_interface
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update t_interface
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=VARCHAR},
+      </if>
+      <if test="record.contacts != null" >
+        contacts = #{record.contacts,jdbcType=VARCHAR},
+      </if>
+      <if test="record.telephone != null" >
+        telephone = #{record.telephone,jdbcType=VARCHAR},
+      </if>
+      <if test="record.registerCompany != null" >
+        register_company = #{record.registerCompany,jdbcType=VARCHAR},
+      </if>
+      <if test="record.interName != null" >
+        inter_name = #{record.interName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.interRemark != null" >
+        inter_remark = #{record.interRemark,jdbcType=VARCHAR},
+      </if>
+      <if test="record.interState != null" >
+        inter_state = #{record.interState,jdbcType=VARCHAR},
+      </if>
+
+      <if test="record.responseMode != null" >
+        response_mode = #{record.responseMode,jdbcType=VARCHAR},
+      </if>
+
+      <if test="record.infoId != null" >
+        info_id = #{record.infoId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.tableEnglish != null" >
+        table_english = #{record.tableEnglish,jdbcType=VARCHAR},
+      </if>
+      <if test="record.interCode != null" >
+        inter_code = #{record.interCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.interUrl != null" >
+        inter_url = #{record.interUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="record.encodingFormat != null" >
+        encoding_format = #{record.encodingFormat,jdbcType=VARCHAR},
+      </if>
+      <if test="record.requestMethod != null" >
+        request_method = #{record.requestMethod,jdbcType=VARCHAR},
+      </if>
+      <if test="record.interVersion != null" >
+        inter_version = #{record.interVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="record.isApply != null" >
+        is_apply = #{record.isApply,jdbcType=VARCHAR},
+      </if>
+      <if test="record.createTime != null" >
+        create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.updateTime != null" >
+        update_time = #{record.updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.example != null" >
+        example = #{record.example,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="record.registerCode != null" >
+        register_code = #{record.registerCode,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="record.stateCode != null" >
+        state_code = #{record.stateCode,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="record.inputParam != null" >
+        input_param = #{record.inputParam,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="record.outputParam != null" >
+        output_param = #{record.outputParam,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="record.success != null" >
+        success = #{record.success,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="record.fail != null" >
+        fail = #{record.fail,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExampleWithBLOBs" parameterType="map" >
+    update t_interface
+    set id = #{record.id,jdbcType=VARCHAR},
+    contacts = #{record.contacts,jdbcType=VARCHAR},
+    telephone = #{record.telephone,jdbcType=VARCHAR},
+    register_company = #{record.registerCompany,jdbcType=VARCHAR},
+    inter_name = #{record.interName,jdbcType=VARCHAR},
+    inter_remark = #{record.interRemark,jdbcType=VARCHAR},
+    inter_state = #{record.interState,jdbcType=VARCHAR},
+
+    response_mode = #{record.responseMode,jdbcType=VARCHAR},
+
+    info_id = #{record.infoId,jdbcType=VARCHAR},
+    table_english = #{record.tableEnglish,jdbcType=VARCHAR},
+    inter_code = #{record.interCode,jdbcType=VARCHAR},
+    inter_url = #{record.interUrl,jdbcType=VARCHAR},
+    encoding_format = #{record.encodingFormat,jdbcType=VARCHAR},
+    request_method = #{record.requestMethod,jdbcType=VARCHAR},
+    inter_version = #{record.interVersion,jdbcType=VARCHAR},
+    is_apply = #{record.isApply,jdbcType=VARCHAR},
+    create_time = #{record.createTime,jdbcType=TIMESTAMP},
+    update_time = #{record.updateTime,jdbcType=TIMESTAMP},
+    example = #{record.example,jdbcType=LONGVARCHAR},
+    register_code = #{record.registerCode,jdbcType=LONGVARCHAR},
+    state_code = #{record.stateCode,jdbcType=LONGVARCHAR},
+    input_param = #{record.inputParam,jdbcType=LONGVARCHAR},
+    output_param = #{record.outputParam,jdbcType=LONGVARCHAR},
+    success = #{record.success,jdbcType=LONGVARCHAR},
+    fail = #{record.fail,jdbcType=LONGVARCHAR}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update t_interface
+    set id = #{record.id,jdbcType=VARCHAR},
+    contacts = #{record.contacts,jdbcType=VARCHAR},
+    telephone = #{record.telephone,jdbcType=VARCHAR},
+    register_company = #{record.registerCompany,jdbcType=VARCHAR},
+    inter_name = #{record.interName,jdbcType=VARCHAR},
+    inter_remark = #{record.interRemark,jdbcType=VARCHAR},
+    inter_state = #{record.interState,jdbcType=VARCHAR},
+
+    response_mode = #{record.responseMode,jdbcType=VARCHAR},
+
+    info_id = #{record.infoId,jdbcType=VARCHAR},
+    table_english = #{record.tableEnglish,jdbcType=VARCHAR},
+    inter_code = #{record.interCode,jdbcType=VARCHAR},
+    inter_url = #{record.interUrl,jdbcType=VARCHAR},
+    encoding_format = #{record.encodingFormat,jdbcType=VARCHAR},
+    request_method = #{record.requestMethod,jdbcType=VARCHAR},
+    inter_version = #{record.interVersion,jdbcType=VARCHAR},
+    is_apply = #{record.isApply,jdbcType=VARCHAR},
+    create_time = #{record.createTime,jdbcType=TIMESTAMP},
+    update_time = #{record.updateTime,jdbcType=TIMESTAMP}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.wugui.datax.admin.datashare.entity.TInterfaceWithBLOBs" >
+    update t_interface
+    <set >
+      <if test="contacts != null" >
+        contacts = #{contacts,jdbcType=VARCHAR},
+      </if>
+      <if test="telephone != null" >
+        telephone = #{telephone,jdbcType=VARCHAR},
+      </if>
+      <if test="registerCompany != null" >
+        register_company = #{registerCompany,jdbcType=VARCHAR},
+      </if>
+      <if test="interName != null" >
+        inter_name = #{interName,jdbcType=VARCHAR},
+      </if>
+      <if test="interRemark != null" >
+        inter_remark = #{interRemark,jdbcType=VARCHAR},
+      </if>
+      <if test="interState != null" >
+        inter_state = #{interState,jdbcType=VARCHAR},
+      </if>
+
+      <if test="responseMode != null" >
+        response_mode = #{responseMode,jdbcType=VARCHAR},
+      </if>
+
+      <if test="infoId != null" >
+        info_id = #{infoId,jdbcType=VARCHAR},
+      </if>
+      <if test="tableEnglish != null" >
+        table_english = #{tableEnglish,jdbcType=VARCHAR},
+      </if>
+      <if test="interCode != null" >
+        inter_code = #{interCode,jdbcType=VARCHAR},
+      </if>
+      <if test="interUrl != null" >
+        inter_url = #{interUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="encodingFormat != null" >
+        encoding_format = #{encodingFormat,jdbcType=VARCHAR},
+      </if>
+      <if test="requestMethod != null" >
+        request_method = #{requestMethod,jdbcType=VARCHAR},
+      </if>
+      <if test="interVersion != null" >
+        inter_version = #{interVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="isApply != null" >
+        is_apply = #{isApply,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="example != null" >
+        example = #{example,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="registerCode != null" >
+        register_code = #{registerCode,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="stateCode != null" >
+        state_code = #{stateCode,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="inputParam != null" >
+        input_param = #{inputParam,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="outputParam != null" >
+        output_param = #{outputParam,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="success != null" >
+        success = #{success,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="fail != null" >
+        fail = #{fail,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.wugui.datax.admin.datashare.entity.TInterfaceWithBLOBs" >
+    update t_interface
+    set contacts = #{contacts,jdbcType=VARCHAR},
+      telephone = #{telephone,jdbcType=VARCHAR},
+      register_company = #{registerCompany,jdbcType=VARCHAR},
+      inter_name = #{interName,jdbcType=VARCHAR},
+      inter_remark = #{interRemark,jdbcType=VARCHAR},
+      inter_state = #{interState,jdbcType=VARCHAR},
+
+      response_mode = #{responseMode,jdbcType=VARCHAR},
+
+      info_id = #{infoId,jdbcType=VARCHAR},
+      table_english = #{tableEnglish,jdbcType=VARCHAR},
+      inter_code = #{interCode,jdbcType=VARCHAR},
+      inter_url = #{interUrl,jdbcType=VARCHAR},
+      encoding_format = #{encodingFormat,jdbcType=VARCHAR},
+      request_method = #{requestMethod,jdbcType=VARCHAR},
+      inter_version = #{interVersion,jdbcType=VARCHAR},
+      is_apply = #{isApply,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      example = #{example,jdbcType=LONGVARCHAR},
+      register_code = #{registerCode,jdbcType=LONGVARCHAR},
+      state_code = #{stateCode,jdbcType=LONGVARCHAR},
+      input_param = #{inputParam,jdbcType=LONGVARCHAR},
+      output_param = #{outputParam,jdbcType=LONGVARCHAR},
+      success = #{success,jdbcType=LONGVARCHAR},
+      fail = #{fail,jdbcType=LONGVARCHAR}
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.wugui.datax.admin.datashare.entity.TInterface" >
+    update t_interface
+    set contacts = #{contacts,jdbcType=VARCHAR},
+      telephone = #{telephone,jdbcType=VARCHAR},
+      register_company = #{registerCompany,jdbcType=VARCHAR},
+      inter_name = #{interName,jdbcType=VARCHAR},
+      inter_remark = #{interRemark,jdbcType=VARCHAR},
+      inter_state = #{interState,jdbcType=VARCHAR},
+
+      response_mode = #{responseMode,jdbcType=VARCHAR},
+
+      info_id = #{infoId,jdbcType=VARCHAR},
+      table_english = #{tableEnglish,jdbcType=VARCHAR},
+      inter_code = #{interCode,jdbcType=VARCHAR},
+      inter_url = #{interUrl,jdbcType=VARCHAR},
+      encoding_format = #{encodingFormat,jdbcType=VARCHAR},
+      request_method = #{requestMethod,jdbcType=VARCHAR},
+      inter_version = #{interVersion,jdbcType=VARCHAR},
+      is_apply = #{isApply,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=VARCHAR}
+  </update>
+
+
+
+  <select id="getInterfaceResult" parameterType="com.wugui.datax.admin.datashare.vo.ApplyResourceQuery" resultMap="interfaceMap">
+    SELECT i.*,CASE WHEN i.id=a.inter_id THEN '已申请'ELSE '未申请' END AS is_apply  FROM t_interface i LEFT JOIN t_apply_resource a ON i.id=a.inter_id
+    <where>
+      and i.inter_state LIKE "%审核通过%"
+      <if test="interName !=null and interName !=''">
+        and i.info_name LIKE "%"#{infoName}"%"
+      </if>
+     <!-- <if test="dataCompany !=null and dataCompany !=''">
+        and i.data_company LIKE "%"#{dataCompany}"%"
+      </if>-->
+    </where>
+  </select>
+
+  <select id="getInterfaceTotal" parameterType="com.wugui.datax.admin.datashare.vo.ApplyResourceQuery" resultType="java.lang.Integer">
+    SELECT COUNT(*)  FROM t_interface i LEFT JOIN t_apply_resource a ON i.id=a.inter_id
+    <where>
+      and i.inter_state LIKE "%审核通过%"
+      <if test="interName !=null and interName !=''">
+        and i.info_name LIKE "%"#{infoName}"%"
+      </if>
+      <!--<if test="dataCompany !=null and dataCompany !=''">
+        and i.data_company LIKE "%"#{dataCompany}"%"
+      </if>-->
+    </where>
+  </select>
+  <resultMap id="interfaceMap" type="com.wugui.datax.admin.datashare.vo.InterfaceResult">
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="contacts" property="contacts" jdbcType="VARCHAR" />
+    <result column="telephone" property="telephone" jdbcType="VARCHAR" />
+    <result column="register_company" property="registerCompany" jdbcType="VARCHAR" />
+    <result column="inter_name" property="interName" jdbcType="VARCHAR" />
+    <result column="inter_remark" property="interRemark" jdbcType="VARCHAR" />
+    <result column="inter_state" property="interState" jdbcType="VARCHAR" />
+<!--    <result column="data_range" property="dataRange" jdbcType="VARCHAR" />-->
+<!--    <result column="data_company" property="dataCompany" jdbcType="VARCHAR" />-->
+<!--    <result column="impl_method" property="implMethod" jdbcType="VARCHAR" />-->
+<!--    <result column="business_type" property="businessType" jdbcType="VARCHAR" />-->
+    <result column="response_mode" property="responseMode" jdbcType="VARCHAR" />
+<!--    <result column="deploy_method" property="deployMethod" jdbcType="VARCHAR" />-->
+<!--    <result column="real_name" property="realName" jdbcType="VARCHAR" />-->
+<!--    <result column="is_limit" property="isLimit" jdbcType="VARCHAR" />-->
+<!--    <result column="provide_service" property="provideService" jdbcType="VARCHAR" />-->
+    <result column="info_id" property="infoId" jdbcType="VARCHAR" />
+    <result column="table_english" property="tableEnglish" jdbcType="VARCHAR" />
+    <result column="inter_code" property="interCode" jdbcType="VARCHAR" />
+    <result column="inter_url" property="interUrl" jdbcType="VARCHAR" />
+    <result column="encoding_format" property="encodingFormat" jdbcType="VARCHAR" />
+    <result column="request_method" property="requestMethod" jdbcType="VARCHAR" />
+    <result column="inter_version" property="interVersion" jdbcType="VARCHAR" />
+    <result column="example" property="example" jdbcType="LONGVARCHAR" />
+    <result column="register_code" property="registerCode" jdbcType="LONGVARCHAR" />
+    <result column="state_code" property="stateCode" jdbcType="LONGVARCHAR" />
+    <result column="input_param" property="inputParam" jdbcType="LONGVARCHAR" />
+    <result column="output_param" property="outputParam" jdbcType="LONGVARCHAR" />
+    <result column="success" property="success" jdbcType="LONGVARCHAR" />
+    <result column="fail" property="fail" jdbcType="LONGVARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="is_apply" property="isApply" jdbcType="VARCHAR"/>
+  </resultMap>
+
+</mapper>

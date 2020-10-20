@@ -2,6 +2,8 @@ package com.wugui.datax.admin.service.impl;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.google.common.collect.Lists;
+import com.wugui.datax.admin.datashare.entity.TDatabaseInfo;
+import com.wugui.datax.admin.datashare.mapper.TDatabaseInfoMapper;
 import com.wugui.datax.admin.entity.JobDatasource;
 import com.wugui.datax.admin.service.DatasourceQueryService;
 import com.wugui.datax.admin.service.JobDatasourceService;
@@ -28,6 +30,8 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
 
     @Autowired
     private JobDatasourceService jobDatasourceService;
+    @Autowired
+    private TDatabaseInfoMapper databaseInfoMapper;
 
     @Override
     public List<String> getDBs(Long id) throws IOException {
@@ -98,6 +102,24 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
         } else {
             BaseQueryTool queryTool = QueryToolFactory.getByDbType(datasource);
             return queryTool.getColumnNames(tableName, datasource.getDatasource());
+        }
+    }
+
+    @Override
+    public Object getTableColumns(Long id, String tableName) throws IOException {
+        //获取数据源对象
+        JobDatasource datasource = jobDatasourceService.getById(id);
+        //queryTool组装
+        if (ObjectUtil.isNull(datasource)) {
+            return Lists.newArrayList();
+        }
+        if (JdbcConstants.HBASE.equals(datasource.getDatasource())) {
+            return new HBaseQueryTool(datasource).getColumns(tableName);
+        } else if (JdbcConstants.MONGODB.equals(datasource.getDatasource())) {
+            return new MongoDBQueryTool(datasource).getColumns(tableName);
+        } else {
+            BaseQueryTool queryTool = QueryToolFactory.getByDbType(datasource);
+            return queryTool.getTableColumns(tableName, datasource.getDatasource(),null);
         }
     }
 

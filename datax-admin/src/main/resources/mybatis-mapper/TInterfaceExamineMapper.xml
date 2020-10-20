@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wugui.datax.admin.datashare.mapper.TInterfaceExamineMapper" >
+  <resultMap id="BaseResultMap" type="com.wugui.datax.admin.datashare.entity.TInterfaceExamine" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="inter_id" property="interId" jdbcType="VARCHAR" />
+    <result column="inter_name" property="interName" jdbcType="VARCHAR" />
+    <result column="inter_remark" property="interRemark" jdbcType="VARCHAR" />
+    <result column="register_company" property="registerCompany" jdbcType="VARCHAR" />
+    <result column="apply_time" property="applyTime" jdbcType="TIMESTAMP" />
+    <result column="state" property="state" jdbcType="VARCHAR" />
+    <result column="reviewer" property="reviewer" jdbcType="VARCHAR" />
+    <result column="exa_time" property="exaTime" jdbcType="TIMESTAMP" />
+    <result column="exa_result" property="exaResult" jdbcType="VARCHAR" />
+    <result column="exa_describe" property="exaDescribe" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    id, inter_id, inter_name, inter_remark, register_company, apply_time, state, reviewer, 
+    exa_time, exa_result, exa_describe, create_time, update_time
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.wugui.datax.admin.datashare.entity.TInterfaceExamineExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_interface_examine
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_interface_examine
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from t_interface_examine
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.wugui.datax.admin.datashare.entity.TInterfaceExamineExample" >
+    delete from t_interface_examine
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.wugui.datax.admin.datashare.entity.TInterfaceExamine" >
+    insert into t_interface_examine (id, inter_id, inter_name, 
+      inter_remark, register_company, apply_time, 
+      state, reviewer, exa_time, 
+      exa_result, exa_describe, create_time, 
+      update_time)
+    values (#{id,jdbcType=INTEGER}, #{interId,jdbcType=VARCHAR}, #{interName,jdbcType=VARCHAR}, 
+      #{interRemark,jdbcType=VARCHAR}, #{registerCompany,jdbcType=VARCHAR}, #{applyTime,jdbcType=TIMESTAMP}, 
+      #{state,jdbcType=VARCHAR}, #{reviewer,jdbcType=VARCHAR}, #{exaTime,jdbcType=TIMESTAMP}, 
+      #{exaResult,jdbcType=VARCHAR}, #{exaDescribe,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{updateTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.wugui.datax.admin.datashare.entity.TInterfaceExamine" >
+    insert into t_interface_examine
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="interId != null" >
+        inter_id,
+      </if>
+      <if test="interName != null" >
+        inter_name,
+      </if>
+      <if test="interRemark != null" >
+        inter_remark,
+      </if>
+      <if test="registerCompany != null" >
+        register_company,
+      </if>
+      <if test="applyTime != null" >
+        apply_time,
+      </if>
+      <if test="state != null" >
+        state,
+      </if>
+      <if test="reviewer != null" >
+        reviewer,
+      </if>
+      <if test="exaTime != null" >
+        exa_time,
+      </if>
+      <if test="exaResult != null" >
+        exa_result,
+      </if>
+      <if test="exaDescribe != null" >
+        exa_describe,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="updateTime != null" >
+        update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="interId != null" >
+        #{interId,jdbcType=VARCHAR},
+      </if>
+      <if test="interName != null" >
+        #{interName,jdbcType=VARCHAR},
+      </if>
+      <if test="interRemark != null" >
+        #{interRemark,jdbcType=VARCHAR},
+      </if>
+      <if test="registerCompany != null" >
+        #{registerCompany,jdbcType=VARCHAR},
+      </if>
+      <if test="applyTime != null" >
+        #{applyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="state != null" >
+        #{state,jdbcType=VARCHAR},
+      </if>
+      <if test="reviewer != null" >
+        #{reviewer,jdbcType=VARCHAR},
+      </if>
+      <if test="exaTime != null" >
+        #{exaTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="exaResult != null" >
+        #{exaResult,jdbcType=VARCHAR},
+      </if>
+      <if test="exaDescribe != null" >
+        #{exaDescribe,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.wugui.datax.admin.datashare.entity.TInterfaceExamineExample" resultType="java.lang.Integer" >
+    select count(*) from t_interface_examine
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update t_interface_examine
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=INTEGER},
+      </if>
+      <if test="record.interId != null" >
+        inter_id = #{record.interId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.interName != null" >
+        inter_name = #{record.interName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.interRemark != null" >
+        inter_remark = #{record.interRemark,jdbcType=VARCHAR},
+      </if>
+      <if test="record.registerCompany != null" >
+        register_company = #{record.registerCompany,jdbcType=VARCHAR},
+      </if>
+      <if test="record.applyTime != null" >
+        apply_time = #{record.applyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.state != null" >
+        state = #{record.state,jdbcType=VARCHAR},
+      </if>
+      <if test="record.reviewer != null" >
+        reviewer = #{record.reviewer,jdbcType=VARCHAR},
+      </if>
+      <if test="record.exaTime != null" >
+        exa_time = #{record.exaTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.exaResult != null" >
+        exa_result = #{record.exaResult,jdbcType=VARCHAR},
+      </if>
+      <if test="record.exaDescribe != null" >
+        exa_describe = #{record.exaDescribe,jdbcType=VARCHAR},
+      </if>
+      <if test="record.createTime != null" >
+        create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.updateTime != null" >
+        update_time = #{record.updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update t_interface_examine
+    set id = #{record.id,jdbcType=INTEGER},
+      inter_id = #{record.interId,jdbcType=VARCHAR},
+      inter_name = #{record.interName,jdbcType=VARCHAR},
+      inter_remark = #{record.interRemark,jdbcType=VARCHAR},
+      register_company = #{record.registerCompany,jdbcType=VARCHAR},
+      apply_time = #{record.applyTime,jdbcType=TIMESTAMP},
+      state = #{record.state,jdbcType=VARCHAR},
+      reviewer = #{record.reviewer,jdbcType=VARCHAR},
+      exa_time = #{record.exaTime,jdbcType=TIMESTAMP},
+      exa_result = #{record.exaResult,jdbcType=VARCHAR},
+      exa_describe = #{record.exaDescribe,jdbcType=VARCHAR},
+      create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      update_time = #{record.updateTime,jdbcType=TIMESTAMP}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.wugui.datax.admin.datashare.entity.TInterfaceExamine" >
+    update t_interface_examine
+    <set >
+      <if test="interId != null" >
+        inter_id = #{interId,jdbcType=VARCHAR},
+      </if>
+      <if test="interName != null" >
+        inter_name = #{interName,jdbcType=VARCHAR},
+      </if>
+      <if test="interRemark != null" >
+        inter_remark = #{interRemark,jdbcType=VARCHAR},
+      </if>
+      <if test="registerCompany != null" >
+        register_company = #{registerCompany,jdbcType=VARCHAR},
+      </if>
+      <if test="applyTime != null" >
+        apply_time = #{applyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="state != null" >
+        state = #{state,jdbcType=VARCHAR},
+      </if>
+      <if test="reviewer != null" >
+        reviewer = #{reviewer,jdbcType=VARCHAR},
+      </if>
+      <if test="exaTime != null" >
+        exa_time = #{exaTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="exaResult != null" >
+        exa_result = #{exaResult,jdbcType=VARCHAR},
+      </if>
+      <if test="exaDescribe != null" >
+        exa_describe = #{exaDescribe,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.wugui.datax.admin.datashare.entity.TInterfaceExamine" >
+    update t_interface_examine
+    set inter_id = #{interId,jdbcType=VARCHAR},
+      inter_name = #{interName,jdbcType=VARCHAR},
+      inter_remark = #{interRemark,jdbcType=VARCHAR},
+      register_company = #{registerCompany,jdbcType=VARCHAR},
+      apply_time = #{applyTime,jdbcType=TIMESTAMP},
+      state = #{state,jdbcType=VARCHAR},
+      reviewer = #{reviewer,jdbcType=VARCHAR},
+      exa_time = #{exaTime,jdbcType=TIMESTAMP},
+      exa_result = #{exaResult,jdbcType=VARCHAR},
+      exa_describe = #{exaDescribe,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

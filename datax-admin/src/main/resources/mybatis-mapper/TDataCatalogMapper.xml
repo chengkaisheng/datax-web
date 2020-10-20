@@ -1,0 +1,615 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wugui.datax.admin.datashare.mapper.TDataCatalogMapper" >
+  <resultMap id="BaseResultMap" type="com.wugui.datax.admin.datashare.entity.TDataCatalog" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="info_id" property="infoId" jdbcType="VARCHAR" />
+    <result column="info_name" property="infoName" jdbcType="VARCHAR" />
+    <result column="info_code" property="infoCode" jdbcType="VARCHAR" />
+    <result column="table_english" property="tableEnglish" jdbcType="VARCHAR" />
+    <result column="data_company" property="dataCompany" jdbcType="VARCHAR" />
+    <result column="company_code" property="companyCode" jdbcType="VARCHAR" />
+    <result column="info_system_name" property="infoSystemName" jdbcType="VARCHAR" />
+    <result column="info_extract" property="infoExtract" jdbcType="VARCHAR" />
+    <result column="region" property="region" jdbcType="VARCHAR" />
+    <result column="import_sort" property="importSort" jdbcType="VARCHAR" />
+    <result column="catalog_state" property="catalogState" jdbcType="VARCHAR" />
+    <result column="info_format" property="infoFormat" jdbcType="VARCHAR" />
+    <result column="is_notional_pool" property="isNotionalPool" jdbcType="VARCHAR" />
+    <result column="update_frequency" property="updateFrequency" jdbcType="VARCHAR" />
+    <result column="update_date" property="updateDate" jdbcType="VARCHAR" />
+    <result column="source" property="source" jdbcType="VARCHAR" />
+    <result column="detailed_list" property="detailedList" jdbcType="VARCHAR" />
+    <result column="business_examine" property="businessExamine" jdbcType="VARCHAR" />
+    <result column="technology_examine" property="technologyExamine" jdbcType="VARCHAR" />
+    <result column="is_quote" property="isQuote" jdbcType="VARCHAR" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="share_attribute" property="shareAttribute" jdbcType="VARCHAR" />
+    <result column="share_condition" property="shareCondition" jdbcType="VARCHAR" />
+    <result column="open_attribute" property="openAttribute" jdbcType="VARCHAR" />
+    <result column="open_condition" property="openCondition" jdbcType="VARCHAR" />
+    <result column="data_server_name" property="dataServerName" jdbcType="VARCHAR" />
+    <result column="is_delete" property="isDelete" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    id, info_id, info_name, info_code, table_english, data_company, company_code, info_system_name, 
+    info_extract, region, import_sort, catalog_state, info_format, is_notional_pool, 
+    update_frequency, update_date, source, detailed_list, business_examine, technology_examine, 
+    is_quote, update_time, create_time, share_attribute, share_condition, open_attribute, 
+    open_condition, data_server_name, is_delete
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.wugui.datax.admin.datashare.entity.TDataCatalogExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_data_catalog
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_data_catalog
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectByInfoId" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from t_data_catalog
+    where info_id = #{id,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from t_data_catalog
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.wugui.datax.admin.datashare.entity.TDataCatalogExample" >
+    delete from t_data_catalog
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.wugui.datax.admin.datashare.entity.TDataCatalog" >
+    insert into t_data_catalog (id, info_id, info_name, 
+      info_code, table_english, data_company, 
+      company_code, info_system_name, info_extract, 
+      region, import_sort, catalog_state, 
+      info_format, is_notional_pool, update_frequency, 
+      update_date, source, detailed_list, 
+      business_examine, technology_examine, is_quote, 
+      update_time, create_time, share_attribute, 
+      share_condition, open_attribute, open_condition, 
+      data_server_name, is_delete)
+    values (#{id,jdbcType=INTEGER}, #{infoId,jdbcType=VARCHAR}, #{infoName,jdbcType=VARCHAR}, 
+      #{infoCode,jdbcType=VARCHAR}, #{tableEnglish,jdbcType=VARCHAR}, #{dataCompany,jdbcType=VARCHAR}, 
+      #{companyCode,jdbcType=VARCHAR}, #{infoSystemName,jdbcType=VARCHAR}, #{infoExtract,jdbcType=VARCHAR}, 
+      #{region,jdbcType=VARCHAR}, #{importSort,jdbcType=VARCHAR}, #{catalogState,jdbcType=VARCHAR}, 
+      #{infoFormat,jdbcType=VARCHAR}, #{isNotionalPool,jdbcType=VARCHAR}, #{updateFrequency,jdbcType=VARCHAR}, 
+      #{updateDate,jdbcType=VARCHAR}, #{source,jdbcType=VARCHAR}, #{detailedList,jdbcType=VARCHAR}, 
+      #{businessExamine,jdbcType=VARCHAR}, #{technologyExamine,jdbcType=VARCHAR}, #{isQuote,jdbcType=VARCHAR}, 
+      #{updateTime,jdbcType=TIMESTAMP}, #{createTime,jdbcType=TIMESTAMP}, #{shareAttribute,jdbcType=VARCHAR}, 
+      #{shareCondition,jdbcType=VARCHAR}, #{openAttribute,jdbcType=VARCHAR}, #{openCondition,jdbcType=VARCHAR}, 
+      #{dataServerName,jdbcType=VARCHAR}, #{isDelete,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.wugui.datax.admin.datashare.entity.TDataCatalog" >
+    insert into t_data_catalog
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="infoId != null" >
+        info_id,
+      </if>
+      <if test="infoName != null" >
+        info_name,
+      </if>
+      <if test="infoCode != null" >
+        info_code,
+      </if>
+      <if test="tableEnglish != null" >
+        table_english,
+      </if>
+      <if test="dataCompany != null" >
+        data_company,
+      </if>
+      <if test="companyCode != null" >
+        company_code,
+      </if>
+      <if test="infoSystemName != null" >
+        info_system_name,
+      </if>
+      <if test="infoExtract != null" >
+        info_extract,
+      </if>
+      <if test="region != null" >
+        region,
+      </if>
+      <if test="importSort != null" >
+        import_sort,
+      </if>
+      <if test="catalogState != null" >
+        catalog_state,
+      </if>
+      <if test="infoFormat != null" >
+        info_format,
+      </if>
+      <if test="isNotionalPool != null" >
+        is_notional_pool,
+      </if>
+      <if test="updateFrequency != null" >
+        update_frequency,
+      </if>
+      <if test="updateDate != null" >
+        update_date,
+      </if>
+      <if test="source != null" >
+        source,
+      </if>
+      <if test="detailedList != null" >
+        detailed_list,
+      </if>
+      <if test="businessExamine != null" >
+        business_examine,
+      </if>
+      <if test="technologyExamine != null" >
+        technology_examine,
+      </if>
+      <if test="isQuote != null" >
+        is_quote,
+      </if>
+      <if test="updateTime != null" >
+        update_time,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="shareAttribute != null" >
+        share_attribute,
+      </if>
+      <if test="shareCondition != null" >
+        share_condition,
+      </if>
+      <if test="openAttribute != null" >
+        open_attribute,
+      </if>
+      <if test="openCondition != null" >
+        open_condition,
+      </if>
+      <if test="dataServerName != null" >
+        data_server_name,
+      </if>
+      <if test="isDelete != null" >
+        is_delete,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="infoId != null" >
+        #{infoId,jdbcType=VARCHAR},
+      </if>
+      <if test="infoName != null" >
+        #{infoName,jdbcType=VARCHAR},
+      </if>
+      <if test="infoCode != null" >
+        #{infoCode,jdbcType=VARCHAR},
+      </if>
+      <if test="tableEnglish != null" >
+        #{tableEnglish,jdbcType=VARCHAR},
+      </if>
+      <if test="dataCompany != null" >
+        #{dataCompany,jdbcType=VARCHAR},
+      </if>
+      <if test="companyCode != null" >
+        #{companyCode,jdbcType=VARCHAR},
+      </if>
+      <if test="infoSystemName != null" >
+        #{infoSystemName,jdbcType=VARCHAR},
+      </if>
+      <if test="infoExtract != null" >
+        #{infoExtract,jdbcType=VARCHAR},
+      </if>
+      <if test="region != null" >
+        #{region,jdbcType=VARCHAR},
+      </if>
+      <if test="importSort != null" >
+        #{importSort,jdbcType=VARCHAR},
+      </if>
+      <if test="catalogState != null" >
+        #{catalogState,jdbcType=VARCHAR},
+      </if>
+      <if test="infoFormat != null" >
+        #{infoFormat,jdbcType=VARCHAR},
+      </if>
+      <if test="isNotionalPool != null" >
+        #{isNotionalPool,jdbcType=VARCHAR},
+      </if>
+      <if test="updateFrequency != null" >
+        #{updateFrequency,jdbcType=VARCHAR},
+      </if>
+      <if test="updateDate != null" >
+        #{updateDate,jdbcType=VARCHAR},
+      </if>
+      <if test="source != null" >
+        #{source,jdbcType=VARCHAR},
+      </if>
+      <if test="detailedList != null" >
+        #{detailedList,jdbcType=VARCHAR},
+      </if>
+      <if test="businessExamine != null" >
+        #{businessExamine,jdbcType=VARCHAR},
+      </if>
+      <if test="technologyExamine != null" >
+        #{technologyExamine,jdbcType=VARCHAR},
+      </if>
+      <if test="isQuote != null" >
+        #{isQuote,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="shareAttribute != null" >
+        #{shareAttribute,jdbcType=VARCHAR},
+      </if>
+      <if test="shareCondition != null" >
+        #{shareCondition,jdbcType=VARCHAR},
+      </if>
+      <if test="openAttribute != null" >
+        #{openAttribute,jdbcType=VARCHAR},
+      </if>
+      <if test="openCondition != null" >
+        #{openCondition,jdbcType=VARCHAR},
+      </if>
+      <if test="dataServerName != null" >
+        #{dataServerName,jdbcType=VARCHAR},
+      </if>
+      <if test="isDelete != null" >
+        #{isDelete,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.wugui.datax.admin.datashare.entity.TDataCatalogExample" resultType="java.lang.Integer" >
+    select count(*) from t_data_catalog
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update t_data_catalog
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=INTEGER},
+      </if>
+      <if test="record.infoId != null" >
+        info_id = #{record.infoId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.infoName != null" >
+        info_name = #{record.infoName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.infoCode != null" >
+        info_code = #{record.infoCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.tableEnglish != null" >
+        table_english = #{record.tableEnglish,jdbcType=VARCHAR},
+      </if>
+      <if test="record.dataCompany != null" >
+        data_company = #{record.dataCompany,jdbcType=VARCHAR},
+      </if>
+      <if test="record.companyCode != null" >
+        company_code = #{record.companyCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.infoSystemName != null" >
+        info_system_name = #{record.infoSystemName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.infoExtract != null" >
+        info_extract = #{record.infoExtract,jdbcType=VARCHAR},
+      </if>
+      <if test="record.region != null" >
+        region = #{record.region,jdbcType=VARCHAR},
+      </if>
+      <if test="record.importSort != null" >
+        import_sort = #{record.importSort,jdbcType=VARCHAR},
+      </if>
+      <if test="record.catalogState != null" >
+        catalog_state = #{record.catalogState,jdbcType=VARCHAR},
+      </if>
+      <if test="record.infoFormat != null" >
+        info_format = #{record.infoFormat,jdbcType=VARCHAR},
+      </if>
+      <if test="record.isNotionalPool != null" >
+        is_notional_pool = #{record.isNotionalPool,jdbcType=VARCHAR},
+      </if>
+      <if test="record.updateFrequency != null" >
+        update_frequency = #{record.updateFrequency,jdbcType=VARCHAR},
+      </if>
+      <if test="record.updateDate != null" >
+        update_date = #{record.updateDate,jdbcType=VARCHAR},
+      </if>
+      <if test="record.source != null" >
+        source = #{record.source,jdbcType=VARCHAR},
+      </if>
+      <if test="record.detailedList != null" >
+        detailed_list = #{record.detailedList,jdbcType=VARCHAR},
+      </if>
+      <if test="record.businessExamine != null" >
+        business_examine = #{record.businessExamine,jdbcType=VARCHAR},
+      </if>
+      <if test="record.technologyExamine != null" >
+        technology_examine = #{record.technologyExamine,jdbcType=VARCHAR},
+      </if>
+      <if test="record.isQuote != null" >
+        is_quote = #{record.isQuote,jdbcType=VARCHAR},
+      </if>
+      <if test="record.updateTime != null" >
+        update_time = #{record.updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.createTime != null" >
+        create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.shareAttribute != null" >
+        share_attribute = #{record.shareAttribute,jdbcType=VARCHAR},
+      </if>
+      <if test="record.shareCondition != null" >
+        share_condition = #{record.shareCondition,jdbcType=VARCHAR},
+      </if>
+      <if test="record.openAttribute != null" >
+        open_attribute = #{record.openAttribute,jdbcType=VARCHAR},
+      </if>
+      <if test="record.openCondition != null" >
+        open_condition = #{record.openCondition,jdbcType=VARCHAR},
+      </if>
+      <if test="record.dataServerName != null" >
+        data_server_name = #{record.dataServerName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.isDelete != null" >
+        is_delete = #{record.isDelete,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update t_data_catalog
+    set id = #{record.id,jdbcType=INTEGER},
+      info_id = #{record.infoId,jdbcType=VARCHAR},
+      info_name = #{record.infoName,jdbcType=VARCHAR},
+      info_code = #{record.infoCode,jdbcType=VARCHAR},
+      table_english = #{record.tableEnglish,jdbcType=VARCHAR},
+      data_company = #{record.dataCompany,jdbcType=VARCHAR},
+      company_code = #{record.companyCode,jdbcType=VARCHAR},
+      info_system_name = #{record.infoSystemName,jdbcType=VARCHAR},
+      info_extract = #{record.infoExtract,jdbcType=VARCHAR},
+      region = #{record.region,jdbcType=VARCHAR},
+      import_sort = #{record.importSort,jdbcType=VARCHAR},
+      catalog_state = #{record.catalogState,jdbcType=VARCHAR},
+      info_format = #{record.infoFormat,jdbcType=VARCHAR},
+      is_notional_pool = #{record.isNotionalPool,jdbcType=VARCHAR},
+      update_frequency = #{record.updateFrequency,jdbcType=VARCHAR},
+      update_date = #{record.updateDate,jdbcType=VARCHAR},
+      source = #{record.source,jdbcType=VARCHAR},
+      detailed_list = #{record.detailedList,jdbcType=VARCHAR},
+      business_examine = #{record.businessExamine,jdbcType=VARCHAR},
+      technology_examine = #{record.technologyExamine,jdbcType=VARCHAR},
+      is_quote = #{record.isQuote,jdbcType=VARCHAR},
+      update_time = #{record.updateTime,jdbcType=TIMESTAMP},
+      create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      share_attribute = #{record.shareAttribute,jdbcType=VARCHAR},
+      share_condition = #{record.shareCondition,jdbcType=VARCHAR},
+      open_attribute = #{record.openAttribute,jdbcType=VARCHAR},
+      open_condition = #{record.openCondition,jdbcType=VARCHAR},
+      data_server_name = #{record.dataServerName,jdbcType=VARCHAR},
+      is_delete = #{record.isDelete,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.wugui.datax.admin.datashare.entity.TDataCatalog" >
+    update t_data_catalog
+    <set >
+      <if test="infoId != null" >
+        info_id = #{infoId,jdbcType=VARCHAR},
+      </if>
+      <if test="infoName != null" >
+        info_name = #{infoName,jdbcType=VARCHAR},
+      </if>
+      <if test="infoCode != null" >
+        info_code = #{infoCode,jdbcType=VARCHAR},
+      </if>
+      <if test="tableEnglish != null" >
+        table_english = #{tableEnglish,jdbcType=VARCHAR},
+      </if>
+      <if test="dataCompany != null" >
+        data_company = #{dataCompany,jdbcType=VARCHAR},
+      </if>
+      <if test="companyCode != null" >
+        company_code = #{companyCode,jdbcType=VARCHAR},
+      </if>
+      <if test="infoSystemName != null" >
+        info_system_name = #{infoSystemName,jdbcType=VARCHAR},
+      </if>
+      <if test="infoExtract != null" >
+        info_extract = #{infoExtract,jdbcType=VARCHAR},
+      </if>
+      <if test="region != null" >
+        region = #{region,jdbcType=VARCHAR},
+      </if>
+      <if test="importSort != null" >
+        import_sort = #{importSort,jdbcType=VARCHAR},
+      </if>
+      <if test="catalogState != null" >
+        catalog_state = #{catalogState,jdbcType=VARCHAR},
+      </if>
+      <if test="infoFormat != null" >
+        info_format = #{infoFormat,jdbcType=VARCHAR},
+      </if>
+      <if test="isNotionalPool != null" >
+        is_notional_pool = #{isNotionalPool,jdbcType=VARCHAR},
+      </if>
+      <if test="updateFrequency != null" >
+        update_frequency = #{updateFrequency,jdbcType=VARCHAR},
+      </if>
+      <if test="updateDate != null" >
+        update_date = #{updateDate,jdbcType=VARCHAR},
+      </if>
+      <if test="source != null" >
+        source = #{source,jdbcType=VARCHAR},
+      </if>
+      <if test="detailedList != null" >
+        detailed_list = #{detailedList,jdbcType=VARCHAR},
+      </if>
+      <if test="businessExamine != null" >
+        business_examine = #{businessExamine,jdbcType=VARCHAR},
+      </if>
+      <if test="technologyExamine != null" >
+        technology_examine = #{technologyExamine,jdbcType=VARCHAR},
+      </if>
+      <if test="isQuote != null" >
+        is_quote = #{isQuote,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null" >
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="shareAttribute != null" >
+        share_attribute = #{shareAttribute,jdbcType=VARCHAR},
+      </if>
+      <if test="shareCondition != null" >
+        share_condition = #{shareCondition,jdbcType=VARCHAR},
+      </if>
+      <if test="openAttribute != null" >
+        open_attribute = #{openAttribute,jdbcType=VARCHAR},
+      </if>
+      <if test="openCondition != null" >
+        open_condition = #{openCondition,jdbcType=VARCHAR},
+      </if>
+      <if test="dataServerName != null" >
+        data_server_name = #{dataServerName,jdbcType=VARCHAR},
+      </if>
+      <if test="isDelete != null" >
+        is_delete = #{isDelete,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.wugui.datax.admin.datashare.entity.TDataCatalog" >
+    update t_data_catalog
+    set info_id = #{infoId,jdbcType=VARCHAR},
+      info_name = #{infoName,jdbcType=VARCHAR},
+      info_code = #{infoCode,jdbcType=VARCHAR},
+      table_english = #{tableEnglish,jdbcType=VARCHAR},
+      data_company = #{dataCompany,jdbcType=VARCHAR},
+      company_code = #{companyCode,jdbcType=VARCHAR},
+      info_system_name = #{infoSystemName,jdbcType=VARCHAR},
+      info_extract = #{infoExtract,jdbcType=VARCHAR},
+      region = #{region,jdbcType=VARCHAR},
+      import_sort = #{importSort,jdbcType=VARCHAR},
+      catalog_state = #{catalogState,jdbcType=VARCHAR},
+      info_format = #{infoFormat,jdbcType=VARCHAR},
+      is_notional_pool = #{isNotionalPool,jdbcType=VARCHAR},
+      update_frequency = #{updateFrequency,jdbcType=VARCHAR},
+      update_date = #{updateDate,jdbcType=VARCHAR},
+      source = #{source,jdbcType=VARCHAR},
+      detailed_list = #{detailedList,jdbcType=VARCHAR},
+      business_examine = #{businessExamine,jdbcType=VARCHAR},
+      technology_examine = #{technologyExamine,jdbcType=VARCHAR},
+      is_quote = #{isQuote,jdbcType=VARCHAR},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      share_attribute = #{shareAttribute,jdbcType=VARCHAR},
+      share_condition = #{shareCondition,jdbcType=VARCHAR},
+      open_attribute = #{openAttribute,jdbcType=VARCHAR},
+      open_condition = #{openCondition,jdbcType=VARCHAR},
+      data_server_name = #{dataServerName,jdbcType=VARCHAR},
+      is_delete = #{isDelete,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <select id="getTDataCatalogServerName" resultType="java.lang.String">
+    SELECT DISTINCT(data_server_name) FROM t_data_catalog
+  </select>
+
+
+  <select id="getOrganizationCatalog" resultMap="catalogMap">
+    SELECT data_company,COUNT(*) num FROM t_data_catalog  GROUP BY data_company
+  </select>
+
+  <select id="getOrganizationCatalogTop" resultMap="catalogMap">
+    SELECT data_company,COUNT(*) num FROM t_data_catalog  GROUP BY data_company ORDER BY num DESC LIMIT 5
+  </select>
+  <resultMap id="catalogMap" type="com.wugui.datax.admin.datashare.vo.OrganizationCatalog">
+    <result column="data_company" property="dataCompany" jdbcType="VARCHAR" />
+    <result column="num" property="num" jdbcType="INTEGER" />
+  </resultMap>
+
+</mapper>
