@@ -23,7 +23,7 @@ public class QueryToolFactory {
             return getMySQLQueryToolInstance(jobDatasource);
         } else if (JdbcConstants.ORACLE.equals(datasource)) {
             return getOracleQueryToolInstance(jobDatasource);
-        } else if (JdbcConstants.POSTGRESQL.equals(datasource)) {
+        } else if (JdbcConstants.POSTGRESQL.equals(datasource) || JdbcConstants.GREENPLUM.equals(datasource)) {
             return getPostgresqlQueryToolInstance(jobDatasource);
         } else if (JdbcConstants.SQL_SERVER.equals(datasource)) {
             return getSqlserverQueryToolInstance(jobDatasource);

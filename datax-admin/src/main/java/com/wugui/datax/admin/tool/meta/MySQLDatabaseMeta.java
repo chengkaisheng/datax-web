@@ -43,5 +43,12 @@ public class MySQLDatabaseMeta extends BaseDatabaseMeta implements DatabaseInter
         return "select column_name from information_schema.columns where table_schema=? and table_name=?";
     }
 
+<<<<<<< HEAD
 
+=======
+    @Override
+    public String getSQLQueryTableSchema(String... args) {
+        return "show databases";
+    }
+>>>>>>> 44f141c4a3bb9973cd71f5a8a8fa0ea88fc6e4f5
 }

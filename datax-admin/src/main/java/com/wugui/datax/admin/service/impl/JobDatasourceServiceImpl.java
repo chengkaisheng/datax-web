@@ -4,10 +4,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wugui.datax.admin.mapper.JobDatasourceMapper;
 import com.wugui.datax.admin.entity.JobDatasource;
 import com.wugui.datax.admin.service.JobDatasourceService;
-import com.wugui.datax.admin.tool.query.BaseQueryTool;
-import com.wugui.datax.admin.tool.query.HBaseQueryTool;
-import com.wugui.datax.admin.tool.query.MongoDBQueryTool;
-import com.wugui.datax.admin.tool.query.QueryToolFactory;
+import com.wugui.datax.admin.tool.query.*;
 import com.wugui.datax.admin.util.AESUtil;
 import com.wugui.datax.admin.util.JdbcConstants;
 import org.springframework.stereotype.Service;
@@ -43,6 +40,9 @@ public class JobDatasourceServiceImpl extends ServiceImpl<JobDatasourceMapper, J
         }
         if (JdbcConstants.MONGODB.equals(jobDatasource.getDatasource())) {
             return new MongoDBQueryTool(jobDatasource).dataSourceTest(jobDatasource.getDatabaseName());
+        }
+        if(JdbcConstants.IMPALA.equalsIgnoreCase(jobDatasource.getDatasource())){
+            return new ImpalaQueryTool(jobDatasource).dataSourceTest(jobDatasource.getDatabaseName());
         }
         BaseQueryTool queryTool = QueryToolFactory.getByDbType(jobDatasource);
         return queryTool.dataSourceTest();
