@@ -62,5 +62,4 @@ public class SearchController {
         Search search=searchService.getSearchById(id);
         return new ReturnT<>(search);
     }
-
 }

@@ -322,6 +322,10 @@
                     <artifactId>jetty</artifactId>
                     <groupId>org.mortbay.jetty</groupId>
                 </exclusion>
+                <exclusion>
+                    <artifactId>commons-configuration</artifactId>
+                    <groupId>commons-configuration</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
 
@@ -878,7 +882,7 @@
             <version>4.5.5</version>
         </dependency>
 
-        <!-- impala -->
+         <!--impala-->
         <dependency>
             <groupId>com.cloudera.impala.jdbc</groupId>
             <artifactId>ImpalaJDBC41</artifactId>

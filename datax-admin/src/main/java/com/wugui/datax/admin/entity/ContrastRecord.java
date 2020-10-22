@@ -35,8 +35,14 @@ public class ContrastRecord {
     @ApiModelProperty("对比记录")
     private String record;
 
+    @ApiModelProperty("entity类型名")
+    private String typeName;
+
+    @ApiModelProperty("entity名称")
+    private String name;
+
     @ApiModelProperty("对比时间")
-    @TableField(fill = FieldFill.INSERT_UPDATE)
+    @TableField(fill = FieldFill.INSERT)
     @JSONField(format = "yyyy/MM/dd HH:mm:ss")
     private Date createTime;
 }

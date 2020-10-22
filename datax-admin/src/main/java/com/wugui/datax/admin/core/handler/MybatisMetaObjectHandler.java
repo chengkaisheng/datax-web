@@ -21,6 +21,7 @@ public class MybatisMetaObjectHandler implements MetaObjectHandler {
     @Override
     public void insertFill(MetaObject metaObject) {
         setFieldValByName("createDate", new Date(), metaObject);
+        setFieldValByName("createTime", new Date(), metaObject);
         setFieldValByName("createBy", getCurrentUser(), metaObject);
     }
 

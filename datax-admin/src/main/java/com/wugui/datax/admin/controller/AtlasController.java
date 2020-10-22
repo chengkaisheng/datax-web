@@ -129,6 +129,12 @@ public class AtlasController extends BaseController {
 
         AtlasClientV2 atlasClientV2 = new AtlasClientV2(MetadataBuildUtils.getServerUrl(), MetadataBuildUtils.getUserInput());
         List<EntityAuditEventV2> auditEventsMap = atlasClientV2.getAuditEvents(guid, null, null, (short) 100);
+        //获取typeName和name
+        AtlasEntity.AtlasEntityWithExtInfo entityByGuid = atlasClientV2.getEntityByGuid(guid);
+        String typeName = entityByGuid.getEntity().getTypeName();
+        String name = (String)entityByGuid.getEntity().getAttributes().get("name");
+        contrastRecord.setName(name);
+        contrastRecord.setTypeName(typeName);
         Map<Long, EntityAuditEventV2> map = new LinkedHashMap<>();
         System.out.println(auditEventsMap);
         //在这里将LinkedHashMap转为Java对象
@@ -137,6 +143,7 @@ public class AtlasController extends BaseController {
             for (Long timestamp : timestamps) {
                 if(Objects.equals(auditEvent.getTimestamp(), timestamp)){
                     map.put(timestamp, auditEvent);
+
                 }
             }
         }
