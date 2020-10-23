@@ -1,6 +1,7 @@
 package com.wugui.datax.executor.service.jobhandler;
 
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.wugui.datatx.core.biz.model.ReturnT;
 import com.wugui.datatx.core.biz.model.TriggerParam;
@@ -25,11 +26,13 @@ public class SqlJobHandler extends IJobHandler {
     @Override
     public ReturnT<String> execute(TriggerParam tgParam) throws Exception {
         String jobJson = tgParam.getJobJson();
-        JobLogger.log(jobJson);
-        Map<String,Object> jsonObject = JSONObject.parseObject(jobJson, HashMap.class);
+        /*JobLogger.log(jobJson);*/
+        JSONObject jsonObject = JSONObject.parseObject(jobJson);
+        /*Map<String,Object> jsonObject = JSONObject.parseObject(jobJson, HashMap.class);
         JSONObject jobDatasourceJson = (JSONObject) jsonObject.get("jobDatasource");
-        String sqlScript = (String)jsonObject.get("sqlScript");
-
+        String sqlScript = (String)jsonObject.get("sqlScript");*/
+        JSONObject jobDatasourceJson = jsonObject.getJSONObject("jobDatasource");
+        String sqlScript = jsonObject.getString("sqlScript");
         JobDatasource jobDatasource = jobDatasourceJson.toJavaObject(JobDatasource.class);
         String[] split = jobDatasource.getJdbcUrl().split("/");
         String databaseName = split[split.length - 1];
@@ -49,6 +52,6 @@ public class SqlJobHandler extends IJobHandler {
         }
         String sqlExecuteTaskResults = HttpClientHelper.getSqlExecuteTaskResults(taskId);
         JobLogger.log(sqlExecuteTaskResults);
-        return new ReturnT<>(200, "****   sql任务执行啦   ****");
+        return new ReturnT<>(200, "****************  sql任务执行啦  ****************");
     }
 }

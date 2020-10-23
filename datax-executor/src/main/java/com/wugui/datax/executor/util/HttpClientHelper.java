@@ -213,5 +213,4 @@ public class HttpClientHelper {
         JSONArray results = result.getJSONArray("results");
         return results.toJSONString();
     }
-
 }

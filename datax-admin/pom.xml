@@ -812,6 +812,12 @@
             <groupId>org.apache.atlas</groupId>
             <artifactId>atlas-client-common</artifactId>
             <version>3.0.0-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.atlas</groupId>
