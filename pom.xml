@@ -15,7 +15,6 @@
         <module>datax-executor</module>
         <module>datax-rpc</module>
         <module>datax-assembly</module>
-        <module>datax-search</module>
     </modules>
 
     <properties>

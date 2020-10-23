@@ -88,7 +88,7 @@ logging:
   #path: ./data/applogs/admin
   level:
     com.wugui.datax.admin.mapper: error
-    path: ./data/applogs/admin
+    path: ${data.path}/applogs/admin
 
 
 
@@ -110,3 +110,7 @@ datax:
 datasource:
   aes:
     key: AD42F6697B035B75
+
+upload:
+  url: /tmp/img/
+  service-url: http://127.0.0.1:8080/image
