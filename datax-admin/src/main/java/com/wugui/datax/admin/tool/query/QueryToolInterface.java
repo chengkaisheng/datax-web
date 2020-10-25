@@ -99,5 +99,5 @@ public interface QueryToolInterface {
 
     String getDBName();
 
-    public Search getTableSize(String tableName, String tableSchema);
+    String getTableSize(String tableName, String tableSchema);
 }

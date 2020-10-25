@@ -100,4 +100,15 @@ public abstract class BaseDatabaseMeta implements DatabaseInterface {
     public String getTableSize(String tableName, String tableSchema) {
         return String.format("SELECT DATA_LENGTH FROM information_schema.`TABLES` where TABLE_SCHEMA='%s' AND TABLE_NAME='%s'",tableSchema,tableName);
     }
+
+    @Override
+    public String getValid(String name, String tableName) {
+        return "select count(*) from "+tableName+" where "+name+" is null or "+name+"=''";
+    }
+
+    @Override
+    public String getMostCommon(String name, String tableName) {
+        return String.format("select count(*) num,%s from %s group by %s ORDER BY num desc limit 0,1"
+                ,name,tableName,name);
+    }
 }

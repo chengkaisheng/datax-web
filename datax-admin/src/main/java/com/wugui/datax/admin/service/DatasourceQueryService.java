@@ -92,5 +92,5 @@ public interface DatasourceQueryService {
 
     List<ColumnMsg> getColumnSchema(Long datasourceId, String tableName);
 
-    Search getTableSize(Long datasourceId, String tableName);
+    String getTableSize(Long datasourceId, String tableName);
 }

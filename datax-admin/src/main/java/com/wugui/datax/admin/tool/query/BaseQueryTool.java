@@ -26,6 +26,8 @@ import com.wugui.datax.admin.entity.Chart;
 import com.wugui.datax.admin.entity.ColumnMsg;
 import javax.sql.DataSource;
 import java.sql.*;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.*;
 import java.util.Date;
 import java.util.*;
@@ -675,6 +677,7 @@ public abstract class BaseQueryTool implements QueryToolInterface {
                 columnMsgs.add(columnMsg);
                 columnMsg.setName(name);
                 columnMsg.setComment(comment);
+                columnMsg.setIndicator(getIndicator(name,tableName));
                 String showType=this.judgeShowType(type);
                 logger.info("*************************showType: "+showType);
                 if("dateType".equals(showType)){
@@ -697,6 +700,65 @@ public abstract class BaseQueryTool implements QueryToolInterface {
             JdbcUtils.close(stmt);
         }
         return columnMsgs;
+    }
+
+    public Map<String,Map<String,Object>> getIndicator(String fieldName,String tableName){
+        Long valid=0L;
+        Long num=0L;
+        Object fieldVal=null;
+        Map<String,Map<String,Object>> map=new HashMap<>();
+        Map<String,Object> validMap=new HashMap<>();
+        Map<String,Object> missingMap=new HashMap<>();
+        Map<String,Object> uniqueMap=new HashMap<>();
+        Map<String,Object> mostCommonMap=new HashMap<>();
+        Statement stmt = null;
+        ResultSet rs = null;
+        Long total=getRows(tableName);
+        try {
+            stmt = connection.createStatement();
+            //获取valid数量
+            String sql = sqlBuilder.getValid(fieldName,tableName);
+            logger.info("=================getValidSql: "+sql);
+            rs = stmt.executeQuery(sql);
+            if(rs.next()){
+                valid = rs.getLong(1);
+                validMap.put("value",valid);
+                validMap.put("rate",getRate(valid,total));
+                missingMap.put("value",total-valid);
+                missingMap.put("rate",getRate(total-valid,total));
+            }
+            sql=sqlBuilder.getMostCommon(fieldName,tableName);
+            logger.info("=================getMostCommon: "+sql);
+            rs = stmt.executeQuery(sql);
+            if(rs.next()){
+                num = rs.getLong(1);
+                fieldVal=rs.getObject(2);
+                mostCommonMap.put("value",fieldVal);
+                mostCommonMap.put("rate",getRate(num,total));
+            }
+            Long unique=getUnique(fieldName,tableName);
+            uniqueMap.put("value",unique);
+            map.put("valid",validMap);
+            map.put("misssing",missingMap);
+            map.put("unique",uniqueMap);
+            map.put("mostCommon",mostCommonMap);
+        } catch (SQLException e) {
+            logger.error("[getTableNames Exception] --> "
+                    + "the exception message is:" + e.getMessage());
+        } finally {
+            JdbcUtils.close(rs);
+            JdbcUtils.close(stmt);
+        }
+        return map;
+    }
+
+    private String getRate(Long a,Long b){
+        // 创建一个数值格式化对象
+        NumberFormat numberFormat = NumberFormat.getInstance();
+        // 设置精确到小数点后2位
+        numberFormat.setMaximumFractionDigits(2);
+        String result = numberFormat.format((float)a/(float)b*100);
+        return result + "%";
     }
 
     private List<Chart<Date>> getDateChart(String name,String tableName) {
@@ -797,17 +859,18 @@ public abstract class BaseQueryTool implements QueryToolInterface {
         return "stringType";
     }
 
-    public Search getTableSize(String tableName, String tableSchema){
-        Search search=new Search();
+    public String getTableSize(String tableName, String tableSchema){
+        Long tableSize =0L;
         Statement stmt = null;
         ResultSet rs = null;
         try {
             stmt = connection.createStatement();
             //获取sql
             String sql = sqlBuilder.getTableSize(tableName,tableSchema);
+            logger.info("=========tableSize Sql: "+sql);
             rs = stmt.executeQuery(sql);
             if(rs.next()){
-                search.setSize(String.valueOf(rs.getLong(1)));
+                tableSize=rs.getLong(1)/1024;
             }
         } catch (SQLException e) {
             logger.error("[getTableNames Exception] --> "
@@ -816,6 +879,6 @@ public abstract class BaseQueryTool implements QueryToolInterface {
             JdbcUtils.close(rs);
             JdbcUtils.close(stmt);
         }
-        return search;
+        return tableSize+"KB";
     }
 }

@@ -3,10 +3,12 @@ package com.wugui.datax.admin.controller;
 import com.wugui.datatx.core.biz.model.ReturnT;
 import com.wugui.datax.admin.entity.JobDatasource;
 import com.wugui.datax.admin.entity.Search;
+import com.wugui.datax.admin.service.DatasourceQueryService;
 import com.wugui.datax.admin.service.ISearchService;
 import com.wugui.datax.admin.service.JobDatasourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,6 +26,8 @@ public class SearchController {
     private JobDatasourceService jobDatasourceService;
     @Autowired
     private ISearchService searchService;
+    @Autowired
+    private DatasourceQueryService datasourceQueryService;
 
     @RequestMapping("/getCreateMsg")
     public ReturnT<List<JobDatasource>> getCreateMsg(String username){
@@ -47,8 +51,17 @@ public class SearchController {
      * @return
      */
     @RequestMapping("/list")
-    public ReturnT<List<Search>> listSearch(){
-        List<Search> searches=searchService.listSearchs();
+    public ReturnT<List<Search>> listSearch(@RequestParam(value = "keyword",defaultValue = "")String keyword
+            ,@RequestParam(value = "pageNum",defaultValue = "1")Integer pageNum
+            ,@RequestParam(value = "pageSize",defaultValue = "10")Integer pageSize){
+        pageNum=(pageNum-1)*pageSize;
+        List<Search> searches=searchService.listSearchs(keyword, pageNum, pageSize);
+        for (Search search:searches) {
+            Long datasourceId=search.getJdbcDatasourceId();
+            String tableName=search.getTableName();
+            search.setRows(datasourceQueryService.getRows(datasourceId,tableName));
+            search.setSize(datasourceQueryService.getTableSize(datasourceId,tableName));
+        }
         return new ReturnT<>(searches);
     }
 
@@ -61,5 +74,11 @@ public class SearchController {
     public ReturnT<Search> getSearchById(Long id){
         Search search=searchService.getSearchById(id);
         return new ReturnT<>(search);
+    }
+
+    @RequestMapping("/remove")
+    public ReturnT removeSearchById(Long id){
+        searchService.remove(id);
+        return ReturnT.SUCCESS;
     }
 }

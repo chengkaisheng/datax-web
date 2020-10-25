@@ -79,4 +79,8 @@ public interface DatabaseInterface {
     String getDateStatistics(String name, String tableName);
 
     String getTableSize(String tableName,String tableSchema);
+
+    String getValid(String name,String tableName);
+
+    String getMostCommon(String name,String tableName);
 }
