@@ -8,6 +8,7 @@ import com.wugui.datax.admin.entity.JobDatasource;
 import com.wugui.datax.admin.entity.Search;
 import com.wugui.datax.admin.service.DatasourceQueryService;
 import com.wugui.datax.admin.service.JobDatasourceService;
+import com.wugui.datax.admin.tool.database.TableInfo;
 import com.wugui.datax.admin.tool.query.*;
 import com.wugui.datax.admin.util.JdbcConstants;
 import org.apache.commons.lang3.StringUtils;
@@ -183,5 +184,10 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
             tableSchema=queryTool.getDBName();
         }
         return queryTool.getTableSize(tableName,tableSchema);
+    }
+
+    @Override
+    public List<TableInfo> getTableInfos(Long id, String schema) {
+        return null;
     }
 }

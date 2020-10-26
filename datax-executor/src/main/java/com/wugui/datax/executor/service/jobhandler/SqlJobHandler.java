@@ -30,7 +30,7 @@ public class SqlJobHandler extends IJobHandler {
 
     private static final String URL = "http://localhost:8979/dbeaver/gql";
 
-    /*@Override
+    @Override
     public ReturnT<String> execute(TriggerParam tgParam) throws Exception {
         String jobJson = tgParam.getJobJson();
         //JobLogger.log(jobJson);
@@ -42,6 +42,11 @@ public class SqlJobHandler extends IJobHandler {
 
         //创建连接
         String[] split = jobDatasource.getJdbcUrl().split("/");
+
+        String databaseName = split[split.length - 1];
+        //System.out.println(databaseName);
+        jobDatasource.setDatabaseName(databaseName);
+
         String temp = split[split.length - 2];
         String host = temp.split(":")[0];
         String port = temp.split(":")[1];
@@ -69,18 +74,23 @@ public class SqlJobHandler extends IJobHandler {
                 "}";
         response = HttpClientHelper.sendPost(URL, createConnBody);
 
-        *//*System.out.println(response);*//*
+        //System.out.println(response);
         if(StringUtils.isEmpty(response)){
-            throw new RuntimeException("创建连接失败");
+            throw new RuntimeException("Create Connection Failed");
         }
         Map<String, JSONObject> map = JSONObject.parseObject(response, HashMap.class);
         String data = map.get("data").toJSONString();
         //记录到handle日志
         JobLogger.log(data);
+
         Map<String, JSONObject> dataMap = JSONObject.parseObject(data, HashMap.class);
         String result = dataMap.get("createConnection").toJSONString();
         Map<String, String> resultMap = JSONObject.parseObject(result, HashMap.class);
         String connectionId = resultMap.get("id");
+        if(connectionId == null){
+            JobLogger.log("Create Connection Failed");
+            return ReturnT.FAIL;
+        }
         //拿到connectionId后  再去初始化连接
         String initConnBody = "{\n" +
                 "    \"query\": \"\\n    mutation initConnection($id: ID!, $credentials: Object) {\\n  connection: initConnection(id: $id, credentials: $credentials) {\\n    id\\n    name\\n    description\\n    driverId\\n    connected\\n    readOnly\\n    features\\n    authNeeded\\n    authModel\\n  }\\n}\\n    \",\n" +
@@ -92,10 +102,8 @@ public class SqlJobHandler extends IJobHandler {
                 "        }\n" +
                 "    }\n" +
                 "}";
-        *//*System.out.println(initConnBody);
-        System.out.println(HttpClientHelper.sendPost(URL, initConnBody));*//*
         String initCoon = HttpClientHelper.sendPost(URL, initConnBody);
-        JobLogger.log(initCoon);
+        JobLogger.log(JSONObject.parseObject(initCoon).toJSONString());
 
         //===========================================================================
         String requestBody = "{\n" +
@@ -110,7 +118,10 @@ public class SqlJobHandler extends IJobHandler {
         JobLogger.log(dataObject.toJSONString());
         JSONObject context = dataObject.getJSONObject("context");
         String contextId = context.getString("id");
-
+        if(StringUtils.isEmpty(contextId)){
+            JobLogger.log("Create SqlContext Fail");
+            return ReturnT.FAIL;
+        }
 
         //===========================================================================
         requestBody = "{\n" +
@@ -132,10 +143,15 @@ public class SqlJobHandler extends IJobHandler {
         JobLogger.log(dataObject.toJSONString());
         JSONObject taskInfo = dataObject.getJSONObject("taskInfo");
         if(taskInfo.get("error") != null){
-            return null;
+            JobLogger.log(taskInfo.getString("error"));
+            return ReturnT.FAIL;
         }
         String taskId = taskInfo.getString("id");
+        if(StringUtils.isEmpty(taskId)){
+            JobLogger.log("SqlTask Executed Fail");
+        }
         //========================================================
+        int i = 0;
         requestBody = "{\n" +
                 "    \"query\": \"\\n    mutation getAsyncTaskInfo($taskId: String!, $removeOnFinish: Boolean!) {\\n  taskInfo: asyncTaskInfo(id: $taskId, removeOnFinish: $removeOnFinish) {\\n    id\\n    name\\n    running\\n    status\\n    error {\\n      message\\n      errorCode\\n      stackTrace\\n    }\\n    taskResult\\n  }\\n}\\n    \",\n" +
                 "    \"variables\": {\n" +
@@ -143,53 +159,45 @@ public class SqlJobHandler extends IJobHandler {
                 "        \"removeOnFinish\": false\n" +
                 "    }\n" +
                 "}";
-        response = HttpClientHelper.sendPost(URL, requestBody);
-        map = JSONObject.parseObject(response, HashMap.class);
-        dataObject = map.get("data");
-        JobLogger.log(dataObject.toJSONString());
-        taskInfo = dataObject.getJSONObject("taskInfo");
-        String status = taskInfo.getString("status");
-        if(taskInfo.get("error")!=null || "Finished")
-        return ( taskInfo.get("error")==null && "Finished".equals(status) );
+        while (i < 10){
+            response = HttpClientHelper.sendPost(URL, requestBody);
+            map = JSONObject.parseObject(response, HashMap.class);
+            dataObject = map.get("data");
+            taskInfo = dataObject.getJSONObject("taskInfo");
+            String status = taskInfo.getString("status");
+            Thread.sleep(1000);
+            i++;
+            if(taskInfo.get("error") != null){
+                JobLogger.log(taskInfo.get("error").toString());
+                return ReturnT.FAIL;
+            }
+            if("Finished".equals(status)){
+                JobLogger.log(taskInfo.toJSONString());
+                break;
+            }
+        }
+        if( i >= 10){
+            JobLogger.log("SqlTask Executed TimeOut");
+            return ReturnT.FAIL;
+        }
 
         //===========================================
-        String request = "{\n" +
+        requestBody = "{\n" +
                 "    \"query\": \"\\n    mutation getSqlExecuteTaskResults($taskId: ID!) {\\n  result: asyncSqlExecuteResults(taskId: $taskId) {\\n    duration\\n    statusMessage\\n    results {\\n      updateRowCount\\n      sourceQuery\\n      title\\n      resultSet {\\n        id\\n        columns {\\n          dataKind\\n          entityName\\n          fullTypeName\\n          icon\\n          label\\n          maxLength\\n          name\\n          position\\n          precision\\n          readOnly\\n          scale\\n          typeName\\n        }\\n        rows\\n      }\\n    }\\n  }\\n}\\n    \",\n" +
                 "    \"variables\": {\n" +
                 "        \"taskId\": \""+taskId+"\"\n" +
                 "    }\n" +
                 "}";
-        String response = HttpClientHelper.sendPost(URL, request);
-        Map<String,JSONObject> map = JSONObject.parseObject(response, HashMap.class);
-        JSONObject data = map.get("data");
-        JobLogger.log(data.toJSONString());
-        JSONObject result = data.getJSONObject("result");
-        JSONArray results = result.getJSONArray("results");
-        return results.toJSONString();
+        response = HttpClientHelper.sendPost(URL, requestBody);
+        map = JSONObject.parseObject(response, HashMap.class);
+        dataObject = map.get("data");
+        JobLogger.log(dataObject.toJSONString());
+        JSONObject resultObject = dataObject.getJSONObject("result");
+        JSONArray results = resultObject.getJSONArray("results");
+        return new ReturnT<>("SqlTask Executed Success");
+    }
 
-
-        String[] split = jobDatasource.getJdbcUrl().split("/");
-        String databaseName = split[split.length - 1];
-        System.out.println(databaseName);
-        jobDatasource.setDatabaseName(databaseName);
-        String connId = HttpClientHelper.initConnection(jobDatasource);
-        String contextId = HttpClientHelper.createContext(connId);
-        String taskId = HttpClientHelper.executeSql(connId, contextId, sqlScript);
-        int i = 0;
-        while (!HttpClientHelper.getAsyncTaskInfo(taskId)){
-            i++;
-            Thread.sleep(500);
-            if(i>=10){
-                JobLogger.log("sql执行出错");
-                return ReturnT.FAIL;
-            }
-        }
-        String sqlExecuteTaskResults = HttpClientHelper.getSqlExecuteTaskResults(taskId);
-        JobLogger.log(sqlExecuteTaskResults);
-        return new ReturnT<>(200, "****************  sql任务执行啦  ****************");
-    }*/
-
-    @Override
+    /*@Override
     public ReturnT<String> execute(TriggerParam tgParam) throws Exception {
         String jobJson = tgParam.getJobJson();
         JobLogger.log(jobJson);
@@ -217,5 +225,5 @@ public class SqlJobHandler extends IJobHandler {
         String sqlExecuteTaskResults = HttpClientHelper.getSqlExecuteTaskResults(taskId);
         JobLogger.log(sqlExecuteTaskResults);
         return new ReturnT<>(200, "****************  sql任务执行啦  ****************");
-    }
+    }*/
 }

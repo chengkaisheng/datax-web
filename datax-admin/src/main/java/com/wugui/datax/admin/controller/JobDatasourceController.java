@@ -7,6 +7,7 @@ import com.wugui.datax.admin.core.util.LocalCacheUtil;
 import com.wugui.datax.admin.entity.JobDatasource;
 import com.wugui.datax.admin.service.DatasourceQueryService;
 import com.wugui.datax.admin.service.JobDatasourceService;
+import com.wugui.datax.admin.tool.database.TableInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -139,5 +140,18 @@ public class JobDatasourceController extends BaseController {
     @ApiOperation("获取一个库下的所有表")
     public R<List<String>> datasourceTable(@RequestParam Long id, @RequestParam String schema) throws IOException {
         return success(datasourceQueryService.getTables(id, schema));
+    }
+
+    @GetMapping("{tableName}/columns")
+    @ApiOperation("获取一张表下的所有字段")
+    public R<List<String>> datasourceColumn(@RequestParam Long id, @PathVariable String tableName) throws IOException {
+        return success(datasourceQueryService.getColumns(id, tableName));
+    }
+
+    @GetMapping("/tableInfos")
+    @ApiOperation("获取一个数据源下的所有表及表的注释信息")
+    public R<List<TableInfo>> datasourceTableInfo(@RequestParam Long id, @RequestParam String schema){
+        List<TableInfo> tableInfos = datasourceQueryService.getTableInfos(id, schema);
+        return success(tableInfos);
     }
 }
