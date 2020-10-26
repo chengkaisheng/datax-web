@@ -3,6 +3,7 @@ package com.wugui.datax.executor.util;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.wugui.datatx.core.log.JobLogger;
 import com.wugui.datax.executor.entity.JobDatasource;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
@@ -13,10 +14,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import javax.jws.soap.SOAPBinding;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class HttpClientHelper {
@@ -117,6 +116,7 @@ public class HttpClientHelper {
                 "    }\n" +
                 "}";
         response = sendPost(URL, createConnBody);
+
         /*System.out.println(response);*/
         if(StringUtils.isEmpty(response)){
             throw new RuntimeException("创建连接失败");
@@ -124,6 +124,8 @@ public class HttpClientHelper {
 
         Map<String, JSONObject> map = JSONObject.parseObject(response, HashMap.class);
         String data = map.get("data").toJSONString();
+        //记录到handle日志
+        JobLogger.log(data);
         Map<String, JSONObject> dataMap = JSONObject.parseObject(data, HashMap.class);
         String result = dataMap.get("createConnection").toJSONString();
         Map<String, String> resultMap = JSONObject.parseObject(result, HashMap.class);
@@ -141,7 +143,8 @@ public class HttpClientHelper {
                 "}";
         /*System.out.println(initConnBody);
         System.out.println(sendPost(URL, initConnBody));*/
-        sendPost(URL, initConnBody);
+        String initCoon = sendPost(URL, initConnBody);
+        JobLogger.log(initCoon);
         return connectionId;
     }
 
@@ -155,6 +158,7 @@ public class HttpClientHelper {
         String response = sendPost(URL, requestBody);
         Map<String,JSONObject> map = JSONObject.parseObject(response, HashMap.class);
         JSONObject data = map.get("data");
+        JobLogger.log(data.toJSONString());
         JSONObject context = data.getJSONObject("context");
         return context.getString("id");
     }
@@ -176,6 +180,7 @@ public class HttpClientHelper {
         String response = sendPost(URL, requestBody);
         Map<String,JSONObject> map = JSONObject.parseObject(response, HashMap.class);
         JSONObject data = map.get("data");
+        JobLogger.log(data.toJSONString());
         JSONObject taskInfo = data.getJSONObject("taskInfo");
         if(taskInfo.get("error") != null){
             return null;
@@ -194,6 +199,7 @@ public class HttpClientHelper {
         String response = sendPost(URL, request);
         Map<String,JSONObject> map = JSONObject.parseObject(response, HashMap.class);
         JSONObject data = map.get("data");
+        JobLogger.log(data.toJSONString());
         JSONObject taskInfo = data.getJSONObject("taskInfo");
         String status = taskInfo.getString("status");
         return ( taskInfo.get("error")==null && "Finished".equals(status) );
@@ -209,6 +215,7 @@ public class HttpClientHelper {
         String response = sendPost(URL, request);
         Map<String,JSONObject> map = JSONObject.parseObject(response, HashMap.class);
         JSONObject data = map.get("data");
+        JobLogger.log(data.toJSONString());
         JSONObject result = data.getJSONObject("result");
         JSONArray results = result.getJSONArray("results");
         return results.toJSONString();
