@@ -47,8 +47,8 @@ public class SearchServiceImpl implements ISearchService {
         return uploadResult;
     }
 
-    public List<Search> listSearchs(){
-        List<Search> searches=searchMapper.listSearch();
+    public List<Search> listSearchs(String keyword, Integer pageNum, Integer pageSize){
+        List<Search> searches=searchMapper.listSearch(keyword,pageNum,pageSize);
         return searches;
     }
 
@@ -59,7 +59,16 @@ public class SearchServiceImpl implements ISearchService {
         String tableName=search.getTableName();
         datasourceQueryService.getRows(datasourceId,tableName);
         search.setRows(datasourceQueryService.getRows(datasourceId,tableName));
-        search.setSize(datasourceQueryService.getTableSize(datasourceId,tableName).getSize());
+        search.setSize(datasourceQueryService.getTableSize(datasourceId,tableName));
         return search;
+    }
+
+    @Override
+    public void remove(Long id) {
+        try{
+            searchMapper.removeSearchById(id);
+        }catch (Exception e){
+            throw new RuntimeException("删除探查数据失败！！！");
+        }
     }
 }

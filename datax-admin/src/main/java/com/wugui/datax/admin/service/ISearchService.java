@@ -1,5 +1,6 @@
 package com.wugui.datax.admin.service;
 
+
 import com.wugui.datax.admin.entity.Search;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -12,7 +13,9 @@ import java.util.Map;
 public interface ISearchService {
     Map<String,Object> createSearch(Search search, MultipartFile multipartFile);
 
-    List<Search> listSearchs();
+    List<Search> listSearchs(String keyword, Integer pageNum, Integer pageSize);
 
     Search getSearchById(Long id);
+
+    void remove(Long id);
 }

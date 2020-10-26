@@ -172,7 +172,7 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
     }
 
     //根据数据源id和表名获取表数据大小
-    public Search getTableSize(Long datasourceId, String tableName){
+    public String getTableSize(Long datasourceId, String tableName){
         JobDatasource jdbcDatasource = jobDatasourceService.getById(datasourceId);
         if (ObjectUtil.isNull(jdbcDatasource)) {
             return null;
