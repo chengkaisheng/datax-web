@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.api.R;
 import com.wugui.datax.admin.core.util.LocalCacheUtil;
 import com.wugui.datax.admin.entity.JobDatasource;
+import com.wugui.datax.admin.service.DatasourceQueryService;
 import com.wugui.datax.admin.service.JobDatasourceService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -33,6 +34,9 @@ public class JobDatasourceController extends BaseController {
      */
     @Autowired
     private JobDatasourceService jobJdbcDatasourceService;
+
+    @Autowired
+    DatasourceQueryService datasourceQueryService;
 
     /**
      * 分页查询所有数据
@@ -129,5 +133,11 @@ public class JobDatasourceController extends BaseController {
     @ApiOperation("测试数据")
     public R<Boolean> dataSourceTest (@RequestBody JobDatasource jobJdbcDatasource) throws IOException {
         return success(jobJdbcDatasourceService.dataSourceTest(jobJdbcDatasource));
+    }
+
+    @GetMapping("/tables")
+    @ApiOperation("获取一个库下的所有表")
+    public R<List<String>> datasourceTable(@RequestParam Long id, @RequestParam String schema) throws IOException {
+        return success(datasourceQueryService.getTables(id, schema));
     }
 }

@@ -122,4 +122,7 @@ public class JobInfo {
 
 	@TableField(exist=false)
 	private String userName;
+
+	@ApiModelProperty("任务类型")
+	private String jobType;
 }
