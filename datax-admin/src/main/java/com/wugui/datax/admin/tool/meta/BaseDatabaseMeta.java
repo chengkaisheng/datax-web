@@ -82,7 +82,7 @@ public abstract class BaseDatabaseMeta implements DatabaseInterface {
 
     @Override
     public String getNumberStatistics(String name,String tableName){
-        return String.format("select minv+floor((b.%s - a.minv)/step)*step as start_bound,(floor((b.%s - a.minv)/step)+1)*step+minv as end_bound,count(1) from %s b left join (select min(a.%s) minv, (max(a.%s) - min(a.%s))/2 step from %s a) a on 1 = 1 group by floor((b.%s - a.minv)/step),minv,step order by start_bound asc"
+        return String.format("select minv+floor((b.%s - a.minv)/step)*step as start_bound,(floor((b.%s - a.minv)/step)+1)*step+minv as end_bound,count(1) from %s b left join (select min(a.%s) minv, (max(a.%s) - min(a.%s))/8 step from %s a) a on 1 = 1 group by floor((b.%s - a.minv)/step),minv,step order by start_bound asc"
                 ,name,name,tableName,name,name,name,tableName,name);
     }
 
@@ -93,7 +93,7 @@ public abstract class BaseDatabaseMeta implements DatabaseInterface {
 
     @Override
     public String getDateStatistics(String name, String tableName) {
-        return "select from_unixtime(UNIX_TIMESTAMP(minv)+floor((UNIX_TIMESTAMP(b."+name+") - UNIX_TIMESTAMP(a.minv))/step)*step,'%Y-%m-%d %H:%i:%S'),from_unixtime((floor((UNIX_TIMESTAMP(b."+name+") - UNIX_TIMESTAMP(a.minv))/step)+1)*step+UNIX_TIMESTAMP(minv),'%Y-%m-%d %H:%i:%S'),count(1) from "+tableName+" b left join (select UNIX_TIMESTAMP(min(a."+name+")) minv, (UNIX_TIMESTAMP(max(a."+name+")) - UNIX_TIMESTAMP(min(a."+name+")))/3 step from "+tableName+" a) a on 1 = 1 group by floor((UNIX_TIMESTAMP(b."+name+") - UNIX_TIMESTAMP(a.minv))/step),minv,step";
+        return "select from_unixtime(UNIX_TIMESTAMP(minv)+floor((UNIX_TIMESTAMP(b."+name+") - UNIX_TIMESTAMP(a.minv))/step)*step,'%Y-%m-%d %H:%i:%S'),from_unixtime((floor((UNIX_TIMESTAMP(b."+name+") - UNIX_TIMESTAMP(a.minv))/step)+1)*step+UNIX_TIMESTAMP(minv),'%Y-%m-%d %H:%i:%S'),count(1) from "+tableName+" b left join (select UNIX_TIMESTAMP(min(a."+name+")) minv, (UNIX_TIMESTAMP(max(a."+name+")) - UNIX_TIMESTAMP(min(a."+name+")))/8 step from "+tableName+" a) a on 1 = 1 group by floor((UNIX_TIMESTAMP(b."+name+") - UNIX_TIMESTAMP(a.minv))/step),minv,step";
     }
 
     @Override
@@ -102,7 +102,7 @@ public abstract class BaseDatabaseMeta implements DatabaseInterface {
     }
 
     @Override
-    public String getValid(String name, String tableName) {
+    public String getMissing(String name, String tableName) {
         return "select count(*) from "+tableName+" where "+name+" is null or "+name+"=''";
     }
 
@@ -110,5 +110,10 @@ public abstract class BaseDatabaseMeta implements DatabaseInterface {
     public String getMostCommon(String name, String tableName) {
         return String.format("select count(*) num,%s from %s group by %s ORDER BY num desc limit 0,1"
                 ,name,tableName,name);
+    }
+
+    @Override
+    public String getMaxMin(String fieldName, String tableName) {
+        return "select max("+fieldName+"),min("+fieldName+") from "+tableName;
     }
 }
