@@ -33,6 +33,16 @@ public interface QueryToolInterface {
     List<Map<String, Object>> getTableInfo(String tableName);
 
     /**
+     * 获取指定schema下的所有表信息
+     *
+     * @return
+     */
+    List<Map<String, Object>> getTablesInfo(String schema);
+
+
+    List<Map<String, Object>> getTablesInfo();
+
+    /**
      * 获取当前schema下的所有表
      *
      * @return
@@ -100,4 +110,6 @@ public interface QueryToolInterface {
     String getDBName();
 
     String getTableSize(String tableName, String tableSchema);
+
+
 }

@@ -170,6 +170,41 @@ public abstract class BaseQueryTool implements QueryToolInterface {
     }
 
     @Override
+    public List<Map<String, Object>> getTablesInfo(String schema) {
+        String sqlQueryTableNameComment = sqlBuilder.getSQLQueryTablesNameComments(schema);
+        logger.info(sqlQueryTableNameComment);
+        List<Map<String, Object>> res = new ArrayList<>();
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(sqlQueryTableNameComment);
+            while (resultSet.next()){
+                Map<String,Object> map = new HashMap<>();
+                map.put("table_name", resultSet.getString(1));
+                map.put("table_comment", resultSet.getString(2));
+                res.add(map);
+            }
+        } catch (SQLException e) {
+            logger.error("[getTableInfo Exception] --> "
+                    + "the exception message is:" + e.getMessage());
+        }
+        return res;
+    }
+
+    @Override
+    public List<Map<String, Object>> getTablesInfo() {
+        String sqlQueryTableNameComment = sqlBuilder.getSQLQueryTablesNameComments();
+        logger.info(sqlQueryTableNameComment);
+        List<Map<String, Object>> res = null;
+        try {
+            res = JdbcUtils.executeQuery(connection, sqlQueryTableNameComment, ImmutableList.of(currentSchema));
+        } catch (SQLException e) {
+            logger.error("[getTableInfo Exception] --> "
+                    + "the exception message is:" + e.getMessage());
+        }
+        return res;
+    }
+
+    @Override
     public List<Map<String, Object>> getTables() {
         String sqlQueryTables = sqlBuilder.getSQLQueryTables();
         logger.info(sqlQueryTables);

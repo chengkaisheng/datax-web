@@ -11,6 +11,7 @@ import com.wugui.datax.admin.service.JobDatasourceService;
 import com.wugui.datax.admin.tool.database.TableInfo;
 import com.wugui.datax.admin.tool.query.*;
 import com.wugui.datax.admin.util.JdbcConstants;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,8 +19,8 @@ import com.wugui.datax.admin.entity.ColumnMsg;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 /**
  * datasource query
  *
@@ -187,7 +188,46 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
     }
 
     @Override
-    public List<TableInfo> getTableInfos(Long id, String schema) {
-        return null;
+    public List<TableInfo> getTableInfos(Long id, String schema) throws IOException {
+        //获取数据源对象
+        JobDatasource datasource = jobDatasourceService.getById(id);
+        List<String> tableNames = new ArrayList<>();
+        List<Map<String,Object>> tableInfoMap = new ArrayList<>();
+        List<TableInfo> tableInfos = new ArrayList<>();
+        //queryTool组装
+        if (ObjectUtil.isNull(datasource)) {
+            return Lists.newArrayList();
+        }if (JdbcConstants.HBASE.equals(datasource.getDatasource())) {
+            tableNames =  new HBaseQueryTool(datasource).getTableNames();
+            tableNames.forEach((tableName)->{
+                tableInfos.add(new TableInfo(tableName));
+            });
+        } else if (JdbcConstants.MONGODB.equals(datasource.getDatasource())) {
+            tableNames =  new MongoDBQueryTool(datasource).getCollectionNames(datasource.getDatabaseName());
+            tableNames.forEach((tableName)->{
+                tableInfos.add(new TableInfo(tableName));
+            });
+        } else {
+            BaseQueryTool qTool = QueryToolFactory.getByDbType(datasource);
+            if(StringUtils.isBlank(schema)){
+                tableInfoMap = qTool.getTablesInfo();
+            }else{
+                tableInfoMap = qTool.getTablesInfo(schema);
+            }
+            for (Map<String, Object> map : tableInfoMap) {
+                TableInfo tableInfoTemp = new TableInfo();
+                for (Map.Entry<String, Object> stringObjectEntry : map.entrySet()) {
+                    if("table_name".equals(stringObjectEntry.getKey())){
+                        tableInfoTemp.setName((String) stringObjectEntry.getValue());
+                    }else if("table_comment".equals(stringObjectEntry.getKey())){
+                        tableInfoTemp.setComment((String) stringObjectEntry.getValue());
+                    }
+                    System.out.println(stringObjectEntry.getKey() + ":" + stringObjectEntry.getValue());
+                }
+                tableInfos.add(tableInfoTemp);
+            }
+        }
+        return tableInfos;
     }
+
 }

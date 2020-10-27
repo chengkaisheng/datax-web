@@ -95,5 +95,5 @@ public interface DatasourceQueryService {
 
     String getTableSize(Long datasourceId, String tableName);
 
-    List<TableInfo> getTableInfos(Long id, String schema);
+    List<TableInfo> getTableInfos(Long id, String schema) throws IOException;
 }

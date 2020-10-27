@@ -21,6 +21,11 @@ public abstract class BaseDatabaseMeta implements DatabaseInterface {
     }
 
     @Override
+    public String getSQLQueryTablesNameComments(String schema) {
+        return null;
+    }
+
+    @Override
     public String getSQLQueryTableNameComment() {
         return "select table_name,table_comment from information_schema.tables where table_schema=? and table_name = ?";
     }

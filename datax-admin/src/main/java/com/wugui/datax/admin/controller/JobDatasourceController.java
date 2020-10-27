@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.api.R;
 import com.wugui.datax.admin.core.util.LocalCacheUtil;
+import com.wugui.datax.admin.entity.ColumnMsg;
 import com.wugui.datax.admin.entity.JobDatasource;
 import com.wugui.datax.admin.service.DatasourceQueryService;
 import com.wugui.datax.admin.service.JobDatasourceService;
@@ -150,8 +151,13 @@ public class JobDatasourceController extends BaseController {
 
     @GetMapping("/tableInfos")
     @ApiOperation("获取一个数据源下的所有表及表的注释信息")
-    public R<List<TableInfo>> datasourceTableInfo(@RequestParam Long id, @RequestParam String schema){
-        List<TableInfo> tableInfos = datasourceQueryService.getTableInfos(id, schema);
-        return success(tableInfos);
+    public R<List<TableInfo>> datasourceTableInfo(@RequestParam Long id, @RequestParam String schema) throws IOException {
+        return success(datasourceQueryService.getTableInfos(id, schema));
+    }
+
+    @GetMapping("{tableName}/columnInfos")
+    @ApiOperation("获取一张表下的所有字段及注释信息")
+    public R<List<ColumnMsg>> datasourceColumnInfos(@RequestParam Long id, @PathVariable String tableName) throws IOException {
+        return success(datasourceQueryService.getColumnSchema(id, tableName));
     }
 }

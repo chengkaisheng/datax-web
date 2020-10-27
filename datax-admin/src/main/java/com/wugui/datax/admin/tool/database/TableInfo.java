@@ -26,4 +26,16 @@ public class TableInfo {
      * 所有列
      */
     private List<ColumnInfo> columns;
+
+    public TableInfo() {
+    }
+
+    public TableInfo(String name, String comment) {
+        this.name = name;
+        this.comment = comment;
+    }
+
+    public TableInfo(String name) {
+        this.name = name;
+    }
 }

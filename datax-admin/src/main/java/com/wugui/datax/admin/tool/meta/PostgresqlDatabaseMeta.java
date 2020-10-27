@@ -72,4 +72,12 @@ public class PostgresqlDatabaseMeta extends BaseDatabaseMeta implements Database
                 " from pg_class pc,pg_attribute pa \n" +
                 "where pa.attrelid = pc.oid and pc.relname = '%s' and pa.attnum>0;",tableName);
     }
+
+    @Override
+    public String getSQLQueryTablesNameComments(String schema) {
+        return "select relname as table_name,cast(obj_description(relfilenode,'pg_class') as varchar) as table_comment from pg_class c\n" +
+                "where relname in (select tablename from pg_tables where schemaname='"+schema+"' and position('_2' in tablename)=0 )";
+    }
+
+
 }

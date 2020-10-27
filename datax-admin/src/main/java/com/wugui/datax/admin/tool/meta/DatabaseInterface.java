@@ -21,6 +21,7 @@ public interface DatabaseInterface {
 
     String getSQLQueryTablesNameComments();
 
+    String getSQLQueryTablesNameComments(String schema);
     /**
      * 获取所有表名的sql
      *
