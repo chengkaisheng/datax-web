@@ -18,7 +18,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * jdbc数据源配置控制器层
@@ -152,7 +154,11 @@ public class JobDatasourceController extends BaseController {
     @GetMapping("/tableInfos")
     @ApiOperation("获取一个数据源下的所有表及表的注释信息")
     public R<List<TableInfo>> datasourceTableInfo(@RequestParam Long id, @RequestParam String schema) throws IOException {
-        return success(datasourceQueryService.getTableInfos(id, schema));
+        List<TableInfo> tableInfos = datasourceQueryService.getTableInfos(id, schema);
+        Set<TableInfo> tableInfoSet = new HashSet<>(tableInfos);
+        tableInfos.clear();
+        tableInfos.addAll(tableInfoSet);
+        return success(tableInfos);
     }
 
     @GetMapping("{tableName}/columnInfos")

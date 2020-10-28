@@ -3,6 +3,7 @@ package com.wugui.datax.admin.tool.database;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 表信息
@@ -37,5 +38,18 @@ public class TableInfo {
 
     public TableInfo(String name) {
         this.name = name;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TableInfo tableInfo = (TableInfo) o;
+        return Objects.equals(name, tableInfo.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
     }
 }

@@ -19,3 +19,4 @@
 /packages/
 /datax-assembly/target/
 /datax-admin/src/main/resources/application.yml
+/datax-executor/src/main/resources/application.yml

@@ -38,7 +38,7 @@ public class MetadataController extends BaseController {
      */
     @GetMapping("/getDBs")
     @ApiOperation("根据数据源id获取mongo库名")
-    public R<List<String>> getDBs(Long datasourceId) throws IOException {
+    public R<List<String>> getDBs(@RequestParam Long datasourceId) throws IOException {
         return success(datasourceQueryService.getDBs(datasourceId));
     }
 
@@ -51,7 +51,7 @@ public class MetadataController extends BaseController {
      */
     @GetMapping("/collectionNames")
     @ApiOperation("根据数据源id,dbname获取CollectionNames")
-    public R<List<String>> getCollectionNames(Long datasourceId,String dbName) throws IOException {
+    public R<List<String>> getCollectionNames(@RequestParam Long datasourceId,@RequestParam String dbName) throws IOException {
         return success(datasourceQueryService.getCollectionNames(datasourceId,dbName));
     }
 
@@ -63,7 +63,7 @@ public class MetadataController extends BaseController {
      */
     @GetMapping("/getDBSchema")
     @ApiOperation("根据数据源id获取 db schema")
-    public R<List<String>> getTableSchema(Long datasourceId) {
+    public R<List<String>> getTableSchema(@RequestParam Long datasourceId) {
         return success(datasourceQueryService.getTableSchema(datasourceId));
     }
 
@@ -75,7 +75,7 @@ public class MetadataController extends BaseController {
      */
     @GetMapping("/getTables")
     @ApiOperation("根据数据源id获取可用表名")
-    public R<List<String>> getTableNames(Long datasourceId,String tableSchema) throws IOException {
+    public R<List<String>> getTableNames(@RequestParam Long datasourceId,@RequestParam String tableSchema) throws IOException {
         return success(datasourceQueryService.getTables(datasourceId,tableSchema));
     }
 
@@ -88,7 +88,7 @@ public class MetadataController extends BaseController {
      */
     @GetMapping("/getColumns")
     @ApiOperation("根据数据源id和表名获取所有字段")
-    public R<List<String>> getColumns(Long datasourceId, String tableName) throws IOException {
+    public R<List<String>> getColumns(@RequestParam Long datasourceId, @RequestParam String tableName) throws IOException {
         return success(datasourceQueryService.getColumns(datasourceId, tableName));
     }
 
@@ -101,7 +101,7 @@ public class MetadataController extends BaseController {
      */
     @GetMapping("/getTableColumns")
     @ApiOperation("根据数据源id和表名获取所有字段名称，类型，comment")
-    public R<Object> getTableColumns(Long datasourceId, String tableName) throws IOException {
+    public R<Object> getTableColumns(@RequestParam Long datasourceId,@RequestParam String tableName) throws IOException {
         return success(datasourceQueryService.getTableColumns(datasourceId, tableName));
     }
 
@@ -114,7 +114,7 @@ public class MetadataController extends BaseController {
      */
     @GetMapping("/getColumnsByQuerySql")
     @ApiOperation("根据数据源id和sql语句获取所有字段")
-    public R<List<String>> getColumnsByQuerySql(Long datasourceId, String querySql) throws SQLException {
+    public R<List<String>> getColumnsByQuerySql(@RequestParam Long datasourceId, @RequestParam String querySql) throws SQLException {
         return success(datasourceQueryService.getColumnsByQuerySql(datasourceId, querySql));
     }
 
@@ -127,7 +127,7 @@ public class MetadataController extends BaseController {
      */
     @GetMapping("/getRows")
     @ApiOperation("根据数据源id和表名获取记录数")
-    public R<Long> getRowsByTableName(Long datasourceId, String tableName) throws SQLException {
+    public R<Long> getRowsByTableName(@RequestParam Long datasourceId, @RequestParam String tableName) throws SQLException {
         return success(datasourceQueryService.getRows(datasourceId,tableName));
     }
 
@@ -142,7 +142,7 @@ public class MetadataController extends BaseController {
      */
     @RequestMapping("/listAll")
     @ApiOperation("根据数据源id和表名获取表所有数据")
-    public R<List<List<Map<String,Object>>>> listALLByTableName(Long datasourceId, String tableName, @RequestParam(required = false,defaultValue ="1") Integer pageNumber, @RequestParam(required = false,defaultValue = "10") Integer pageSize) throws Exception {
+    public R<List<List<Map<String,Object>>>> listALLByTableName(@RequestParam Long datasourceId, @RequestParam String tableName, @RequestParam(required = false,defaultValue ="1") Integer pageNumber, @RequestParam(required = false,defaultValue = "10") Integer pageSize) throws Exception {
         return success(datasourceQueryService.listAll(datasourceId,tableName,pageNumber,pageSize));
     }
 
@@ -155,8 +155,7 @@ public class MetadataController extends BaseController {
      */
     @RequestMapping("/getColumnSchema")
     @ApiOperation("根据数据源id和表名获取表所有字段名和字段类型以及字段统计结果")
-    public R<List<ColumnMsg>> getColumnSchema(Long datasourceId, String tableName) throws Exception {
+    public R<List<ColumnMsg>> getColumnSchema(@RequestParam Long datasourceId, @RequestParam String tableName) throws Exception {
         return success(datasourceQueryService.getColumnSchema(datasourceId,tableName));
     }
-
 }

@@ -194,7 +194,7 @@ public class SqlJobHandler extends IJobHandler {
         JobLogger.log(dataObject.toJSONString());
         JSONObject resultObject = dataObject.getJSONObject("result");
         JSONArray results = resultObject.getJSONArray("results");
-        return new ReturnT<>("SqlTask Executed Success");
+        return new ReturnT<>(200,"SqlTask Executed Success");
     }
 
     /*@Override
