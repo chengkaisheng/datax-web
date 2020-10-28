@@ -908,38 +908,12 @@
             <version>2.5.0</version>
         </dependency>
 
-        <!--<dependency>
-            <groupId>org.apache.hive</groupId>
-            <artifactId>hive-cli</artifactId>
-            <version>${hive.jdbc.version}</version>
-        </dependency>-->
-
-
-        <!--<dependency>
-            <groupId>org.apache.hive</groupId>
-            <artifactId>hive-metastore</artifactId>
-            <version>${hive.jdbc.version}</version>
-        </dependency>-->
-
-        <!--<dependency>
-            <groupId>org.apache.hive</groupId>
-            <artifactId>hive-common</artifactId>
-            <version>${hive.jdbc.version}</version>
-        </dependency>-->
-
-        <!--<dependency>
-            <groupId>org.apache.thrift</groupId>
-            <artifactId>libfb303</artifactId>
-            <version>0.9.0</version>
-        </dependency>-->
-
-        <!--dependency>
-            <groupId>org.apache.thrift</groupId>
-            <artifactId>libthrift</artifactId>
-            <version>0.9.0</version>
-        </dependency>-->
-
-        <!-- impala end -->
+        <!-- https://mvnrepository.com/artifact/com.ibm.db2.jcc/db2jcc -->
+        <dependency>
+            <groupId>com.ibm.db2.jcc</groupId>
+            <artifactId>db2jcc</artifactId>
+            <version>db2jcc4</version>
+        </dependency>
 
     </dependencies>
 

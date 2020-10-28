@@ -157,7 +157,7 @@ public class DataxJsonHelper implements DataxJsonInterface {
         } else if (CLICKHOUSE.equals(datasource)) {
             readerPlugin = new ClickHouseReader();
             buildReader = buildReader();
-        } else if (HIVE.equals(datasource) || IMPALA.equals(datasource)) {
+        } else if (HIVE.equals(datasource) || IMPALA.equals(datasource) || DB2.equals(datasource)) {
             String username = readerDatasource.getJdbcUsername();
             String password = readerDatasource.getJdbcPassword();
             readerDatasource.setJdbcUsername((username != null && !"".equals(username)) ? username : "default");

@@ -92,6 +92,8 @@ public class QualityJsonServiceImpl implements QualityJsonService {
                     list.add(" and " + columnName + " ~ " + "'" +regular + "'" );
                 } else if (dataSource.equalsIgnoreCase(CLICKHOUSE)) {
                     list.add(" and match(" + columnName + "'" + regular + "')");
+                }else if(dataSource.equals(DB2)){
+                    list.add(" and xmlcast(xmlquery('fn:matches($v," + "\""+regular + "\""+ ")' PASSING "+columnName+" as \"v\") as integer) =1 " );
                 }
 
             }
@@ -107,39 +109,4 @@ public class QualityJsonServiceImpl implements QualityJsonService {
         return stringBuffer.toString();
     }
 
-    public String getWhere (QualityJsonBuildDto dto,JobDatasource readerDatasource){
-        //构建规则
-        List<String> list = new ArrayList<>();
-        String dataSource = readerDatasource.getDatasource();
-        List<RuleInfoDto> ruleInfoDtoList = dto.getRule();
-        for(int i = 0; i < ruleInfoDtoList.size(); i++){
-            String columnName = ruleInfoDtoList.get(i).getColumnName();
-            List<RuleIdInfoDto> ruleIdInfoDtoList = ruleInfoDtoList.get(i).getRuleId();
-            for(int j = 0; j < ruleIdInfoDtoList.size(); j++){
-                String code = ruleIdInfoDtoList.get(j).getCode();
-                String codeTemp = code.split("\\$")[1];
-                //根据Id查询规则表达式
-                PersonaliseRule personaliseRule = personaliseRuleMapper.selectByCode(codeTemp);
-                String regular = personaliseRule.getRegular();
-                if(dataSource.equalsIgnoreCase(MYSQL)){
-                    list.add(" " + columnName + " REGEXP " + "'" +regular + "'" + " and ");
-                }else if(dataSource.equalsIgnoreCase(ORACLE)){
-                    list.add(" REGEXP_LIKE(" + "\"" + columnName + "\"" +","+ "'" + regular + "') and " );
-                }else if(dataSource.equalsIgnoreCase(POSTGRESQL)){
-                    list.add(" " + columnName + " ~ " + "'" +regular + "'" + " and ");
-                }
-
-            }
-        }
-
-        String str = "";
-        StringBuffer sb = new StringBuffer();
-        for(int i = 0;i < list.size(); i++){
-            sb.append(list.get(i));
-            if(i == list.size() - 1){
-                str  = sb.substring(0,sb.length()-4);
-            }
-        }
-        return str;
-    }
 }

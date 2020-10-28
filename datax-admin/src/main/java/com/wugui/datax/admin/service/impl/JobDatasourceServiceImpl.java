@@ -54,6 +54,9 @@ public class JobDatasourceServiceImpl extends ServiceImpl<JobDatasourceMapper, J
         if(JdbcConstants.PHOENIX.equals(jobDatasource.getDatasource())){
             return new PhoenixQueryTool(jobDatasource).dataSourceTest(jobDatasource.getDatabaseName());
         }
+        if(JdbcConstants.DB2.equals(jobDatasource.getDatasource())){
+            return new DB2QueryTool(jobDatasource).dataSourceTest(jobDatasource.getDatabaseName());
+        }
         BaseQueryTool queryTool = QueryToolFactory.getByDbType(jobDatasource);
         return queryTool.dataSourceTest();
     }

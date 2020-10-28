@@ -55,7 +55,10 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
             return new HBaseQueryTool(datasource).getTableNames();
         } else if (JdbcConstants.MONGODB.equals(datasource.getDatasource())) {
             return new MongoDBQueryTool(datasource).getCollectionNames(datasource.getDatabaseName());
-        } else {
+        } else if(JdbcConstants.DB2.equals(datasource.getDatasource())){
+            return new DB2QueryTool(datasource).getCollectionNames(datasource.getDatabaseName());
+        }
+        else {
             BaseQueryTool qTool = QueryToolFactory.getByDbType(datasource);
             if(StringUtils.isBlank(tableSchema)){
                 return qTool.getTableNames();
@@ -101,7 +104,10 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
             return new HBaseQueryTool(datasource).getColumns(tableName);
         } else if (JdbcConstants.MONGODB.equals(datasource.getDatasource())) {
             return new MongoDBQueryTool(datasource).getColumns(tableName);
-        } else {
+        }else if (JdbcConstants.DB2.equals(datasource.getDatasource())){
+            return new DB2QueryTool(datasource).getColumns(tableName);
+        }
+        else {
             BaseQueryTool queryTool = QueryToolFactory.getByDbType(datasource);
             return queryTool.getColumnNames(tableName, datasource.getDatasource());
         }
