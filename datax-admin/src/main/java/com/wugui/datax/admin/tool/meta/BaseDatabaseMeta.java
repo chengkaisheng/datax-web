@@ -98,7 +98,14 @@ public abstract class BaseDatabaseMeta implements DatabaseInterface {
 
     @Override
     public String getDateStatistics(String name, String tableName) {
-        return "select from_unixtime(UNIX_TIMESTAMP(minv)+floor((UNIX_TIMESTAMP(b."+name+") - UNIX_TIMESTAMP(a.minv))/step)*step,'%Y-%m-%d %H:%i:%S'),from_unixtime((floor((UNIX_TIMESTAMP(b."+name+") - UNIX_TIMESTAMP(a.minv))/step)+1)*step+UNIX_TIMESTAMP(minv),'%Y-%m-%d %H:%i:%S'),count(1) from "+tableName+" b left join (select UNIX_TIMESTAMP(min(a."+name+")) minv, (UNIX_TIMESTAMP(max(a."+name+")) - UNIX_TIMESTAMP(min(a."+name+")))/8 step from "+tableName+" a) a on 1 = 1 group by floor((UNIX_TIMESTAMP(b."+name+") - UNIX_TIMESTAMP(a.minv))/step),minv,step";
+        /*
+            select from_unixtime(minv+floor((UNIX_TIMESTAMP(b.dt) - a.minv)/step)*step,'%Y-%m-%d %H:%i:%S'),
+            from_unixtime((floor((UNIX_TIMESTAMP(b.dt) - a.minv)/step)+1)*step+minv,'%Y-%m-%d %H:%i:%S'),
+            count(1) from pv_day_3 b left join (select UNIX_TIMESTAMP(min(a.dt)) minv,
+            (UNIX_TIMESTAMP(max(a.dt)) - UNIX_TIMESTAMP(min(a.dt)))/3 step from pv_day_3 a) a on 1 = 1 group by
+            floor((UNIX_TIMESTAMP(b.dt) - a.minv)/step),minv,step
+         */
+        return "select max("+name+") from "+tableName;
     }
 
     @Override

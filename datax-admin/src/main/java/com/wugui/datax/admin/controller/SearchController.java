@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -53,7 +54,7 @@ public class SearchController {
     @RequestMapping("/list")
     public ReturnT<List<Search>> listSearch(@RequestParam(value = "keyword",defaultValue = "")String keyword
             ,@RequestParam(value = "pageNum",defaultValue = "1")Integer pageNum
-            ,@RequestParam(value = "pageSize",defaultValue = "10")Integer pageSize){
+            ,@RequestParam(value = "pageSize",defaultValue = "10")Integer pageSize) throws IOException {
         pageNum=(pageNum-1)*pageSize;
         List<Search> searches=searchService.listSearchs(keyword, pageNum, pageSize);
         for (Search search:searches) {
@@ -61,6 +62,7 @@ public class SearchController {
             String tableName=search.getTableName();
             search.setRows(datasourceQueryService.getRows(datasourceId,tableName));
             search.setSize(datasourceQueryService.getTableSize(datasourceId,tableName));
+            search.setCols(datasourceQueryService.getColumns(datasourceId,tableName).size());
         }
         return new ReturnT<>(searches);
     }

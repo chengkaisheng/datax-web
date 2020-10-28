@@ -28,6 +28,7 @@ import javax.sql.DataSource;
 import java.sql.*;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
 import java.util.*;
@@ -812,7 +813,30 @@ public abstract class BaseQueryTool implements QueryToolInterface {
         return result + "%";
     }
 
-    private List<Chart<Date>> getDateChart(String name,String tableName) {
+    private String getDateChart(String name,String tableName) {
+        Date dt=new Date();
+        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = connection.createStatement();
+            //获取sql
+            String sql = sqlBuilder.getDateStatistics(name,tableName);
+            rs = stmt.executeQuery(sql);
+            while (rs.next()) {
+                dt=rs.getTimestamp(1);
+            }
+        } catch (SQLException e) {
+            logger.error("[getTableNames Exception] --> "
+                    + "the exception message is:" + e.getMessage());
+        } finally {
+            JdbcUtils.close(rs);
+            JdbcUtils.close(stmt);
+        }
+        return sdf.format(dt);
+    }
+
+    /*private List<Chart<Date>> getDateChart(String name,String tableName) {
         List<Chart<Date>> charts = new ArrayList<>();
         Statement stmt = null;
         ResultSet rs = null;
@@ -839,7 +863,7 @@ public abstract class BaseQueryTool implements QueryToolInterface {
             JdbcUtils.close(stmt);
         }
         return charts;
-    }
+    }*/
 
     private Long getUnique(String name,String tableName) {
         Long ret = 0L;

@@ -86,12 +86,14 @@ public class OracleDatabaseMeta extends BaseDatabaseMeta implements DatabaseInte
 
     @Override
     public String getDateStatistics(String name, String tableName) {
-        return String.format("select minv+floor((b.%s - a.minv)/step)*step as start,(floor((b.%s - a.minv)/step)+1)*step+minv as end,count(1) from %s b left join (select min(a.%s) minv, (max(a.%s) - min(a.%s))/3 step from %s a) a on 1 = 1 group by floor((b.%s - a.minv)/step),minv,step order by start asc",
-                name,name,tableName,name,name,name,tableName,name);
+        /*return String.format("select minv+floor((b.%s - a.minv)/step)*step as start,(floor((b.%s - a.minv)/step)+1)*step+minv as end,count(1) from %s b left join (select min(a.%s) minv, (max(a.%s) - min(a.%s))/3 step from %s a) a on 1 = 1 group by floor((b.%s - a.minv)/step),minv,step order by start asc",
+                name,name,tableName,name,name,name,tableName,name);*/
+        return "select max("+name+") from "+tableName;
     }
 
     @Override
     public String getListAll(String tableName, Integer pageNumber, Integer pageSize,String columnName) {
-        return String.format("select * from (select ROWNUM AS rowno,t.* from %s t) where rowno > (%s-1)*%s and rowno<=%s*%s",tableName,pageNumber,pageSize,pageNumber,pageSize);
+        return String.format("select b.* from (select rn,ri from (select ROWNUM AS rn,rowid ri from %s t) where rn > (%s-1)*%s and rn<=%s*%s) a,%s b where a.ri=b.rowid"
+                ,tableName,pageNumber,pageSize,pageNumber,pageSize,tableName);
     }
 }
