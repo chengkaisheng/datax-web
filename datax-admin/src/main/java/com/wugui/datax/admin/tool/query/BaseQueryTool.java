@@ -623,7 +623,7 @@ public abstract class BaseQueryTool implements QueryToolInterface {
     }
 
     public Long getRows(String tableName) {
-        Long rows=null;
+        Long rows=0L;
         Statement stmt = null;
         ResultSet rs = null;
         try {
@@ -644,8 +644,7 @@ public abstract class BaseQueryTool implements QueryToolInterface {
         return rows;
     }
 
-    public List<List<Map<String,Object>>> listAll(List<String> columns, String tableName,Integer pageNumber,Integer pageSize) {
-        logger.info("*****************************columns: "+columns);
+    public Map<String,Object> listAll(List<String> columns, String tableName,Integer pageNumber,Integer pageSize) {
         List<List<Map<String,Object>>> datas = new ArrayList<>();
         Statement stmt = null;
         ResultSet rs = null;
@@ -671,7 +670,11 @@ public abstract class BaseQueryTool implements QueryToolInterface {
             JdbcUtils.close(rs);
             JdbcUtils.close(stmt);
         }
-        return datas;
+        Map<String,Object> ret=new HashMap(){{
+                this.put("datas",datas);
+                this.put("total",getRows(tableName));
+        }};
+        return ret;
     }
 
     public String getDBName(){
@@ -714,7 +717,7 @@ public abstract class BaseQueryTool implements QueryToolInterface {
                 columnMsg.setName(name);
                 columnMsg.setComment(comment);
                 String showType=this.judgeShowType(type);
-                columnMsg.setIndicator(getIndicator(name,tableName,showType));
+                columnMsg.setIndicator(this.getIndicator(name,tableName,showType));
                 logger.info("*************************showType: "+showType);
                 if("dateType".equals(showType)){
                     columnMsg.setType("date");
@@ -758,7 +761,6 @@ public abstract class BaseQueryTool implements QueryToolInterface {
             stmt = connection.createStatement();
             //获取valid数量
             String sql = sqlBuilder.getMissing(fieldName,tableName);
-            logger.info("=================getValidSql: "+sql);
             rs = stmt.executeQuery(sql);
             if(rs.next()){
                 missing = rs.getLong(1);
@@ -768,7 +770,6 @@ public abstract class BaseQueryTool implements QueryToolInterface {
                 validMap.put("rate",getRate(total-missing,total));
             }
             sql=sqlBuilder.getMostCommon(fieldName,tableName);
-            logger.info("=================getMostCommon: "+sql);
             rs = stmt.executeQuery(sql);
             if(rs.next()){
                 num = rs.getLong(1);
@@ -805,6 +806,13 @@ public abstract class BaseQueryTool implements QueryToolInterface {
     }
 
     private String getRate(Long a,Long b){
+        if(b==0){
+            logger.info("表记录数为0，除数不能为0");
+            throw  new RuntimeException("表记录数为0，除数不能为0");
+        }
+        if (a==0){
+            return "0%";
+        }
         // 创建一个数值格式化对象
         NumberFormat numberFormat = NumberFormat.getInstance();
         // 设置精确到小数点后2位
@@ -823,8 +831,12 @@ public abstract class BaseQueryTool implements QueryToolInterface {
             //获取sql
             String sql = sqlBuilder.getDateStatistics(name,tableName);
             rs = stmt.executeQuery(sql);
-            while (rs.next()) {
-                dt=rs.getTimestamp(1);
+            if (rs.next()) {
+                Date temp=rs.getTimestamp(1);
+                if(temp!=null){
+                    dt=temp;
+                }
+
             }
         } catch (SQLException e) {
             logger.error("[getTableNames Exception] --> "
@@ -833,7 +845,9 @@ public abstract class BaseQueryTool implements QueryToolInterface {
             JdbcUtils.close(rs);
             JdbcUtils.close(stmt);
         }
+        logger.info("date-------->"+sdf.format(dt));
         return sdf.format(dt);
+        //return dt.toString();
     }
 
     /*private List<Chart<Date>> getDateChart(String name,String tableName) {
@@ -895,7 +909,6 @@ public abstract class BaseQueryTool implements QueryToolInterface {
             stmt = connection.createStatement();
             //获取sql
             String sql = sqlBuilder.getNumberStatistics(name,tableName);
-            logger.info("********************sql: "+sql);
             rs = stmt.executeQuery(sql);
             while (rs.next()) {
                 Chart<Float> chart=new Chart();
@@ -907,7 +920,6 @@ public abstract class BaseQueryTool implements QueryToolInterface {
                 chart.setMax(max);
                 chart.setNumber(number);
             }
-            logger.info("****************************number-charts: "+charts);
         } catch (SQLException e) {
             logger.error("[getTableNames Exception] --> "
                     + "the exception message is:" + e.getMessage());
@@ -942,7 +954,6 @@ public abstract class BaseQueryTool implements QueryToolInterface {
             stmt = connection.createStatement();
             //获取sql
             String sql = sqlBuilder.getTableSize(tableName,tableSchema);
-            logger.info("=========tableSize Sql: "+sql);
             rs = stmt.executeQuery(sql);
             if(rs.next()){
                 tableSize=rs.getLong(1)/1024;

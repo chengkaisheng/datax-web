@@ -96,4 +96,9 @@ public class OracleDatabaseMeta extends BaseDatabaseMeta implements DatabaseInte
         return String.format("select b.* from (select rn,ri from (select ROWNUM AS rn,rowid ri from %s t) where rn > (%s-1)*%s and rn<=%s*%s) a,%s b where a.ri=b.rowid"
                 ,tableName,pageNumber,pageSize,pageNumber,pageSize,tableName);
     }
+
+    @Override
+    public String getMostCommon(String name, String tableName) {
+        return "select * from (select count(*) num,"+name+" from "+tableName+" group by "+name+" ORDER BY num desc) where rownum=1";
+    }
 }

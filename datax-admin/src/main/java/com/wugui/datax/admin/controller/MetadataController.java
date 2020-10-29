@@ -142,7 +142,7 @@ public class MetadataController extends BaseController {
      */
     @RequestMapping("/listAll")
     @ApiOperation("根据数据源id和表名获取表所有数据")
-    public R<List<List<Map<String,Object>>>> listALLByTableName(@RequestParam Long datasourceId, @RequestParam String tableName, @RequestParam(required = false,defaultValue ="1") Integer pageNumber, @RequestParam(required = false,defaultValue = "10") Integer pageSize) throws Exception {
+    public R<Map<String,Object>> listALLByTableName(@RequestParam Long datasourceId, @RequestParam String tableName, @RequestParam(required = false,defaultValue ="1") Integer pageNumber, @RequestParam(required = false,defaultValue = "10") Integer pageSize) throws Exception {
         return success(datasourceQueryService.listAll(datasourceId,tableName,pageNumber,pageSize));
     }
 
