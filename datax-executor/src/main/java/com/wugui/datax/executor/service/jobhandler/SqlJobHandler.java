@@ -1,9 +1,10 @@
 package com.wugui.datax.executor.service.jobhandler;
 
 
-import com.alibaba.fastjson.JSON;
+
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.wugui.datatx.core.biz.model.ReturnT;
 import com.wugui.datatx.core.biz.model.TriggerParam;
 import com.wugui.datatx.core.handler.IJobHandler;
@@ -80,8 +81,9 @@ public class SqlJobHandler extends IJobHandler {
         }
         Map<String, JSONObject> map = JSONObject.parseObject(response, HashMap.class);
         String data = map.get("data").toJSONString();
+
         //记录到handle日志
-        JobLogger.log(data);
+        JobLogger.log(map.get("data").toString(SerializerFeature.PrettyFormat));
 
         Map<String, JSONObject> dataMap = JSONObject.parseObject(data, HashMap.class);
         String result = dataMap.get("createConnection").toJSONString();
@@ -103,7 +105,7 @@ public class SqlJobHandler extends IJobHandler {
                 "    }\n" +
                 "}";
         String initCoon = HttpClientHelper.sendPost(URL, initConnBody);
-        JobLogger.log(JSONObject.parseObject(initCoon).toJSONString());
+        JobLogger.log(JSONObject.parseObject(initCoon).getJSONObject("data").toString(SerializerFeature.PrettyFormat));
 
         //===========================================================================
         String requestBody = "{\n" +
@@ -115,7 +117,7 @@ public class SqlJobHandler extends IJobHandler {
         response = HttpClientHelper.sendPost(URL, requestBody);
         map = JSONObject.parseObject(response, HashMap.class);
         JSONObject dataObject = map.get("data");
-        JobLogger.log(dataObject.toJSONString());
+        JobLogger.log(dataObject.toString(SerializerFeature.PrettyFormat));
         JSONObject context = dataObject.getJSONObject("context");
         String contextId = context.getString("id");
         if(StringUtils.isEmpty(contextId)){
@@ -140,7 +142,7 @@ public class SqlJobHandler extends IJobHandler {
         response = HttpClientHelper.sendPost(URL, requestBody);
         map = JSONObject.parseObject(response, HashMap.class);
         dataObject = map.get("data");
-        JobLogger.log(dataObject.toJSONString());
+        JobLogger.log(dataObject.toString(SerializerFeature.PrettyFormat));
         JSONObject taskInfo = dataObject.getJSONObject("taskInfo");
         if(taskInfo.get("error") != null){
             JobLogger.log(taskInfo.getString("error"));
@@ -172,7 +174,7 @@ public class SqlJobHandler extends IJobHandler {
                 return ReturnT.FAIL;
             }
             if("Finished".equals(status)){
-                JobLogger.log(taskInfo.toJSONString());
+                JobLogger.log(dataObject.toString(SerializerFeature.PrettyFormat));
                 break;
             }
         }
@@ -191,7 +193,7 @@ public class SqlJobHandler extends IJobHandler {
         response = HttpClientHelper.sendPost(URL, requestBody);
         map = JSONObject.parseObject(response, HashMap.class);
         dataObject = map.get("data");
-        JobLogger.log(dataObject.toJSONString());
+        JobLogger.log(dataObject.toString(SerializerFeature.PrettyFormat));
         JSONObject resultObject = dataObject.getJSONObject("result");
         JSONArray results = resultObject.getJSONArray("results");
         return new ReturnT<>(200,"SqlTask Executed Success");
