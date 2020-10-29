@@ -2,6 +2,7 @@ package com.wugui.datax.admin.service.impl;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.wugui.datax.admin.datashare.entity.TDatabaseInfo;
 import com.wugui.datax.admin.datashare.mapper.TDatabaseInfoMapper;
 import com.wugui.datax.admin.entity.JobDatasource;
@@ -154,14 +155,14 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
     }
 
     //获取表的所有数据
-    public List<List<Map<String,Object>>> listAll(Long datasourceId,String tableName,Integer pageNumber,Integer pageSize) throws IOException {
+    public Map<String,Object> listAll(Long datasourceId,String tableName,Integer pageNumber,Integer pageSize) throws IOException {
         JobDatasource jdbcDatasource = jobDatasourceService.getById(datasourceId);
         List<String> columns = this.getColumns(datasourceId, tableName);
         if (ObjectUtil.isNull(jdbcDatasource)) {
-            return Lists.newArrayList();
+            return Maps.newHashMap();
         }
         BaseQueryTool queryTool = QueryToolFactory.getByDbType(jdbcDatasource);
-        List<List<Map<String,Object>>> maps = queryTool.listAll(columns,tableName,pageNumber,pageSize);
+        Map<String,Object> maps = queryTool.listAll(columns,tableName,pageNumber,pageSize);
         return maps;
     }
 
@@ -173,6 +174,9 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
         }
         BaseQueryTool queryTool = QueryToolFactory.getByDbType(jdbcDatasource);
         String tableSchema="";
+        if(queryTool.getClass()==MySQLQueryTool.class){
+            tableSchema=queryTool.getDBName();
+        }
         if(queryTool.getClass()==MySQLQueryTool.class){
             tableSchema=queryTool.getDBName();
         }

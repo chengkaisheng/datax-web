@@ -89,7 +89,7 @@ public interface DatasourceQueryService {
      * @return
      * @throws IOException
      */
-    List<List<Map<String,Object>>> listAll(Long datasourceId, String tableName,Integer pageNumber,Integer pageSize)throws IOException;
+    Map<String,Object> listAll(Long datasourceId, String tableName,Integer pageNumber,Integer pageSize)throws IOException;
 
     List<ColumnMsg> getColumnSchema(Long datasourceId, String tableName);
 

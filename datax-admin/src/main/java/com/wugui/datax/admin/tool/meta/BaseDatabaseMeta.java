@@ -85,6 +85,7 @@ public abstract class BaseDatabaseMeta implements DatabaseInterface {
         return "select database()";
     }
 
+    //SQLServer可能存在除数为0错误，step字段
     @Override
     public String getNumberStatistics(String name,String tableName){
         return String.format("select minv+floor((b.%s - a.minv)/step)*step as start_bound,(floor((b.%s - a.minv)/step)+1)*step+minv as end_bound,count(1) from %s b left join (select min(a.%s) minv, (max(a.%s) - min(a.%s))/8 step from %s a) a on 1 = 1 group by floor((b.%s - a.minv)/step),minv,step order by start_bound asc"
@@ -102,7 +103,7 @@ public abstract class BaseDatabaseMeta implements DatabaseInterface {
             select from_unixtime(minv+floor((UNIX_TIMESTAMP(b.dt) - a.minv)/step)*step,'%Y-%m-%d %H:%i:%S'),
             from_unixtime((floor((UNIX_TIMESTAMP(b.dt) - a.minv)/step)+1)*step+minv,'%Y-%m-%d %H:%i:%S'),
             count(1) from pv_day_3 b left join (select UNIX_TIMESTAMP(min(a.dt)) minv,
-            (UNIX_TIMESTAMP(max(a.dt)) - UNIX_TIMESTAMP(min(a.dt)))/3 step from pv_day_3 a) a on 1 = 1 group by
+            (UNIX_TIMESTAMP(max(a.dt)) - UNIX_TIMESTAMP(min(a.dt)))/8 step from pv_day_3 a) a on 1 = 1 group by
             floor((UNIX_TIMESTAMP(b.dt) - a.minv)/step),minv,step
          */
         return "select max("+name+") from "+tableName;
