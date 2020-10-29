@@ -145,7 +145,7 @@ public class SqlJobHandler extends IJobHandler {
         JobLogger.log(dataObject.toString(SerializerFeature.PrettyFormat));
         JSONObject taskInfo = dataObject.getJSONObject("taskInfo");
         if(taskInfo.get("error") != null){
-            JobLogger.log(taskInfo.getString("error"));
+            JobLogger.log(taskInfo.getJSONObject("error").toString(SerializerFeature.PrettyFormat));
             return ReturnT.FAIL;
         }
         String taskId = taskInfo.getString("id");
@@ -170,7 +170,8 @@ public class SqlJobHandler extends IJobHandler {
             Thread.sleep(1000);
             i++;
             if(taskInfo.get("error") != null){
-                JobLogger.log(taskInfo.get("error").toString());
+                //JobLogger.log(taskInfo.get("error").toString().replace("\\r\\n", "\\n"));
+                JobLogger.log(taskInfo.get("error").toString().replace("\\r\\n\\", "\n"));
                 return ReturnT.FAIL;
             }
             if("Finished".equals(status)){
