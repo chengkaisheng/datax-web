@@ -92,6 +92,11 @@ public class OracleDatabaseMeta extends BaseDatabaseMeta implements DatabaseInte
     }
 
     @Override
+    public String getTableSize(String tableName, String tableSchema) {
+        return "select round(sum(BYTES)/1024,2) from user_segments where segment_name='"+tableName+"'";
+    }
+
+    @Override
     public String getListAll(String tableName, Integer pageNumber, Integer pageSize,String columnName) {
         return String.format("select b.* from (select rn,ri from (select ROWNUM AS rn,rowid ri from %s t) where rn > (%s-1)*%s and rn<=%s*%s) a,%s b where a.ri=b.rowid"
                 ,tableName,pageNumber,pageSize,pageNumber,pageSize,tableName);

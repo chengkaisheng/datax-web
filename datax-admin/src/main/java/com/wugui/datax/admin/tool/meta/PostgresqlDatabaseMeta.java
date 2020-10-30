@@ -79,5 +79,14 @@ public class PostgresqlDatabaseMeta extends BaseDatabaseMeta implements Database
                 "where relname in (select tablename from pg_tables where schemaname='"+schema+"' and position('_2' in tablename)=0 )";
     }
 
+    @Override
+    public String getMostCommon(String name, String tableName) {
+        return String.format("select count(*) num,%s from %s group by %s ORDER BY num desc limit 1 OFFSET 0"
+                ,name,tableName,name);
+    }
 
+    @Override
+    public String getTableSize(String tableName, String tableSchema) {
+        return "select pg_size_pretty(pg_relation_size(relid)) from pg_stat_user_tables where schemaname='public' and relname='"+tableName+"'";
+    }
 }

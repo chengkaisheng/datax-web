@@ -69,6 +69,11 @@ public class SqlServerDatabaseMeta extends BaseDatabaseMeta implements DatabaseI
     }
 
     @Override
+    public String getTableSize(String tableName, String tableSchema) {
+        return "exec sp_spaceused '"+tableName+"'";
+    }
+
+    @Override
     public String getMostCommon(String name, String tableName) {
         return "select top 1 count(*) num,"+name+" from "+tableName+" group by "+name+" ORDER BY num desc";
     }

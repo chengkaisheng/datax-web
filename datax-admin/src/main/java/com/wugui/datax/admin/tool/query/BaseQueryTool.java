@@ -15,6 +15,8 @@ import com.wugui.datax.admin.tool.database.DasColumn;
 import com.wugui.datax.admin.tool.database.TableInfo;
 import com.wugui.datax.admin.tool.meta.DatabaseInterface;
 import com.wugui.datax.admin.tool.meta.DatabaseMetaFactory;
+import com.wugui.datax.admin.tool.meta.PostgresqlDatabaseMeta;
+import com.wugui.datax.admin.tool.meta.SqlServerDatabaseMeta;
 import com.wugui.datax.admin.util.AESUtil;
 import com.wugui.datax.admin.util.JdbcConstants;
 import com.wugui.datax.admin.util.JdbcUtils;
@@ -956,6 +958,11 @@ public abstract class BaseQueryTool implements QueryToolInterface {
             String sql = sqlBuilder.getTableSize(tableName,tableSchema);
             rs = stmt.executeQuery(sql);
             if(rs.next()){
+                if(sqlBuilder.getClass()==SqlServerDatabaseMeta.class){
+                    return  rs.getString(4);
+                }else if(sqlBuilder.getClass()== PostgresqlDatabaseMeta.class){
+                    return  rs.getString(1);
+                }
                 tableSize=rs.getLong(1)/1024;
             }
         } catch (SQLException e) {
