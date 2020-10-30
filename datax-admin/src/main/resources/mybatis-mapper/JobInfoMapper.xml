@@ -318,6 +318,37 @@
 		LIMIT #{pagesize}
 	</select>
 
+	<select id="pageConfList" resultType="com.wugui.datax.admin.dto.QualityConfDto">
+		select a.id as id,b.name as projectName,c.datasource_name as dataSourceName,
+		a.add_time as addTime,d.username as userName,a.job_json as jobJson
+		FROM job_info AS a
+		left join job_project as b on  a.project_id = b.id
+		left join job_jdbc_datasource as c on a.datasource_id = c.id
+		left join job_user as d on a.user_id = d.id
+		<where>
+			<if test="name != null and name != '' ">
+				and a.job_desc = #{name}
+			</if>
+			<if test="jobType != null and jobType != '' ">
+				and a.job_type = #{jobType}
+			</if>
+		</where>
+		order by a.add_time desc
+		limit #{offset}, #{pageSize}
+	</select>
+
+	<select id="selectConfCount" resultType="java.lang.Integer">
+		select count(1) from job_info as t
+		<where>
+			<if test="name != null and name != '' ">
+				and t.job_desc = #{name}
+			</if>
+			<if test="jobType != null and jobType != '' ">
+				and t.job_type = #{jobType}
+			</if>
+		</where>
+	</select>
+
 	<update id="scheduleUpdate" parameterType="com.wugui.datax.admin.entity.JobInfo"  >
 		UPDATE job_info
 		SET

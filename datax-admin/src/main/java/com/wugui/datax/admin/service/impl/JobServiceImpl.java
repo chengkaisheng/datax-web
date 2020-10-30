@@ -1,5 +1,6 @@
 package com.wugui.datax.admin.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.wugui.datatx.core.biz.model.ReturnT;
 import com.wugui.datatx.core.enums.ExecutorBlockStrategyEnum;
 import com.wugui.datatx.core.glue.GlueTypeEnum;
@@ -10,6 +11,7 @@ import com.wugui.datax.admin.core.thread.JobScheduleHelper;
 import com.wugui.datax.admin.core.util.I18nUtil;
 import com.wugui.datax.admin.dto.DataXBatchJsonBuildDto;
 import com.wugui.datax.admin.dto.DataXJsonBuildDto;
+import com.wugui.datax.admin.dto.QualityConfDto;
 import com.wugui.datax.admin.entity.JobGroup;
 import com.wugui.datax.admin.entity.JobInfo;
 import com.wugui.datax.admin.entity.JobLogReport;
@@ -459,5 +461,25 @@ public class JobServiceImpl implements JobService {
             jobInfoMapper.save(jobInfo);
         }
         return ReturnT.SUCCESS;
+    }
+
+    @Override
+    public Map<String, Object> getPageConf(int current, int size, String name) {
+        Map<String,Object> map = new HashMap<>();
+        JSONObject jsonObject1 = null;
+        JSONObject jsonObject2 = null;
+        //先查询出所有的质量任务
+        List<QualityConfDto> list = jobInfoMapper.pageConfList((current-1) * size,size,name,"DQCJOB");
+        int count = jobInfoMapper.selectConfCount((current-1) * size,size,name,"DQCJOB");
+        for (int i = 0 ; i < list.size(); i++){
+            jsonObject1 = JSONObject.parseObject(list.get(i).getJobJson());
+            String reader = jsonObject1.getJSONObject("job").getJSONArray("content").get(0).toString();
+            logger.info("reader={}",reader);
+            jsonObject2 = JSONObject.parseObject(reader);
+            String querySql = jsonObject2.getJSONObject("reader").getJSONObject("parameter").
+                    getJSONArray("connection").getJSONObject(0).getJSONArray("querySql").get(0).toString();
+            logger.info("querySql={}",querySql);
+        }
+        return null;
     }
 }

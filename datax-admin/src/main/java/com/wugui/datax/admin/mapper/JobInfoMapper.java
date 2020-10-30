@@ -1,5 +1,6 @@
 package com.wugui.datax.admin.mapper;
 
+import com.wugui.datax.admin.dto.QualityConfDto;
 import com.wugui.datax.admin.entity.JobInfo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -57,4 +58,8 @@ public interface JobInfoMapper {
 	public int updateLastHandleCode(@Param("id") int id,@Param("lastHandleCode")int lastHandleCode);
 
     void incrementIdUpdate(@Param("id") int id, @Param("incStartId")Long incStartId);
+
+    List<QualityConfDto> pageConfList(@Param("offset") int offset, @Param("pagesize")int pagesize, @Param("name") String name, @Param("jobType") String jobType);
+
+    int selectConfCount(@Param("offset") int offset, @Param("pagesize") int pagesize, @Param("name") String name, @Param("jobType") String jobType);
 }
