@@ -16,6 +16,7 @@ import com.wugui.datax.admin.util.MetadataBuildUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.atlas.AtlasClientV2;
+import org.apache.atlas.AtlasException;
 import org.apache.atlas.AtlasServiceException;
 import org.apache.atlas.model.audit.EntityAuditEventV2;
 import org.apache.atlas.model.instance.AtlasEntity;
@@ -245,4 +246,38 @@ public class AtlasController extends BaseController {
         queryWrapper.eq("guid", guid);
         return new ReturnT<>(contrastRecordService.list(queryWrapper));
     }
+
+    /*@PostMapping("/clickHouse/import")
+    public ReturnT clickHouseMetadata(@RequestParam Long datasourceId) throws AtlasException, IOException {
+        JobDatasource jobDatasource = jobJdbcDatasourceService.getById(datasourceId);
+        jobDatasource.setDatabaseName(getDatabaseName(jobDatasource.getJdbcUrl()));
+        MetadataBuildUtils.jobDatasource = jobDatasource;
+        AtlasClientV2 atlasClientV2 = new AtlasClientV2(MetadataBuildUtils.getServerUrl(), MetadataBuildUtils.getUserInput());
+        String coonId = HttpClientHelper.initConnection(jobDatasource);
+        //创建instance
+        MetadataBuildUtils.buildRdbmsInstance(atlasClientV2, jobDatasource);
+
+
+        //创建database
+
+
+        //创建table
+
+
+        //创建column
+
+
+        //创建index
+
+
+
+        return ReturnT.SUCCESS;
+    }
+*/
+
+    /*private String getDatabaseName(String url){
+        String[] split = url.split("/");
+        String databaseName = split[split.length - 1];
+        return databaseName;
+    }*/
 }

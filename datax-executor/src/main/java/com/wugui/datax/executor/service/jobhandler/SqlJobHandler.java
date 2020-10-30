@@ -171,7 +171,7 @@ public class SqlJobHandler extends IJobHandler {
             i++;
             if(taskInfo.get("error") != null){
                 //JobLogger.log(taskInfo.get("error").toString().replace("\\r\\n", "\\n"));
-                JobLogger.log(taskInfo.get("error").toString().replace("\\r\\n\\", "\n"));
+                JobLogger.log(taskInfo.get("error").toString().replace("\\r\\n\\", "\n").replace("\\r\\n", "\n").replace("\\n", "\n"));
                 return ReturnT.FAIL;
             }
             if("Finished".equals(status)){

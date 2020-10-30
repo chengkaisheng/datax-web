@@ -210,4 +210,60 @@ public class MetadataBuildUtils {
 
         return null; // will not reach here
     }
+
+    public static List<Map.Entry<String,String>> setRdbmsInstance(AtlasClientV2 atlasClientV2){
+        AtlasEntity atlasEntity = buildRdbmsInstance();
+        return createEntities(atlasClientV2, new AtlasEntity.AtlasEntitiesWithExtInfo(atlasEntity));
+    }
+
+
+    public static AtlasEntity buildRdbmsInstance() {
+        String[] split = jobDatasource.getJdbcUrl().split("/");
+        String host = split[split.length-1].split(":")[0];
+        String port = split[split.length-1].split(":")[1];
+        AtlasEntity atlasEntity = new AtlasEntity("clickHouse_instance");
+        atlasEntity.setAttribute("qualifiedName", host +"@"+ jobDatasource.getDatasource());
+        atlasEntity.setAttribute("host", host);
+        atlasEntity.setAttribute("port", port);
+        atlasEntity.setAttribute("instanceType", jobDatasource.getDatasource());
+        atlasEntity.setAttribute("updateTime", sdf.format(new Date()));
+        return atlasEntity;
+    }
+
+    public static AtlasEntity buildRdbmsDb(Map<String, String> relationship){
+        String[] split = jobDatasource.getJdbcUrl().split("/");
+        String host = split[split.length-1].split(":")[0];
+        AtlasEntity atlasEntity = new AtlasEntity("clickHouse_db");
+        atlasEntity.setAttribute("qualifiedName", jobDatasource.getDatabaseName() + "." +host+ "@" + jobDatasource.getDatasource() );
+        atlasEntity.setAttribute("databaseName", jobDatasource.getDatabaseName());
+        atlasEntity.setAttribute("updateTime", sdf.format(new Date()));
+        atlasEntity.setAttribute("instance", relationship);
+        return atlasEntity;
+    }
+
+   /* public static List<Map.Entry<String,String>> setClickHouseDb(AtlasClientV2 atlasClientV2, String guid, List<String> dbs){
+        Map<String, String> relation = buildRelation(guid);
+        List<Map.Entry<String,String>> list = new ArrayList<>();
+        for (String db : dbs) {
+            AtlasEntity atlasEntity = buildRdbmsDb(relation);
+            list.add(createEntities(atlasClientV2, new AtlasEntity.AtlasEntitiesWithExtInfo(atlasEntity)));
+        }
+        return null;
+
+        Map<String, Map<String,String>> map = HttpClientHelper.getTablesInfo(coonId, database, tableNames);
+        List<AtlasEntity> atlasEntities = new ArrayList<>();
+        Map<String,String> relationship = buildRelation(guid);
+        for (Map.Entry<String, Map<String, String>> stringMapEntry : map.entrySet()) {
+            String tableName = stringMapEntry.getKey();
+            Map<String, String> properties = stringMapEntry.getValue();
+            atlasEntities.add(buildTableEntity(tableName, properties, relationship));
+        }
+        List<Map.Entry<String, String>> entities = createEntities(atlasClientV2, new AtlasEntity.AtlasEntitiesWithExtInfo(atlasEntities));
+        Map<String,String> guidMap = new HashMap<>();
+        for (int i = 0; i < tableNames.size(); i++) {
+            guidMap.put(tableNames.get(i), entities.get(i).getValue());
+        }
+        return guidMap;
+    }*/
+
 }
