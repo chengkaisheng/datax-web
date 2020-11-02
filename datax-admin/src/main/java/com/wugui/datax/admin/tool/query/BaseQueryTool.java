@@ -383,14 +383,16 @@ public abstract class BaseQueryTool implements QueryToolInterface {
         Statement stmt = null;
         ResultSet rs = null;
         try {
-            String strsql="select database()";
-            stmt = connection.createStatement();
-            rs = stmt.executeQuery(strsql);
-            JSON dataBaseNameJson= resultSetToJSON(rs);
-            JSONArray jsonArray = JSONArray.parseArray(dataBaseNameJson.toJSONString());
-            if(jsonArray.size()>0){
-                JSONObject job = jsonArray.getJSONObject(0);  // 遍历 jsonarray 数组，把每一个对象转成 json 对象
-                databaseName=job.get("database()").toString();  // 得到 每个对象中的属性值
+            if(StringUtils.isEmpty(databaseName)){
+                String strsql="select database()";
+                stmt = connection.createStatement();
+                rs = stmt.executeQuery(strsql);
+                JSON dataBaseNameJson= resultSetToJSON(rs);
+                JSONArray jsonArray = JSONArray.parseArray(dataBaseNameJson.toJSONString());
+                if(jsonArray.size()>0){
+                    JSONObject job = jsonArray.getJSONObject(0);  // 遍历 jsonarray 数组，把每一个对象转成 json 对象
+                    databaseName=job.get("database()").toString();  // 得到 每个对象中的属性值
+                }
             }
 
             //获取查询指定表所有字段的sql语句

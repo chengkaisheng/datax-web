@@ -13,6 +13,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -165,5 +166,27 @@ public class JobDatasourceController extends BaseController {
     @ApiOperation("获取一张表下的所有字段及注释信息")
     public R<List<ColumnMsg>> datasourceColumnInfos(@RequestParam Long id, @PathVariable String tableName) throws IOException {
         return success(datasourceQueryService.getColumnSchema(id, tableName));
+    }
+
+
+    @GetMapping("/project")
+    @ApiOperation("查询一个项目下的所有数据源")
+    @ApiImplicitParams(
+            {@ApiImplicitParam(paramType = "query", dataType = "String", name = "current", value = "当前页", defaultValue = "1", required = true),
+                    @ApiImplicitParam(paramType = "query", dataType = "String", name = "size", value = "一页大小", defaultValue = "10", required = true),
+                    @ApiImplicitParam(paramType = "query", dataType = "Boolean", name = "ifCount", value = "是否查询总数", defaultValue = "true"),
+                    @ApiImplicitParam(paramType = "query", dataType = "String", name = "ascs", value = "升序字段，多个用逗号分隔"),
+                    @ApiImplicitParam(paramType = "query", dataType = "String", name = "descs", value = "降序字段，多个用逗号分隔"),
+                    @ApiImplicitParam(paramType = "query", required = true, dataType = "Integer", name = "projectId", value = "项目id"),
+                    @ApiImplicitParam(paramType = "query", dataType = "String", name = "datasourceName", value = "数据源名称")
+            })
+    public R<IPage<JobDatasource>> selectByProjectId(@RequestParam(value = "projectId",required = true) Integer projectId, @RequestParam(name = "datasourceName", required = false) String datasourceName){
+        BaseForm form = new BaseForm();
+        QueryWrapper<JobDatasource> queryWrapper = new QueryWrapper<JobDatasource>().eq("project_id", projectId);
+        if(!StringUtils.isEmpty(datasourceName)){
+            queryWrapper.like("datasource_name", datasourceName);
+        }
+        QueryWrapper<JobDatasource> query = (QueryWrapper<JobDatasource>) form.pageQueryWrapperCustom(form.getParameters(), queryWrapper);
+        return success(jobJdbcDatasourceService.page(form.getPlusPagingQueryEntity(), query));
     }
 }

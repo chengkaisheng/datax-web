@@ -52,4 +52,9 @@ public class MySQLDatabaseMeta extends BaseDatabaseMeta implements DatabaseInter
     public String getSQLQueryTables(String... tableSchema) {
         return "select table_name from information_schema.tables where table_schema='"+tableSchema[0]+"'";
     }
+
+    @Override
+    public String getSQLQueryTablesNameComments(String schema) {
+        return "select table_name ,table_comment from information_schema.tables where table_schema='"+schema+"'";
+    }
 }

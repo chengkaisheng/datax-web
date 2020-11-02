@@ -90,11 +90,11 @@ public class JobLogFileCleanThread {
                     }
                 }
             }
-            logger.info(">>>>>>>>>>> datax-web, executor JobLogFileCleanThread thread destory.");
+            logger.info(">>>>>>>>>>> DataElit, executor JobLogFileCleanThread thread destory.");
 
         });
         localThread.setDaemon(true);
-        localThread.setName("datax-web, executor JobLogFileCleanThread");
+        localThread.setName("DataElit, executor JobLogFileCleanThread");
         localThread.start();
     }
 

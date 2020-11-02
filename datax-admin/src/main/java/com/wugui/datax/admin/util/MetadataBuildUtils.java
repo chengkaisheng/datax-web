@@ -1,6 +1,7 @@
 package com.wugui.datax.admin.util;
 
 import com.wugui.datax.admin.entity.JobDatasource;
+import com.wugui.datax.admin.tool.query.ClickHouseQueryTool;
 import org.apache.atlas.AtlasClientV2;
 import org.apache.atlas.AtlasServiceException;
 import org.apache.atlas.model.instance.AtlasEntity;
@@ -8,6 +9,7 @@ import org.apache.atlas.model.instance.EntityMutationResponse;
 import org.apache.commons.collections.CollectionUtils;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -211,9 +213,14 @@ public class MetadataBuildUtils {
         return null; // will not reach here
     }
 
-    public static List<Map.Entry<String,String>> setRdbmsInstance(AtlasClientV2 atlasClientV2){
+    public static Map<String,String> setRdbmsInstance(AtlasClientV2 atlasClientV2) {
         AtlasEntity atlasEntity = buildRdbmsInstance();
-        return createEntities(atlasClientV2, new AtlasEntity.AtlasEntitiesWithExtInfo(atlasEntity));
+        List<Map.Entry<String, String>> entities = createEntities(atlasClientV2, new AtlasEntity.AtlasEntitiesWithExtInfo(atlasEntity));
+        Map<String, String> guidMap = new HashMap<>();
+        for (int i = 0; i < entities.size(); i++) {
+            guidMap.put(jobDatasource.getDatabaseName(), entities.get(i).getValue());
+        }
+        return guidMap;
     }
 
 
@@ -230,33 +237,38 @@ public class MetadataBuildUtils {
         return atlasEntity;
     }
 
-    public static AtlasEntity buildRdbmsDb(Map<String, String> relationship){
+
+    public static AtlasEntity buildClickHouseDb(Map<String, String> relationship){
         String[] split = jobDatasource.getJdbcUrl().split("/");
         String host = split[split.length-1].split(":")[0];
         AtlasEntity atlasEntity = new AtlasEntity("clickHouse_db");
-        atlasEntity.setAttribute("qualifiedName", jobDatasource.getDatabaseName() + "." +host+ "@" + jobDatasource.getDatasource() );
+        atlasEntity.setAttribute("qualifiedName", jobDatasource.getDatabaseName() + "@" +host+ "@" + jobDatasource.getDatasource() );
         atlasEntity.setAttribute("databaseName", jobDatasource.getDatabaseName());
         atlasEntity.setAttribute("updateTime", sdf.format(new Date()));
         atlasEntity.setAttribute("instance", relationship);
         return atlasEntity;
     }
 
-   /* public static List<Map.Entry<String,String>> setClickHouseDb(AtlasClientV2 atlasClientV2, String guid, List<String> dbs){
+    public static Map<String,String> setClickHouseDb(AtlasClientV2 atlasClientV2, String guid) throws SQLException {
         Map<String, String> relation = buildRelation(guid);
-        List<Map.Entry<String,String>> list = new ArrayList<>();
-        for (String db : dbs) {
-            AtlasEntity atlasEntity = buildRdbmsDb(relation);
-            list.add(createEntities(atlasClientV2, new AtlasEntity.AtlasEntitiesWithExtInfo(atlasEntity)));
+        AtlasEntity atlasEntity = buildClickHouseDb(relation);
+        List<Map.Entry<String, String>> entities = createEntities(atlasClientV2, new AtlasEntity.AtlasEntitiesWithExtInfo(atlasEntity));
+        Map<String,String> guidMap = new HashMap<>();
+        for (int i = 0; i < entities.size(); i++) {
+            guidMap.put(jobDatasource.getDatabaseName(), entities.get(i).getValue());
         }
-        return null;
+        return guidMap;
+    }
 
-        Map<String, Map<String,String>> map = HttpClientHelper.getTablesInfo(coonId, database, tableNames);
+
+    public static Map<String, String> setClickHouseTables(AtlasClientV2 atlasClientV2, String guid, List<String> tableNames, String connId) throws IOException {
+        Map<String, Map<String, String>> tablesInfoMap = HttpClientHelper.getTablesInfo(connId, jobDatasource.getDatabaseName(), tableNames);
+        Map<String, String> relation = buildRelation(guid);
         List<AtlasEntity> atlasEntities = new ArrayList<>();
-        Map<String,String> relationship = buildRelation(guid);
-        for (Map.Entry<String, Map<String, String>> stringMapEntry : map.entrySet()) {
+        for (Map.Entry<String, Map<String, String>> stringMapEntry : tablesInfoMap.entrySet()) {
             String tableName = stringMapEntry.getKey();
             Map<String, String> properties = stringMapEntry.getValue();
-            atlasEntities.add(buildTableEntity(tableName, properties, relationship));
+            atlasEntities.add(buildClickHouseTables(relation, tableName, properties));
         }
         List<Map.Entry<String, String>> entities = createEntities(atlasClientV2, new AtlasEntity.AtlasEntitiesWithExtInfo(atlasEntities));
         Map<String,String> guidMap = new HashMap<>();
@@ -264,6 +276,52 @@ public class MetadataBuildUtils {
             guidMap.put(tableNames.get(i), entities.get(i).getValue());
         }
         return guidMap;
-    }*/
+    }
+
+    private static AtlasEntity buildClickHouseTables(Map<String, String> relation, String tableName, Map<String,String> properties) {
+        String[] split = jobDatasource.getJdbcUrl().split("/");
+        String host = split[split.length-1].split(":")[0];
+        AtlasEntity atlasEntity = new AtlasEntity("clickHouse_table");
+        properties.forEach(atlasEntity::setAttribute);
+        atlasEntity.setAttribute("qualifiedName",jobDatasource.getDatabaseName() +"."+tableName+ "@" +host+ "@" + jobDatasource.getDatasource() );
+        atlasEntity.setAttribute("db", relation);
+        atlasEntity.setAttribute("updateTime", sdf.format(new Date()));
+        return atlasEntity;
+    }
+
+    public static Map<String, String> setClickHouseColumns(AtlasClientV2 atlasClientV2, String guid, String tableName, List<String> columns, String connId) throws IOException {
+        if(CollectionUtils.isEmpty(columns)){
+            throw new RuntimeException("创建失败");
+        }
+        Map<String,Map<String,String>> map = HttpClientHelper.getColumnsInfo(connId, jobDatasource.getDatabaseName(), tableName, columns);
+        List<AtlasEntity> atlasEntities = new ArrayList<>();
+        Map<String,String> relationship = buildRelation(guid);
+        for (Map.Entry<String, Map<String, String>> stringMapEntry : map.entrySet()) {
+            String columnName = stringMapEntry.getKey();
+            Map<String, String> properties = stringMapEntry.getValue();
+            atlasEntities.add(buildClickHouseColumns(columnName,tableName, properties, relationship));
+        }
+        List<Map.Entry<String, String>> entities = createEntities(atlasClientV2, new AtlasEntity.AtlasEntitiesWithExtInfo(atlasEntities));
+        Map<String,String> guidMap = new HashMap<>();
+        for (int i = 0; i < columns.size(); i++) {
+            guidMap.put(columns.get(i), entities.get(i).getValue());
+        }
+        return guidMap;
+    }
+
+    private static AtlasEntity buildClickHouseColumns(String columnName,
+                                                      String tableName,
+                                                      Map<String, String> properties,
+                                                      Map<String, String> relationship) {
+        AtlasEntity atlasEntity = new AtlasEntity("clickHouse_column");
+        String[] split = jobDatasource.getJdbcUrl().split("/");
+        String host = split[split.length-1].split(":")[0];
+        atlasEntity.setAttribute("qualifiedName", jobDatasource.getDatabaseName() +"."+tableName +"."+columnName + "@" +host+ "@" + jobDatasource.getDatasource());
+        atlasEntity.setAttribute("table", relationship);
+        atlasEntity.setAttribute("updateTime", sdf.format(new Date()));
+        properties.forEach(atlasEntity::setAttribute);
+        return atlasEntity;
+    }
+
 
 }

@@ -247,7 +247,7 @@ public class AtlasController extends BaseController {
         return new ReturnT<>(contrastRecordService.list(queryWrapper));
     }
 
-    /*@PostMapping("/clickHouse/import")
+    @PostMapping("/clickHouse/import")
     public ReturnT clickHouseMetadata(@RequestParam Long datasourceId) throws AtlasException, IOException {
         JobDatasource jobDatasource = jobJdbcDatasourceService.getById(datasourceId);
         jobDatasource.setDatabaseName(getDatabaseName(jobDatasource.getJdbcUrl()));
@@ -255,7 +255,7 @@ public class AtlasController extends BaseController {
         AtlasClientV2 atlasClientV2 = new AtlasClientV2(MetadataBuildUtils.getServerUrl(), MetadataBuildUtils.getUserInput());
         String coonId = HttpClientHelper.initConnection(jobDatasource);
         //创建instance
-        MetadataBuildUtils.buildRdbmsInstance(atlasClientV2, jobDatasource);
+        MetadataBuildUtils.setRdbmsInstance(atlasClientV2);
 
 
         //创建database
@@ -273,11 +273,10 @@ public class AtlasController extends BaseController {
 
         return ReturnT.SUCCESS;
     }
-*/
 
-    /*private String getDatabaseName(String url){
+    private String getDatabaseName(String url){
         String[] split = url.split("/");
         String databaseName = split[split.length - 1];
         return databaseName;
-    }*/
+    }
 }

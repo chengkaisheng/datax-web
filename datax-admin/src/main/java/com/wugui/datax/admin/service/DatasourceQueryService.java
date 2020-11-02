@@ -55,7 +55,7 @@ public interface DatasourceQueryService {
      * @param id
      * @return
      */
-    Object getTableColumns(Long id, String tableName) throws IOException;
+    Object getTableColumns(Long id, String schema, String tableName) throws IOException;
 
 
     /**

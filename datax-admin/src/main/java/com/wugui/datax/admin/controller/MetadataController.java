@@ -101,8 +101,8 @@ public class MetadataController extends BaseController {
      */
     @GetMapping("/getTableColumns")
     @ApiOperation("根据数据源id和表名获取所有字段名称，类型，comment")
-    public R<Object> getTableColumns(Long datasourceId, String tableName) throws IOException {
-        return success(datasourceQueryService.getTableColumns(datasourceId, tableName));
+    public R<Object> getTableColumns(Long datasourceId,String schema, String tableName) throws IOException {
+        return success(datasourceQueryService.getTableColumns(datasourceId, schema, tableName));
     }
 
     /**

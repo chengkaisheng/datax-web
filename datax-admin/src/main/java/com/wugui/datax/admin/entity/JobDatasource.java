@@ -140,4 +140,8 @@ public class JobDatasource extends Model<JobDatasource> {
     protected Serializable pkVal() {
         return this.id;
     }
+
+
+    @ApiModelProperty("对应项目id")
+    private int projectId;
 }
