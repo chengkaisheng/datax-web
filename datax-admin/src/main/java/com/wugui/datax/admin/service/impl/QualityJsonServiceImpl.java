@@ -80,7 +80,7 @@ public class QualityJsonServiceImpl implements QualityJsonService {
             List<RuleIdInfoDto> ruleIdInfoDtoList = ruleInfoDtoList.get(i).getRuleId();
             for(int j = 0; j < ruleIdInfoDtoList.size(); j++){
                 String code = ruleIdInfoDtoList.get(j).getCode();
-                String codeTemp = code.split("\\$")[1];
+                String codeTemp = code.split("\\:")[1];
                 //根据Id查询规则表达式
                 PersonaliseRule personaliseRule = personaliseRuleMapper.selectByCode(codeTemp);
                 String regular = personaliseRule.getRegular();

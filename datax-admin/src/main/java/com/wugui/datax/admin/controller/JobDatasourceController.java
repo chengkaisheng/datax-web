@@ -189,4 +189,13 @@ public class JobDatasourceController extends BaseController {
         QueryWrapper<JobDatasource> query = (QueryWrapper<JobDatasource>) form.pageQueryWrapperCustom(form.getParameters(), queryWrapper);
         return success(jobJdbcDatasourceService.page(form.getPlusPagingQueryEntity(), query));
     }
+
+    @GetMapping("/calculateDataSource")
+    @ApiOperation("获取一个项目的计算数据源")
+    public R<List<JobDatasource>> getCalculateDataSource(@RequestParam(value = "projectId",required = true) Integer projectId,@RequestParam(name = "datasourceName", required = false) String datasourceName){
+        QueryWrapper<JobDatasource> queryWrapper = new QueryWrapper<JobDatasource>().eq("project_id",projectId)
+                .like(StringUtils.isNotEmpty(datasourceName),"datasource_name",datasourceName)
+                .in("datasource","hive","impala","spark","flink");
+        return success(jobJdbcDatasourceService.list(queryWrapper));
+    }
 }

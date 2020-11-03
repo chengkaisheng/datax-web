@@ -44,7 +44,7 @@
     </select>
     <select id="selectUniverToPerson" resultType="com.wugui.datax.admin.entity.UniversalRule">
         select
-        concat(a.code,'$',b.code) as code,
+        concat(a.code,':',b.code) as code,
         concat(case a.type when 0 then '完整性'
         when 1 then '准确性'
         when 2 then '规范性'
