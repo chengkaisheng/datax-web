@@ -25,6 +25,7 @@ public class HttpClientHelper {
 
     private static Log logger = LogFactory.getLog(HttpClientHelper.class);
 
+
     public static String sendPost(String urlParam) throws HttpException, IOException {
         // 创建httpClient实例对象
         HttpClient httpClient = HttpClientUtil.getInstance();
@@ -151,24 +152,10 @@ public class HttpClientHelper {
     public static Map<String, String> parse(String response){
         Map<String, String> mapInfo = new HashMap<>();
         Map<String, JSONObject> map = JSONObject.parseObject(response, HashMap.class);
-        /*System.out.println(map);
-        if(map.get("data") == null){
-            System.out.println("json解析异常：data=null");
-        }*/
         JSONObject jsonObject = map.get("data");
         JSONObject objectInfo = jsonObject.getJSONObject("objectInfo");
         JSONObject object1 = objectInfo.getJSONObject("object");
         List<Property> list = object1.getJSONArray("properties").toJavaList(Property.class);
-        /*JSONArray properties1 = (JSONArray) properties2;
-        System.out.println(jsonObject.toString());
-        String data = jsonObject.toString();
-        Map<String, JSONObject> dataMap = JSONObject.parseObject(data, HashMap.class);
-        String result = dataMap.get("objectInfo").toString();
-        Map<String, JSONObject> resultMap = JSONObject.parseObject(result, HashMap.class);
-        String object = resultMap.get("object").toString();
-        Map<String, JSONArray> objectMap = JSONObject.parseObject(object, HashMap.class);
-        JSONArray properties = objectMap.get("properties");
-        List<Property> list = properties.toJavaList(Property.class);*/
         for (Property property : list) {
             mapInfo.put(property.getId(), property.getValue());
         }
@@ -239,6 +226,7 @@ public class HttpClientHelper {
         return map;
     }
 
-
-
+    public static Map<String, Map<String, String>> getIndexesInfo(String connId, String databaseName, String tableName, List<String> indexes) {
+        return null;
+    }
 }

@@ -324,4 +324,38 @@ public class MetadataBuildUtils {
     }
 
 
+    public static Map<String, String> setClickHouseIndexes(AtlasClientV2 atlasClientV2, String guid, String tableName, List<String> indexes, String connId) throws IOException {
+        if(CollectionUtils.isEmpty(indexes)){
+            throw new RuntimeException("创建失败");
+        }
+        Map<String,Map<String,String>> map = HttpClientHelper.getIndexesInfo(connId, jobDatasource.getDatabaseName(), tableName, indexes);
+        List<AtlasEntity> atlasEntities = new ArrayList<>();
+        Map<String,String> relationship = buildRelation(guid);
+        for (Map.Entry<String, Map<String, String>> stringMapEntry : map.entrySet()) {
+            String columnName = stringMapEntry.getKey();
+            Map<String, String> properties = stringMapEntry.getValue();
+            atlasEntities.add(buildClickHouseColumns(columnName,tableName, properties, relationship));
+        }
+        List<Map.Entry<String, String>> entities = createEntities(atlasClientV2, new AtlasEntity.AtlasEntitiesWithExtInfo(atlasEntities));
+        Map<String,String> guidMap = new HashMap<>();
+        for (int i = 0; i < indexes.size(); i++) {
+            guidMap.put(indexes.get(i), entities.get(i).getValue());
+        }
+        return guidMap;
+    }
+
+    private static AtlasEntity buildClickHouseIndexes(String indexName,
+                                                      String tableName,
+                                                      Map<String, String> properties,
+                                                      Map<String, String> relationship) {
+        AtlasEntity atlasEntity = new AtlasEntity("clickHouse_column");
+        String[] split = jobDatasource.getJdbcUrl().split("/");
+        String host = split[split.length-1].split(":")[0];
+        atlasEntity.setAttribute("qualifiedName", jobDatasource.getDatabaseName() +"."+tableName +"."+ indexName + "@" +host+ "@" + jobDatasource.getDatasource());
+        atlasEntity.setAttribute("table", relationship);
+        atlasEntity.setAttribute("updateTime", sdf.format(new Date()));
+        properties.forEach(atlasEntity::setAttribute);
+        return atlasEntity;
+    }
+
 }
