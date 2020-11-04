@@ -71,7 +71,6 @@ public class UniversalRuleServiceImpl  implements UniversalRuleService {
     public Map<String, Object> getUniverToPerson() {
 
         Map<String,Object> map = new HashMap<>();
-        //先根据规则大类找到对应的通用规则
 
         List<UniversalRule> list = universalRuleMapper.selectUniverToPerson();
         map.put("data",list);

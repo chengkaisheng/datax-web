@@ -479,6 +479,7 @@ public class JobServiceImpl implements JobService {
             String querySql = jsonObject2.getJSONObject("reader").getJSONObject("parameter").
                     getJSONArray("connection").getJSONObject(0).getJSONArray("querySql").get(0).toString();
             logger.info("querySql={}",querySql);
+
         }
         return null;
     }
