@@ -6,6 +6,7 @@ import com.wugui.datax.admin.entity.Search;
 import com.wugui.datax.admin.service.DatasourceQueryService;
 import com.wugui.datax.admin.service.ISearchService;
 import com.wugui.datax.admin.service.JobDatasourceService;
+import com.wugui.datax.admin.util.JdbcConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -54,7 +55,7 @@ public class SearchController {
     @RequestMapping("/list")
     public ReturnT<List<Search>> listSearch(@RequestParam(value = "keyword",defaultValue = "")String keyword
             ,@RequestParam(value = "pageNum",defaultValue = "1")Integer pageNum
-            ,@RequestParam(value = "pageSize",defaultValue = "10")Integer pageSize) throws IOException {
+            ,@RequestParam(value = "pageSize",defaultValue = "10")Integer pageSize) throws Exception {
         pageNum=(pageNum-1)*pageSize;
         List<Search> searches=searchService.listSearchs(keyword, pageNum, pageSize);
         for (Search search:searches) {
@@ -73,7 +74,7 @@ public class SearchController {
      * @return 探查数据详细信息
      */
     @RequestMapping("/getSearchById")
-    public ReturnT<Search> getSearchById(Long id){
+    public ReturnT<Search> getSearchById(Long id) throws Exception {
         Search search=searchService.getSearchById(id);
         return new ReturnT<>(search);
     }

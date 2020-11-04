@@ -127,7 +127,7 @@ public class MetadataController extends BaseController {
      */
     @GetMapping("/getRows")
     @ApiOperation("根据数据源id和表名获取记录数")
-    public R<Long> getRowsByTableName(Long datasourceId, String tableName) throws SQLException {
+    public R<Long> getRowsByTableName(Long datasourceId, String tableName) throws Exception {
         return success(datasourceQueryService.getRows(datasourceId,tableName));
     }
 

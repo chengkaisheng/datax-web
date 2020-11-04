@@ -53,13 +53,14 @@ public class SearchServiceImpl implements ISearchService {
     }
 
     //根据探查数据id获取探查信息
-    public Search getSearchById(Long id){
+    public Search getSearchById(Long id) throws Exception {
         Search search=searchMapper.getSearchById(id);
         Long datasourceId=search.getJdbcDatasourceId();
         String tableName=search.getTableName();
         datasourceQueryService.getRows(datasourceId,tableName);
         search.setRows(datasourceQueryService.getRows(datasourceId,tableName));
         search.setSize(datasourceQueryService.getTableSize(datasourceId,tableName));
+        search.setCols(datasourceQueryService.getColumns(datasourceId,tableName).size());
         return search;
     }
 

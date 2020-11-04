@@ -145,10 +145,15 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
     }
 
     //获取表的记录数
-    public Long getRows(Long datasourceId,String tableName){
+    public Long getRows(Long datasourceId,String tableName) throws Exception {
         JobDatasource jdbcDatasource = jobDatasourceService.getById(datasourceId);
         if (ObjectUtil.isNull(jdbcDatasource)) {
             return 0L;
+        }
+        if (JdbcConstants.MONGODB.equals(jdbcDatasource.getDatasource())) {
+            return new MongoDBQueryTool(jdbcDatasource).getRows(tableName);
+        }else if(JdbcConstants.DB2.equals(jdbcDatasource.getDatasource())){
+            return new DB2QueryTool(jdbcDatasource).getRows(tableName);
         }
         BaseQueryTool queryTool = QueryToolFactory.getByDbType(jdbcDatasource);
         return queryTool.getRows(tableName);
@@ -161,19 +166,29 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
         if (ObjectUtil.isNull(jdbcDatasource)) {
             return Maps.newHashMap();
         }
+        if (JdbcConstants.MONGODB.equals(jdbcDatasource.getDatasource())) {
+            return new MongoDBQueryTool(jdbcDatasource).listAll(columns,tableName);
+        }else if(JdbcConstants.DB2.equals(jdbcDatasource.getDatasource())){
+            return new DB2QueryTool(jdbcDatasource).listAll(columns,tableName,pageNumber,pageSize);
+        }
         BaseQueryTool queryTool = QueryToolFactory.getByDbType(jdbcDatasource);
         Map<String,Object> maps = queryTool.listAll(columns,tableName,pageNumber,pageSize);
         return maps;
     }
 
     //获取表所有字段的统计值
-    public List<ColumnMsg> getColumnSchema(Long datasourceId, String tableName){
+    public List<ColumnMsg> getColumnSchema(Long datasourceId, String tableName) throws IOException {
+        String tableSchema="";
         JobDatasource jdbcDatasource = jobDatasourceService.getById(datasourceId);
         if (ObjectUtil.isNull(jdbcDatasource)) {
             return Lists.newArrayList();
         }
+        if (JdbcConstants.MONGODB.equals(jdbcDatasource.getDatasource())) {
+            return new MongoDBQueryTool(jdbcDatasource).getColumnSchema(getColumns(datasourceId, tableName),tableName);
+        }else if (JdbcConstants.DB2.equals(jdbcDatasource.getDatasource())) {
+            return new DB2QueryTool(jdbcDatasource).getColumnSchema(tableName,tableSchema);
+        }
         BaseQueryTool queryTool = QueryToolFactory.getByDbType(jdbcDatasource);
-        String tableSchema="";
         if(queryTool.getClass()==MySQLQueryTool.class){
             tableSchema=queryTool.getDBName();
         }
@@ -184,10 +199,14 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
     }
 
     //根据数据源id和表名获取表数据大小
-    public String getTableSize(Long datasourceId, String tableName){
+    public String getTableSize(Long datasourceId, String tableName) throws Exception {
         JobDatasource jdbcDatasource = jobDatasourceService.getById(datasourceId);
         if (ObjectUtil.isNull(jdbcDatasource)) {
             return null;
+        }if (JdbcConstants.MONGODB.equals(jdbcDatasource.getDatasource())) {
+            return new MongoDBQueryTool(jdbcDatasource).getTableSize(tableName);
+        }else if(JdbcConstants.DB2.equals(jdbcDatasource.getDatasource())){
+            return new DB2QueryTool(jdbcDatasource).getTableSize(tableName,"DB2INST1");
         }
         BaseQueryTool queryTool = QueryToolFactory.getByDbType(jdbcDatasource);
         String tableSchema="";
