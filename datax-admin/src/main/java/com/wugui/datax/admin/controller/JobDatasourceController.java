@@ -3,12 +3,14 @@ package com.wugui.datax.admin.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.api.R;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wugui.datax.admin.core.util.LocalCacheUtil;
 import com.wugui.datax.admin.entity.ColumnMsg;
 import com.wugui.datax.admin.entity.JobDatasource;
 import com.wugui.datax.admin.service.DatasourceQueryService;
 import com.wugui.datax.admin.service.JobDatasourceService;
 import com.wugui.datax.admin.tool.database.TableInfo;
+import com.wugui.datax.admin.util.AESUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -19,9 +21,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.sql.SQLException;
+import java.util.*;
 
 /**
  * jdbc数据源配置控制器层
@@ -154,7 +155,7 @@ public class JobDatasourceController extends BaseController {
 
     @GetMapping("/tableInfos")
     @ApiOperation("获取一个数据源下的所有表及表的注释信息")
-    public R<List<TableInfo>> datasourceTableInfo(@RequestParam Long id, @RequestParam String schema) throws IOException {
+    public R<List<TableInfo>> datasourceTableInfo(@RequestParam Long id, @RequestParam String schema) throws IOException, SQLException {
         List<TableInfo> tableInfos = datasourceQueryService.getTableInfos(id, schema);
         Set<TableInfo> tableInfoSet = new HashSet<>(tableInfos);
         tableInfos.clear();
@@ -187,7 +188,16 @@ public class JobDatasourceController extends BaseController {
             queryWrapper.like("datasource_name", datasourceName);
         }
         QueryWrapper<JobDatasource> query = (QueryWrapper<JobDatasource>) form.pageQueryWrapperCustom(form.getParameters(), queryWrapper);
-        return success(jobJdbcDatasourceService.page(form.getPlusPagingQueryEntity(), query));
+        Page<JobDatasource> data = jobJdbcDatasourceService.page(form.getPlusPagingQueryEntity(), query);
+        List<JobDatasource> records = data.getRecords();
+        //为前端测试用
+        records.forEach((jobDatasource -> {
+            Map<String,String> secretMap = new HashMap<>();
+            secretMap.put("u", AESUtil.decrypt(jobDatasource.getJdbcUsername()));
+            secretMap.put("p", AESUtil.decrypt(jobDatasource.getJdbcPassword()));
+            jobDatasource.setSecretMap(secretMap);
+        }));
+        return success(data);
     }
 
     @GetMapping("/calculateDataSource")

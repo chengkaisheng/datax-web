@@ -1,10 +1,10 @@
-package com.wugui.datax.admin.util.metadata.query;
+package com.wugui.datax.admin.util.metadata.tool;
 
 import com.wugui.datax.admin.entity.JobDatasource;
-import com.wugui.datax.admin.tool.query.*;
+import com.wugui.datax.admin.tool.query.BaseQueryTool;
+import com.wugui.datax.admin.tool.query.OracleQueryTool;
 import com.wugui.datax.admin.util.JdbcConstants;
 import com.wugui.datax.admin.util.RdbmsException;
-import org.apache.atlas.AtlasException;
 
 import java.sql.SQLException;
 
@@ -16,50 +16,50 @@ import java.sql.SQLException;
  * @Version 1.0
  * @since 2019/7/18 9:36
  */
-public class MetadataQueryFactory {
+public class MetadataAssembleHelperFactory {
 
-    public static BaseMetaDataQuery getMetadataQuery(JobDatasource jobDatasource) {
+    public static BaseMetadataAssembleHelper getCloudBeaverHelper(JobDatasource jobDatasource) {
         //获取dbType
         String datasource = jobDatasource.getDatasource();
         if (JdbcConstants.MYSQL.equals(datasource)) {
-            return getMySQLMetadataQueryInstance(jobDatasource);
+            return getMySQLCloudBeaverHelper(jobDatasource);
         } else if (JdbcConstants.ORACLE.equals(datasource)) {
             return getOracleMetadataQueryInstance(jobDatasource);
         } else if (JdbcConstants.POSTGRESQL.equals(datasource) || JdbcConstants.GREENPLUM.equals(datasource)) {
-            return getPostgresqlMetadataQueryInstance(jobDatasource);
+            return getPostgresqlCloudBeaverHelper(jobDatasource);
         } /*else if (JdbcConstants.SQL_SERVER.equals(datasource)) {
             return getSqlserverMetadataQueryInstance(jobDatasource);
         }*//*else if (JdbcConstants.HIVE.equals(datasource)) {
             return getHiveMetadataQueryInstance(jobDatasource);
         } */else if (JdbcConstants.CLICKHOUSE.equals(datasource)) {
-            return getClickHouseMetadataQueryInstance(jobDatasource);
+            return getClickHouseCloudBeaverHelper(jobDatasource);
         }/*else if (JdbcConstants.HBASE20XSQL.equals(datasource)) {
             return getHbase20XsqlMetadataQueryInstance(jobDatasource);
         }*/
         throw new UnsupportedOperationException("找不到该类型: ".concat(datasource));
     }
 
-    private static BaseMetaDataQuery getMySQLMetadataQueryInstance(JobDatasource jdbcDatasource) {
+    private static BaseMetadataAssembleHelper getMySQLCloudBeaverHelper(JobDatasource jdbcDatasource) {
         try {
-            return new MysqlMetadataQuery(jdbcDatasource);
+            return new MysqlMetadataAssembleHelper(jdbcDatasource);
         } catch (Exception e) {
             throw RdbmsException.asConnException(JdbcConstants.MYSQL,
                     e,jdbcDatasource.getJdbcUsername(),jdbcDatasource.getDatasourceName());
         }
     }
 
-    private static BaseMetaDataQuery getOracleMetadataQueryInstance(JobDatasource jdbcDatasource) {
+    private static BaseMetadataAssembleHelper getOracleMetadataQueryInstance(JobDatasource jdbcDatasource) {
         try {
-            return new OracleMetadataQuery(jdbcDatasource);
+            return new OracleMetadataAssembleHelper(jdbcDatasource);
         } catch (Exception e) {
             throw RdbmsException.asConnException(JdbcConstants.ORACLE,
                     e,jdbcDatasource.getJdbcUsername(),jdbcDatasource.getDatasourceName());
         }
     }
 
-    private static BaseMetaDataQuery getPostgresqlMetadataQueryInstance(JobDatasource jdbcDatasource) {
+    private static BaseMetadataAssembleHelper getPostgresqlCloudBeaverHelper(JobDatasource jdbcDatasource) {
         try {
-            return new PostgresqlMetadataQuery(jdbcDatasource);
+            return new PostgresqlMetadataAssembleHelper(jdbcDatasource);
         } catch (Exception e) {
             throw RdbmsException.asConnException(JdbcConstants.POSTGRESQL,
                     e,jdbcDatasource.getJdbcUsername(),jdbcDatasource.getDatasourceName());
@@ -83,9 +83,9 @@ public class MetadataQueryFactory {
                     e,jdbcDatasource.getJdbcUsername(),jdbcDatasource.getDatasourceName());
         }
     }*/
-    private static BaseMetaDataQuery getClickHouseMetadataQueryInstance(JobDatasource jdbcDatasource) {
+    private static BaseMetadataAssembleHelper getClickHouseCloudBeaverHelper(JobDatasource jdbcDatasource) {
         try {
-            return new ClickHouseMetadataQuery(jdbcDatasource);
+            return new ClickHouseMetadataAssembleHelper(jdbcDatasource);
         } catch (Exception e) {
             throw RdbmsException.asConnException(JdbcConstants.CLICKHOUSE,
                     e, jdbcDatasource.getJdbcUsername(), jdbcDatasource.getDatasourceName());

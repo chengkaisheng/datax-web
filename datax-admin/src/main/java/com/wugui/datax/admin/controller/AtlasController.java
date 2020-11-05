@@ -10,7 +10,9 @@ import com.wugui.datax.admin.entity.JobDatasource;
 import com.wugui.datax.admin.service.ContrastRecordService;
 import com.wugui.datax.admin.service.DatasourceQueryService;
 import com.wugui.datax.admin.service.JobDatasourceService;
+import com.wugui.datax.admin.tool.query.BaseQueryTool;
 import com.wugui.datax.admin.tool.query.MySQLQueryTool;
+import com.wugui.datax.admin.tool.query.QueryToolFactory;
 import com.wugui.datax.admin.util.FastJsonDiff;
 import com.wugui.datax.admin.util.HttpClientHelper;
 import com.wugui.datax.admin.util.MetadataBuildUtils;
@@ -280,5 +282,13 @@ public class AtlasController extends BaseController {
         String[] split = url.split("/");
         String databaseName = split[split.length - 1];
         return databaseName;
+    }
+
+    public ReturnT importMetadata2(Long datasourceId){
+        JobDatasource jobDatasource = jobJdbcDatasourceService.getById(datasourceId);
+        BaseQueryTool queryTool = QueryToolFactory.getByDbType(jobDatasource);
+        String dbName = queryTool.getDBName();
+        jobDatasource.setDatabaseName(dbName);
+        return null;
     }
 }

@@ -86,4 +86,20 @@ public interface DatabaseInterface {
     String getMostCommon(String name,String tableName);
 
     String getMaxMin(String fieldName, String tableName);
+
+    String getSchemaMetadata(String schema);
+
+    String getTableMetadata(String schema, String tableName);
+
+    String getTablesMetadata(String schema);
+
+    String getColumnMetadata(String schema, String tableName, String column);
+
+    String getColumnsMetadata(String schema, String tableName);
+
+    String getIndexesMetadata(String schema,String tableName);
+
+    String getIndexMetadata(String schema,String tableName, String index);
+
+    String getIndexName(String schema, String tableName);
 }

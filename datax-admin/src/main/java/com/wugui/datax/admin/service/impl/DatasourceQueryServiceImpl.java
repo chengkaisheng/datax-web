@@ -12,6 +12,7 @@ import com.wugui.datax.admin.service.JobDatasourceService;
 import com.wugui.datax.admin.tool.database.TableInfo;
 import com.wugui.datax.admin.tool.query.*;
 import com.wugui.datax.admin.util.JdbcConstants;
+import io.swagger.models.auth.In;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import com.wugui.datax.admin.entity.ColumnMsg;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -217,7 +219,7 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
     }
 
     @Override
-    public List<TableInfo> getTableInfos(Long id, String schema) throws IOException {
+    public List<TableInfo> getTableInfos(Long id, String schema) throws IOException, SQLException {
         //获取数据源对象
         JobDatasource datasource = jobDatasourceService.getById(id);
         List<String> tableNames = new ArrayList<>();
@@ -236,7 +238,18 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
             tableNames.forEach((tableName)->{
                 tableInfos.add(new TableInfo(tableName));
             });
-        } else {
+        }
+        else if (JdbcConstants.HIVE.equals(datasource.getDatasource())) {
+            if(StringUtils.isEmpty(schema)) {
+                tableNames = new HiveQueryTool(datasource).getTableNames();
+            }
+            else {
+                tableNames = new HiveQueryTool(datasource).getTableNames(schema);
+            }
+            tableNames.forEach((tableName)->{
+                tableInfos.add(new TableInfo(tableName));
+            });
+        }else {
             BaseQueryTool qTool = QueryToolFactory.getByDbType(datasource);
             if(StringUtils.isBlank(schema)){
                 tableInfoMap = qTool.getTablesInfo();
@@ -249,14 +262,17 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
                     if("table_name".equals(stringObjectEntry.getKey())){
                         tableInfoTemp.setName((String) stringObjectEntry.getValue());
                     }else if("table_comment".equals(stringObjectEntry.getKey())){
-                        tableInfoTemp.setComment((String) stringObjectEntry.getValue());
+                        tableInfoTemp.setComment(stringObjectEntry.getValue()==null? "": (String) stringObjectEntry.getValue());
+                    }else if("data_length".equals(stringObjectEntry.getKey())){
+                        int i = Integer.parseInt(String.valueOf(stringObjectEntry.getValue()));
+                        tableInfoTemp.setDataLength(i/1024 + "K");
                     }
-                    System.out.println(stringObjectEntry.getKey() + ":" + stringObjectEntry.getValue());
                 }
                 tableInfos.add(tableInfoTemp);
             }
         }
         return tableInfos;
     }
+
 
 }

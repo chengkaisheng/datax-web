@@ -9,7 +9,6 @@ import com.google.common.collect.Lists;
 import com.wugui.datatx.core.util.Constants;
 import com.wugui.datax.admin.core.util.LocalCacheUtil;
 import com.wugui.datax.admin.entity.JobDatasource;
-import com.wugui.datax.admin.entity.Search;
 import com.wugui.datax.admin.tool.database.ColumnInfo;
 import com.wugui.datax.admin.tool.database.DasColumn;
 import com.wugui.datax.admin.tool.database.TableInfo;
@@ -28,16 +27,14 @@ import com.wugui.datax.admin.entity.Chart;
 import com.wugui.datax.admin.entity.ColumnMsg;
 import javax.sql.DataSource;
 import java.sql.*;
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
-import java.util.*;
 
 import static com.wugui.datax.admin.datashare.tools.ResultToJsonUtil.resultSetToJSON;
 import com.wugui.datax.admin.datashare.tools.ConnectUtil;
-import com.wugui.datax.admin.datashare.tools.ResultToJsonUtil;
+
 /**
  * 抽象查询工具
  *
@@ -52,16 +49,16 @@ public abstract class BaseQueryTool implements QueryToolInterface {
     /**
      * 用于获取查询语句
      */
-    private DatabaseInterface sqlBuilder;
+    protected DatabaseInterface sqlBuilder;
 
-    private DataSource datasource;
+    protected DataSource datasource;
 
-    private Connection connection;
+    protected Connection connection;
     /**
      * 当前数据库名
      */
-    private String currentSchema;
-    private String currentDatabase;
+    protected String currentSchema;
+    protected String currentDatabase;
 
     /**
      * 构造方法
@@ -184,6 +181,7 @@ public abstract class BaseQueryTool implements QueryToolInterface {
                 Map<String,Object> map = new HashMap<>();
                 map.put("table_name", resultSet.getString(1));
                 map.put("table_comment", resultSet.getString(2));
+                map.put("data_length", resultSet.getString(3));
                 res.add(map);
             }
         } catch (SQLException e) {
@@ -975,5 +973,65 @@ public abstract class BaseQueryTool implements QueryToolInterface {
             JdbcUtils.close(stmt);
         }
         return tableSize+"KB";
+    }
+
+    @Override
+    public Map<String, Object> getSchemaMetadata(String schema) {
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> getTableMetadata(String schema, String tableName) {
+        return null;
+    }
+
+    @Override
+    public List<Map<String, Object>> getTablesMetadata(String schema) {
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> getColumnMetadata(String schema, String tableName, String columnName) {
+        return null;
+    }
+
+    @Override
+    public List<Map<String, Object>> getColumnsMetadata(String schema, String tableName) {
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> getIndexMetadata(String schema, String tableName, String indexName) {
+        return null;
+    }
+
+    @Override
+    public List<Map<String, Object>> getIndexesMetadata(String schema, String tableName) {
+        return null;
+    }
+
+    @Override
+    public List<String> getIndexName(String schema, String tableName) {
+        String indexName;
+        Statement stmt = null;
+        ResultSet rs = null;
+        List<String> indexNames = new ArrayList<>();
+        try {
+            stmt = connection.createStatement();
+            //获取sql
+            String sql = sqlBuilder.getIndexName(schema,tableName);
+            rs = stmt.executeQuery(sql);
+            while (rs.next()) {
+                indexName = rs.getString(1);
+                indexNames.add(indexName);
+            }
+        } catch (SQLException e) {
+            logger.error("[getTableNames Exception] --> "
+                    + "the exception message is:" + e.getMessage());
+        } finally {
+            JdbcUtils.close(rs);
+            JdbcUtils.close(stmt);
+        }
+        return indexNames;
     }
 }

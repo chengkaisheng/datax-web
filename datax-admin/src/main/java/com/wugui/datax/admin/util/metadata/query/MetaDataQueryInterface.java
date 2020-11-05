@@ -3,6 +3,7 @@ package com.wugui.datax.admin.util.metadata.query;
 import org.apache.atlas.model.instance.AtlasEntity;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -14,31 +15,37 @@ public interface MetaDataQueryInterface {
 
     Map<String,String> setInstanceMetadata();
 
-    Map<String,String> setDbMetadata() throws IOException;
+    Map<String,String> setDbMetadata(String guid) throws IOException, SQLException;
 
     Map<String,String> setTableMetadata(String database,
                                         List<String> tableNames,
-                                        String guid) throws IOException;
+                                        String guid) throws IOException, SQLException;
 
     Map<String,String> setColumnMetadata(String database,
                                          String tableName,
                                          List<String> columns,
                                          String guid) throws IOException;
 
-    Map<String,String> setIndexMetadata();
+    Map<String,String> setIndexMetadata(String database,
+                                        String tableName,
+                                        List<String> indexes,
+                                        String guid) throws IOException;
 
     AtlasEntity buildInstanceEntity();
 
-    AtlasEntity buildDbEntity(Map<String, String> properties);
+    AtlasEntity buildDbEntity(Map<String, Object> properties, Map<String, String> relationship);
 
     AtlasEntity buildTableEntity(String tableName,
-                                 Map<String, String> properties,
+                                 Map<String, Object> properties,
                                  Map<String, String> relationship);
 
     AtlasEntity buildColumnEntity(String columnName,
                                   String tableName,
-                                  Map<String, String> properties,
+                                  Map<String, Object> properties,
                                   Map<String, String> relationship);
 
-    AtlasEntity buildIndexEntity();
+    AtlasEntity buildIndexEntity(String indexName,
+                                 String tableName,
+                                 Map<String, Object> properties,
+                                 Map<String, String> relationship);
 }

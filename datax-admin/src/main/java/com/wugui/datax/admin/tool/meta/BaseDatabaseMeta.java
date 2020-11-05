@@ -17,7 +17,7 @@ public abstract class BaseDatabaseMeta implements DatabaseInterface {
 
     @Override
     public String getSQLQueryTablesNameComments() {
-        return "select table_name,table_comment from information_schema.tables where table_schema=?";
+        return "select table_name,table_comment,data_length from information_schema.tables where table_schema=?";
     }
 
     @Override
@@ -128,5 +128,45 @@ public abstract class BaseDatabaseMeta implements DatabaseInterface {
     @Override
     public String getMaxMin(String fieldName, String tableName) {
         return "select max("+fieldName+"),min("+fieldName+") from "+tableName;
+    }
+
+    @Override
+    public String getSchemaMetadata(String schema) {
+        return null;
+    }
+
+    @Override
+    public String getTableMetadata(String schema, String tableName) {
+        return null;
+    }
+
+    @Override
+    public String getTablesMetadata(String schema) {
+        return null;
+    }
+
+    @Override
+    public String getColumnMetadata(String schema, String tableName, String column) {
+        return null;
+    }
+
+    @Override
+    public String getColumnsMetadata(String schema, String tableName) {
+        return null;
+    }
+
+    @Override
+    public String getIndexesMetadata(String schema, String tableName) {
+        return null;
+    }
+
+    @Override
+    public String getIndexMetadata(String schema, String tableName, String index) {
+        return null;
+    }
+
+    @Override
+    public String getIndexName(String schema, String tableName) {
+        return null;
     }
 }

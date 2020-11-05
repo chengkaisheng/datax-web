@@ -55,6 +55,53 @@ public class MySQLDatabaseMeta extends BaseDatabaseMeta implements DatabaseInter
 
     @Override
     public String getSQLQueryTablesNameComments(String schema) {
-        return "select table_name ,table_comment from information_schema.tables where table_schema='"+schema+"'";
+        return "select table_name ,table_comment,data_length from information_schema.tables where table_schema='"+schema+"'";
+    }
+
+    @Override
+    public String getSchemaMetadata(String schema) {
+        return "select * from information_schema.schemata where schema_name='" + schema + "'";
+    }
+
+    //查询某一张表的元数据
+    @Override
+    public String getTableMetadata(String schema, String tableName) {
+        return "select * from information_schema.tables where schema_name='"+schema+"'and table_name='"+tableName+"'";
+    }
+
+    //查询一个库下的所有表的元数据
+    @Override
+    public String getTablesMetadata(String schema) {
+        return "select * from information_schema.tables where schema_name='"+schema+"'";
+    }
+
+
+    @Override
+    public String getColumnMetadata(String schema, String tableName, String column) {
+        return "select * from information_schema.columns where schema='"+schema+"' and tableName='"+tableName+"' and column_name='" + column + "'";
+    }
+
+    @Override
+    public String getColumnsMetadata(String schema, String tableName) {
+        return "select * from information_schema.columns where schema='"+schema+"' and tableName='"+tableName+"'";
+    }
+
+    @Override
+    public String getIndexesMetadata(String schema, String tableName) {
+        return "SELECT a.index_name , a.stat_name , a.stat_value , a.sample_size , stat_description " +
+                "FROM mysql.`innodb_index_stats` a " +
+                "WHERE a.`database_name` = '"+schema+"' and table_name = '"+tableName+"';";
+    }
+
+    @Override
+    public String getIndexMetadata(String schema, String tableName, String index) {
+        return null;
+    }
+
+    @Override
+    public String getIndexName(String schema, String tableName) {
+        return "SELECT a.stat_name \n" +
+                "FROM mysql.`innodb_index_stats` a \n" +
+                "WHERE a.`database_name` = '"+schema+"' AND a.table_name = '"+tableName+"';";
     }
 }

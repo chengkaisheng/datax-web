@@ -28,15 +28,23 @@ public class TableInfo {
      */
     private List<ColumnInfo> columns;
 
+    private String dataLength;
+
     public TableInfo() {
+        this.comment = "";
+        this.dataLength = "";
+        this.name="";
     }
 
     public TableInfo(String name, String comment) {
         this.name = name;
         this.comment = comment;
+        this.dataLength = "";
     }
 
     public TableInfo(String name) {
+        this.dataLength = "";
+        this.comment = "";
         this.name = name;
     }
 
