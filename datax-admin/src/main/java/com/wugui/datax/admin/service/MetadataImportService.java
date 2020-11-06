@@ -1,5 +1,7 @@
 package com.wugui.datax.admin.service;
 
+import org.apache.atlas.AtlasException;
+
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -9,5 +11,5 @@ import java.sql.SQLException;
  */
 public interface MetadataImportService {
 
-    public void importMetadata(Long datasourceId) throws IOException, SQLException;
+    public void importMetadata(Long datasourceId) throws IOException, SQLException, AtlasException;
 }

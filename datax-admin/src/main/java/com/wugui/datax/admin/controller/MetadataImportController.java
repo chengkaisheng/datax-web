@@ -3,6 +3,7 @@ package com.wugui.datax.admin.controller;
 import com.baomidou.mybatisplus.extension.api.R;
 import com.wugui.datatx.core.biz.model.ReturnT;
 import com.wugui.datax.admin.service.MetadataImportService;
+import org.apache.atlas.AtlasException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,8 +24,8 @@ public class MetadataImportController {
     MetadataImportService metadataImportService;
 
     @PostMapping("import")
-    public ReturnT metadataImport(Long datasourceId) throws IOException, SQLException {
+    public ReturnT metadataImport(Long datasourceId) throws IOException, SQLException, AtlasException {
         metadataImportService.importMetadata(datasourceId);
-        return ReturnT.SUCCESS;
+        return new ReturnT(200, "导入元数据成功");
     }
 }

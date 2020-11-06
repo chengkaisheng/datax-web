@@ -87,7 +87,7 @@ public class MysqlMetadataQuery extends BaseMetaDataQuery {
         for (Map.Entry<String, Map<String, Object>> stringMapEntry : map.entrySet()) {
             String columnName = stringMapEntry.getKey();
             Map<String, Object> properties = stringMapEntry.getValue();
-            atlasEntities.add(buildColumnEntity(columnName,tableName, properties, relationship));
+            atlasEntities.add(buildIndexEntity(columnName,tableName, properties, relationship));
         }
         List<Map.Entry<String, String>> entities = createEntities(atlasClientV2, new AtlasEntity.AtlasEntitiesWithExtInfo(atlasEntities));
         Map<String,String> guidMap = new HashMap<>();

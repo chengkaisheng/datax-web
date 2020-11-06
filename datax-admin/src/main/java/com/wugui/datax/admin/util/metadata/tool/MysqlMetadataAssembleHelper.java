@@ -32,8 +32,8 @@ public class MysqlMetadataAssembleHelper extends BaseMetadataAssembleHelper {
     @Override
     public Map<String, Map<String, Object>> getTablesInfo(String database, List<String> tableNames) throws IOException {
         Map<String,Map<String,Object>> tableInfoMap = new HashMap<>();
+        List<Map<String, Object>> tablesMetadata = queryTool.getTablesMetadata(database);
         tableNames.forEach((table)->{
-            List<Map<String, Object>> tablesMetadata = queryTool.getTablesMetadata(database);
             for (Map<String, Object> tableMetadata : tablesMetadata) {
                 if (StringUtils.equals(table, String.valueOf(tableMetadata.get("table_name")))){
                     tableInfoMap.put(table, tableMetadata);
@@ -46,8 +46,8 @@ public class MysqlMetadataAssembleHelper extends BaseMetadataAssembleHelper {
     @Override
     public Map<String, Map<String, Object>> getColumnsInfo(String database, String tablename, List<String> columns) throws IOException {
         Map<String,Map<String,Object>> columnInfoMap = new HashMap<>();
+        List<Map<String, Object>> columnsMetadata = queryTool.getColumnsMetadata(database, tablename);
         columns.forEach((column)->{
-            List<Map<String, Object>> columnsMetadata = queryTool.getColumnsMetadata(database, tablename);
             for (Map<String, Object> columnMetadata : columnsMetadata) {
                 if (StringUtils.equals(column, String.valueOf(columnMetadata.get("column_name")))){
                     columnInfoMap.put(column, columnMetadata);
@@ -60,8 +60,8 @@ public class MysqlMetadataAssembleHelper extends BaseMetadataAssembleHelper {
     @Override
     public Map<String, Map<String, Object>> getIndexesInfo(String databaseName, String tableName, List<String> indexes) throws IOException {
         Map<String,Map<String,Object>> indexesInfoMap = new HashMap<>();
+        List<Map<String, Object>> indexesMetadata = queryTool.getIndexesMetadata(databaseName, tableName);
         indexes.forEach((index)->{
-            List<Map<String, Object>> indexesMetadata = queryTool.getIndexesMetadata(databaseName, tableName);
             for (Map<String, Object> indexMetadata : indexesMetadata) {
                 if (StringUtils.equals(index, String.valueOf(indexMetadata.get("stat_name")))){
                     indexesInfoMap.put(index, indexMetadata);

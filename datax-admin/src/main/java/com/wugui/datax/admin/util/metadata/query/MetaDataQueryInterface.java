@@ -1,5 +1,6 @@
 package com.wugui.datax.admin.util.metadata.query;
 
+import org.apache.atlas.AtlasException;
 import org.apache.atlas.model.instance.AtlasEntity;
 
 import java.io.IOException;
@@ -13,7 +14,7 @@ import java.util.Map;
  */
 public interface MetaDataQueryInterface {
 
-    Map<String,String> setInstanceMetadata();
+    Map<String,String> setInstanceMetadata() throws AtlasException;
 
     Map<String,String> setDbMetadata(String guid) throws IOException, SQLException;
 

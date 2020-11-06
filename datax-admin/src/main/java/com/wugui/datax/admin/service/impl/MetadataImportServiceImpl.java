@@ -8,12 +8,13 @@ import com.wugui.datax.admin.service.JobDatasourceService;
 import com.wugui.datax.admin.service.MetadataImportService;
 import com.wugui.datax.admin.tool.query.BaseQueryTool;
 import com.wugui.datax.admin.tool.query.HBaseQueryTool;
-import com.wugui.datax.admin.tool.query.MongoDBQueryTool;
+
 import com.wugui.datax.admin.tool.query.QueryToolFactory;
 import com.wugui.datax.admin.util.AESUtil;
 import com.wugui.datax.admin.util.JdbcConstants;
 import com.wugui.datax.admin.util.metadata.query.BaseMetaDataQuery;
 import com.wugui.datax.admin.util.metadata.query.MetadataQueryFactory;
+import org.apache.atlas.AtlasException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +36,7 @@ public class MetadataImportServiceImpl implements MetadataImportService {
     DatasourceQueryService datasourceQueryService;
 
     @Override
-    public void importMetadata(Long datasourceId) throws IOException, SQLException {
+    public void importMetadata(Long datasourceId) throws IOException, SQLException, AtlasException {
         //获取数据源对象
         JobDatasource datasource = jobDatasourceService.getById(datasourceId);
         //queryTool组装
@@ -47,11 +48,6 @@ public class MetadataImportServiceImpl implements MetadataImportService {
         } else if (JdbcConstants.MONGODB.equals(datasource.getDatasource())) {
             return;
         } else {
-            BaseMetaDataQuery metaDataQuery = MetadataQueryFactory.getMetadataQuery(datasource);
-            //导入instance元数据,返回guid
-            Map<String, String> instanceMetadata = metaDataQuery.setInstanceMetadata();
-            //导入database元数据,返回guid
-            Map<String, String> dbMetadata = metaDataQuery.setDbMetadata(instanceMetadata.get(datasource.getDatasource()));
             BaseQueryTool queryTool = QueryToolFactory.getByDbType(datasource);
             String schema;
             if(JdbcConstants.ORACLE.equals(datasource.getDatasource())){
@@ -59,7 +55,13 @@ public class MetadataImportServiceImpl implements MetadataImportService {
             }else {
                 schema = queryTool.getDBName();
             }
-            List<String> tables = datasourceQueryService.getTables(datasourceId, schema);
+            datasource.setDatabaseName(schema);
+            BaseMetaDataQuery metaDataQuery = MetadataQueryFactory.getMetadataQuery(datasource);
+            //导入instance元数据,返回guid
+            Map<String, String> instanceMetadata = metaDataQuery.setInstanceMetadata();
+            //导入database元数据,返回guid
+            Map<String, String> dbMetadata = metaDataQuery.setDbMetadata(instanceMetadata.get(datasource.getDatasource()));
+            List<String> tables = queryTool.getTableNames(schema);
             //导入table元数据,返回guid
             Map<String, String> tableMetadata = metaDataQuery.setTableMetadata(schema, tables, dbMetadata.get(schema));
             for (String table : tables) {

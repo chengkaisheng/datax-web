@@ -82,7 +82,7 @@ public class OracleQueryTool extends BaseQueryTool implements QueryToolInterface
                 tablesMetadata.add(map);
             }
         } catch (SQLException e) {
-            logger.error("[getTableNames Exception] --> "
+            logger.error("[getTablesMetadata Exception] --> "
                     + "the exception message is:" + e.getMessage());
         } finally {
             JdbcUtils.close(rs);
@@ -109,18 +109,18 @@ public class OracleQueryTool extends BaseQueryTool implements QueryToolInterface
             while (rs.next()){
                 Map<String,Object> map= new HashMap<>();
                 map.put("column_name", rs.getString(1));
-                map.put("table_comment", rs.getString(2));
-                map.put("ordinal_position", rs.getString(3));
+                map.put("column_comment", rs.getString(2));
+                map.put("ordinal_position", rs.getInt(3));
                 map.put("owner", rs.getString(4));
                 map.put("default", rs.getString(5));
-                map.put("data_length", rs.getString(6));
+                map.put("data_length", rs.getInt(6));
                 map.put("data_precision", rs.getString(7));
                 map.put("data_scale", rs.getString(8));
                 map.put("data_type", rs.getString(9));
                 columnsMetadata.add(map);
             }
         } catch (SQLException e) {
-            logger.error("[getTableNames Exception] --> "
+            logger.error("[getColumnsMetadata Exception] --> "
                     + "the exception message is:" + e.getMessage());
         } finally {
             JdbcUtils.close(rs);
@@ -148,13 +148,14 @@ public class OracleQueryTool extends BaseQueryTool implements QueryToolInterface
                 Map<String,Object> map= new HashMap<>();
                 map.put("owner", rs.getString(1));
                 map.put("index_name", rs.getString(2));
-                map.put("uniqueness", rs.getString(3));
-                map.put("compression", rs.getString(4));
-                map.put("status", rs.getString(5));
+                /*map.put("index_type", rs.getString(3));*/
+                map.put("uniqueness", true);
+                map.put("compression", rs.getString(5));
+                map.put("status", rs.getString(6));
                 columnsMetadata.add(map);
             }
         } catch (SQLException e) {
-            logger.error("[getTableNames Exception] --> "
+            logger.error("[getIndexesMetadata Exception] --> "
                     + "the exception message is:" + e.getMessage());
         } finally {
             JdbcUtils.close(rs);
@@ -182,7 +183,7 @@ public class OracleQueryTool extends BaseQueryTool implements QueryToolInterface
                 list.add(map);
             }
         } catch (SQLException e) {
-            logger.error("[getTableNames Exception] --> "
+            logger.error("[getTablesInfo Exception] --> "
                     + "the exception message is:" + e.getMessage());
         } finally {
             JdbcUtils.close(rs);
@@ -221,7 +222,7 @@ public class OracleQueryTool extends BaseQueryTool implements QueryToolInterface
                 list.add(map);
             }
         } catch (SQLException e) {
-            logger.error("[getTableColumnNames Exception] --> "
+            logger.error("[getTableColumns Exception] --> "
                     + "the exception message is:" + e.getMessage());
         } finally {
             JdbcUtils.close(rs);
