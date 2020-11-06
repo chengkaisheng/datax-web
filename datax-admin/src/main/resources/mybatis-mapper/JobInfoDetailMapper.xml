@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wugui.datax.admin.mapper.JobInfoDetailMapper">
+
+    <resultMap id="JobInfoDetail" type="com.wugui.datax.admin.entity.JobInfoDetail" >
+        <result column="jobInfoId" property="jobInfoId" />
+        <result column="jobInfoName" property="jobInfoName" />
+        <result column="jobCron" property="jobCron" />
+        <result column="flowChatInformation" property="flowChatInformation" />
+        <result column="triggerNextTime" property="triggerNextTime" />
+        <result column="projectId" property="projectId" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+		t.jobInfoId,
+		t.jobInfoName,
+		t.jobCron,
+		t.flowChatInformation,
+		t.triggerNextTime,
+		t.projectId
+	</sql>
+
+    <insert id="save" parameterType="com.wugui.datax.admin.entity.JobInfoDetail" >
+        INSERT INTO job_info_detail (
+        jobInfoId,
+        jobInfoName,
+        jobCron,
+        flowChatInformation,
+        triggerNextTime,
+        projectId
+        ) VALUES (
+        #{jobInfoId},
+        #{jobInfoName},
+        #{jobCron},
+        #{flowChatInformation},
+        #{triggerNextTime},
+        #{projectId}
+        );
+    </insert>
+
+    <select id="loadById" parameterType="java.util.HashMap" resultMap="JobInfoDetail">
+        SELECT <include refid="Base_Column_List" />
+        FROM job_info_detail AS t
+        WHERE t.jobInfoId = #{jobInfoId}
+    </select>
+
+    <update id="update" parameterType="com.wugui.datax.admin.entity.JobInfoDetail" >
+		UPDATE job_info_detail
+		SET
+			jobInfoName = #{jobInfoName},
+			jobCron=#{jobCron},
+			flowChatInformation=#{flowChatInformation},
+			triggerNextTime=#{triggerNextTime},
+			projectId=#{projectId}
+		WHERE jobInfoId = #{jobInfoId}
+	</update>
+
+    <delete id="delete" parameterType="java.util.HashMap">
+		DELETE
+		FROM job_info_detail
+		WHERE jobInfoId = #{jobInfoId}
+	</delete>
+
+    <select id="findAll" parameterType="java.util.HashMap" resultMap="JobInfoDetail">
+        SELECT <include refid="Base_Column_List" />
+        FROM job_info_detail AS t
+        INNER JOIN job_project p on t.projectId=p.id
+        <trim prefix="WHERE" prefixOverrides="AND | OR" >
+            <if test="jobInfoId!=null and jobInfoId!=''">
+                AND t.jobInfoId = #{jobInfoId}
+            </if>
+            <if test="projectId > 0">
+                AND t.projectId = #{projectId}
+            </if>
+        </trim>
+    </select>
+
+    <select id="scheduleJobQuery" parameterType="java.util.HashMap" resultMap="JobInfoDetail">
+        SELECT <include refid="Base_Column_List" />
+        FROM job_info_detail AS t
+        WHERE t.triggerNextTime <![CDATA[ <= ]]> #{maxNextTime}
+        LIMIT #{pagesize}
+    </select>
+
+    <update id="scheduleUpdate" parameterType="com.wugui.datax.admin.entity.JobInfoDetail"  >
+		UPDATE job_info_detail
+		SET
+			triggerNextTime = #{triggerNextTime}
+					WHERE jobInfoId = #{jobInfoId}
+	</update>
+</mapper>

@@ -11,6 +11,15 @@ public class TriggerParam implements Serializable{
     private static final long serialVersionUID = 42L;
 
     private int jobId;
+    private String jobInfoId;
+
+    public String getJobInfoId() {
+        return jobInfoId;
+    }
+
+    public void setJobInfoId(String jobInfoId) {
+        this.jobInfoId = jobInfoId;
+    }
 
     private String executorHandler;
     private String executorParams;

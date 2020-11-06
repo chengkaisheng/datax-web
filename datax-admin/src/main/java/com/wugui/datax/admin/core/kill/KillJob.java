@@ -19,7 +19,7 @@ public class KillJob {
      * @param address
      * @param processId
      */
-    public static ReturnT<String> trigger(long logId, Date triggerTime, String address, String processId) {
+    public static ReturnT<String> trigger(long logId, Date triggerTime, String address, String processId,String jobInfoId) {
         ReturnT<String> triggerResult;
         TriggerParam triggerParam = new TriggerParam();
         triggerParam.setJobId(-1);
@@ -29,6 +29,7 @@ public class KillJob {
         triggerParam.setGlueType(GlueTypeEnum.BEAN.getDesc());
         triggerParam.setExecutorBlockStrategy(ExecutorBlockStrategyEnum.SERIAL_EXECUTION.getTitle());
         triggerParam.setLogDateTime(triggerTime.getTime());
+        triggerParam.setJobInfoId(jobInfoId);
         if (address != null) {
             triggerResult = JobTrigger.runExecutor(triggerParam, address);
         } else {

@@ -1,24 +1,31 @@
 package com.wugui.datax.admin.service.impl;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wugui.datatx.core.biz.model.NetWork;
 import com.wugui.datatx.core.biz.model.ReturnT;
 import com.wugui.datatx.core.enums.ExecutorBlockStrategyEnum;
 import com.wugui.datatx.core.glue.GlueTypeEnum;
 import com.wugui.datatx.core.util.DateUtil;
+import com.wugui.datax.admin.core.conf.JobAdminConfig;
 import com.wugui.datax.admin.core.cron.CronExpression;
 import com.wugui.datax.admin.core.route.ExecutorRouteStrategyEnum;
 import com.wugui.datax.admin.core.thread.JobScheduleHelper;
+import com.wugui.datax.admin.core.thread.JobTriggerPoolHelper;
+import com.wugui.datax.admin.core.trigger.TriggerTypeEnum;
 import com.wugui.datax.admin.core.util.I18nUtil;
 import com.wugui.datax.admin.dto.DataXBatchJsonBuildDto;
 import com.wugui.datax.admin.dto.DataXJsonBuildDto;
-import com.wugui.datax.admin.entity.JobGroup;
-import com.wugui.datax.admin.entity.JobInfo;
-import com.wugui.datax.admin.entity.JobLogReport;
-import com.wugui.datax.admin.entity.JobTemplate;
+import com.wugui.datax.admin.entity.*;
 import com.wugui.datax.admin.mapper.*;
 import com.wugui.datax.admin.service.DatasourceQueryService;
 import com.wugui.datax.admin.service.DataxJsonService;
 import com.wugui.datax.admin.service.JobService;
 import com.wugui.datax.admin.util.DateFormatUtils;
+import com.wugui.datax.admin.util.NetWorkUtils;
+import com.wugui.datax.admin.util.UUIDUtils;
+import com.wugui.datax.admin.util.UploadUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,11 +46,18 @@ import java.util.*;
 @Service
 public class JobServiceImpl implements JobService {
     private static Logger logger = LoggerFactory.getLogger(JobServiceImpl.class);
-
+    private final static NetWork netWork=new NetWork();
+    public static NetWork getInstance() {
+        return netWork;
+    }
     @Resource
     private JobGroupMapper jobGroupMapper;
     @Resource
     private JobInfoMapper jobInfoMapper;
+    @Resource
+    private  JobInfoLinkMapper jobInfoLinkMapper;
+    @Resource
+    private JobInfoDetailMapper jobInfoDetailMapper;
     @Resource
     private JobLogMapper jobLogMapper;
     @Resource
@@ -460,4 +474,104 @@ public class JobServiceImpl implements JobService {
         }
         return ReturnT.SUCCESS;
     }
+
+    @Override
+    public ReturnT<String> triggerJob(int jobId, TriggerTypeEnum triggerType, int failRetryCount,
+                                      String executorShardingParam, String executorParam) {
+        /*NetWork netWork=new NetWork();
+        netWork= NetWorkUtils.getNetWork(jobId,netWork);//获取所有节点任务组成网格图
+        netWork.initJob();//初始化所有节点任务
+        netWork.show();//显示所有任务的执行路径
+        String startPoint = String.valueOf(jobId);//获取任务节点的起点
+        netWork.recursive(netWork, startPoint, new ArrayList<>()); //递归计算所有节点的路径
+        JobInfoDetail jobInfoDetail=new JobInfoDetail();
+        jobInfoDetail.setJobInfoId(UUIDUtils.getUUID());
+        jobInfoDetail.setJobInfoName("测试项目");
+        jobInfoDetailMapper.save(jobInfoDetail);
+        NetWorkUtils.getJobInfoLink(jobId,netWork,jobInfoDetail);
+        JobTriggerPoolHelper.trigger(jobId, triggerType, failRetryCount, executorShardingParam, executorParam,jobInfoDetail.getJobInfoId());*/
+        return ReturnT.SUCCESS;
+    }
+
+    @Override
+    public ReturnT<String> addVirtualTask(JobInfoDetail jobInfoDetail) {
+        ReturnT<String> result=null;
+        if (!CronExpression.isValidExpression(jobInfoDetail.getJobCron())) {
+            return new ReturnT<>(ReturnT.FAIL_CODE, "请填写正确的Cron表达式!");
+        }
+        if (UUIDUtils.isEmpty(jobInfoDetail.getFlowChatInformation())) {
+            return new ReturnT<>(ReturnT.FAIL_CODE, "流程图信息为空!");
+        }
+        if (UUIDUtils.isEmpty(jobInfoDetail.getJobInfoName())) {
+            return new ReturnT<>(ReturnT.FAIL_CODE, "任务名称不能为空!");
+        }
+        if (jobInfoDetail.getProjectId()<=0) {
+            return new ReturnT<>(ReturnT.FAIL_CODE, "任务所属的项目Id不能为空!");
+        }
+        if(!UUIDUtils.notEmpty(jobInfoDetail.getJobInfoId())){
+            jobInfoDetail.setJobInfoId(UUIDUtils.getUUID());
+            int n=jobInfoDetailMapper.save(jobInfoDetail);
+            if(n>0){
+                result= new ReturnT<>(ReturnT.SUCCESS_CODE,"保存成功");
+            }else {
+                result= new ReturnT<>(ReturnT.FAIL_CODE, "保存失败");
+            }
+        }else {
+           result=updateVirtualTask(jobInfoDetail);
+        }
+        return result;
+    }
+
+    @Override
+    public ReturnT<String> updateVirtualTask(JobInfoDetail jobInfoDetail) {
+        JobInfoDetail exists_jobInfo = jobInfoDetailMapper.loadById(jobInfoDetail.getJobInfoId());
+        if(!UUIDUtils.notEmpty(exists_jobInfo)){
+            return new ReturnT<>(ReturnT.FAIL_CODE, "没有当前任务信息,信息已被更改,请重新提交");
+        }
+        // 获取下次执行时间 (5s后生效，避开预读周期)
+        long nextTriggerTime = jobInfoDetail.getTriggerNextTime();
+        if (!jobInfoDetail.getJobCron().equals(exists_jobInfo.getJobCron())) {
+            try {
+                Date nextValidTime = new CronExpression(jobInfoDetail.getJobCron()).getNextValidTimeAfter(new Date(System.currentTimeMillis() + JobScheduleHelper.PRE_READ_MS));
+                if (nextValidTime == null) {
+                    return new ReturnT<String>(ReturnT.FAIL_CODE, "jobinfoDetail_field_cron_never_fire");
+                }
+                nextTriggerTime = nextValidTime.getTime();
+            } catch (ParseException e) {
+                logger.error(e.getMessage(), e);
+                return new ReturnT<String>(ReturnT.FAIL_CODE, "jobinfoDetail_field_cron_invalid" + " | " + e.getMessage());
+            }
+        }
+
+        BeanUtils.copyProperties(jobInfoDetail, exists_jobInfo);
+        exists_jobInfo.setTriggerNextTime(nextTriggerTime);
+        int n=jobInfoDetailMapper.update(exists_jobInfo);
+        if(n>0){
+            return new ReturnT<>(ReturnT.SUCCESS_CODE,"保存成功");
+        }else {
+            return new ReturnT<>(ReturnT.FAIL_CODE, "保存失败");
+        }
+    }
+
+    @Override
+    public List<JobInfoDetail> listVirtualTask(int projectId,String jobInfoId) {
+        return jobInfoDetailMapper.findAll(projectId,jobInfoId);
+    }
+
+    @Override
+    public ReturnT<String> triggerVirtualTask(JobInfoDetail jobInfoDetail) {
+        JobInfoDetail jobInfoVirtualTask=jobInfoDetailMapper.loadById(jobInfoDetail.getJobInfoId());
+        String jobInfoId=UUIDUtils.getUUID();
+        NetWorkUtils.triggerVirtualTask(jobInfoId,jobInfoVirtualTask);
+        List<JobInfoLink> scheduleList=new ArrayList<>();
+        scheduleList = jobInfoLinkMapper.loadTriggerVirtualTask(jobInfoId);
+        if (scheduleList != null && scheduleList.size() > 0) {
+            for (JobInfoLink jobInfoLink : scheduleList) {
+                JobTriggerPoolHelper.trigger(jobInfoLink.getId(),TriggerTypeEnum.MANUAL, -1, null, "",jobInfoId);
+            }
+        }
+        return ReturnT.SUCCESS;
+    }
+
+
 }

@@ -2,9 +2,11 @@ package com.wugui.datax.admin.service;
 
 
 import com.wugui.datatx.core.biz.model.ReturnT;
+import com.wugui.datax.admin.core.trigger.TriggerTypeEnum;
 import com.wugui.datax.admin.dto.DataXBatchJsonBuildDto;
 import com.wugui.datax.admin.dto.TaskScheduleDto;
 import com.wugui.datax.admin.entity.JobInfo;
+import com.wugui.datax.admin.entity.JobInfoDetail;
 
 import java.io.IOException;
 import java.util.List;
@@ -93,4 +95,43 @@ public interface JobService {
      * @return
      */
     ReturnT<String> batchAdd(DataXBatchJsonBuildDto dto) throws IOException;
+
+    /**
+     * triggerJob
+     * @param jobId
+     * @param triggerType
+     * @param failRetryCount
+     * @param executorShardingParam
+     * @param executorParam
+     * @return
+     * @throws IOException
+     */
+    ReturnT<String> triggerJob(int jobId, TriggerTypeEnum triggerType, int failRetryCount, String executorShardingParam, String executorParam) throws IOException;
+
+    /**
+     * 添加虚任务
+     * @param jobInfoDetail
+     * @return
+     */
+    ReturnT<String> addVirtualTask(JobInfoDetail jobInfoDetail);
+
+    /**
+     * 更新虚任务
+     * @param jobInfoDetail
+     * @return
+     */
+    ReturnT<String> updateVirtualTask(JobInfoDetail jobInfoDetail);
+
+    /**
+     * 获取虚任务列表
+     * @return
+     */
+    List<JobInfoDetail> listVirtualTask(int projectId,String jobInfoId);
+
+    /**
+     * 触发虚任务
+     * @param jobInfoDetail
+     * @return
+     */
+    ReturnT<String> triggerVirtualTask(JobInfoDetail jobInfoDetail);
 }

@@ -12,10 +12,13 @@ import com.wugui.datax.admin.core.thread.JobTriggerPoolHelper;
 import com.wugui.datax.admin.core.trigger.TriggerTypeEnum;
 import com.wugui.datax.admin.core.util.I18nUtil;
 import com.wugui.datax.admin.entity.JobInfo;
+import com.wugui.datax.admin.entity.JobInfoLink;
 import com.wugui.datax.admin.entity.JobLog;
+import com.wugui.datax.admin.mapper.JobInfoLinkMapper;
 import com.wugui.datax.admin.mapper.JobInfoMapper;
 import com.wugui.datax.admin.mapper.JobLogMapper;
 import com.wugui.datax.admin.mapper.JobRegistryMapper;
+import com.wugui.datax.admin.util.UUIDUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -23,6 +26,7 @@ import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -37,6 +41,8 @@ public class AdminBizImpl implements AdminBiz {
     public JobLogMapper jobLogMapper;
     @Resource
     private JobInfoMapper jobInfoMapper;
+    @Resource
+    private JobInfoLinkMapper jobInfoLinkMapper;
     @Resource
     private JobRegistryMapper jobRegistryMapper;
 
@@ -81,21 +87,35 @@ public class AdminBizImpl implements AdminBiz {
         String callbackMsg = null;
         int resultCode = handleCallbackParam.getExecuteResult().getCode();
 
-        if (IJobHandler.SUCCESS.getCode() == resultCode) {
-
+        if (IJobHandler.SUCCESS.getCode() == resultCode && UUIDUtils.notEmpty(handleCallbackParam.getJobInfoId())) {
+            JobInfoLink jobInfoLinkcode=jobInfoLinkMapper.loadByJobInfoId(handleCallbackParam.getJobInfoId(),log.getJobId());
+            jobInfoLinkcode.setTriggerStatus(1);
+            jobInfoLinkMapper.updateByIdAndJobInfoId(jobInfoLinkcode);
             JobInfo jobInfo = jobInfoMapper.loadById(log.getJobId());
-
             updateIncrementParam(log, jobInfo.getIncrementType());
 
-            if (jobInfo != null && jobInfo.getChildJobId() != null && jobInfo.getChildJobId().trim().length() > 0) {
+            if (jobInfo!=null && jobInfoLinkcode.getChildJobId() != null && jobInfoLinkcode.getChildJobId().trim().length() > 0) {
                 callbackMsg = "<br><br><span style=\"color:#00c0ef;\" > >>>>>>>>>>>" + I18nUtil.getString("jobconf_trigger_child_run") + "<<<<<<<<<<< </span><br>";
 
-                String[] childJobIds = jobInfo.getChildJobId().split(",");
+                String[] childJobIds = jobInfoLinkcode.getChildJobId().split(",");
                 for (int i = 0; i < childJobIds.length; i++) {
                     int childJobId = (childJobIds[i] != null && childJobIds[i].trim().length() > 0 && isNumeric(childJobIds[i])) ? Integer.valueOf(childJobIds[i]) : -1;
                     if (childJobId > 0) {
-
-                        JobTriggerPoolHelper.trigger(childJobId, TriggerTypeEnum.PARENT, -1, null, null);
+                        JobInfoLink jobInfoLink=jobInfoLinkMapper.loadByJobInfoId(handleCallbackParam.getJobInfoId(),childJobId);
+                        String[] parentJobIds = jobInfoLink.getParentJobId().split(",");
+                        boolean code=true;
+                        for (int  j= 0; j < parentJobIds.length; j++) {
+                            int parentJobId = (parentJobIds[j] != null && parentJobIds[j].trim().length() > 0 && isNumeric(parentJobIds[j])) ? Integer.valueOf(parentJobIds[j]) : -1;
+                            if(parentJobId>0){
+                                JobInfoLink jobInfoLinkParent=jobInfoLinkMapper.loadByJobInfoId(handleCallbackParam.getJobInfoId(),parentJobId);
+                                if(jobInfoLinkParent.getTriggerStatus()==0){
+                                    code=false;
+                                }
+                            }
+                        }
+                        if(code&&jobInfoLink.getTriggerStatus()==0){
+                            JobTriggerPoolHelper.trigger(childJobId, TriggerTypeEnum.PARENT, -1, null, null,jobInfoLink.getJobInfoId());
+                        }
                         ReturnT<String> triggerChildResult = ReturnT.SUCCESS;
 
                         // add msg
@@ -115,10 +135,41 @@ public class AdminBizImpl implements AdminBiz {
 
             }
         }
+        if (IJobHandler.SUCCESS.getCode() == resultCode && handleCallbackParam.getJobInfoId()==null) {
+            JobInfo jobInfo = jobInfoMapper.loadById(log.getJobId());
+            updateIncrementParam(log, jobInfo.getIncrementType());
 
+            if (jobInfo != null && jobInfo.getChildJobId() != null && jobInfo.getChildJobId().trim().length() > 0) {
+                callbackMsg = "<br><br><span style=\"color:#00c0ef;\" > >>>>>>>>>>>" + I18nUtil.getString("jobconf_trigger_child_run") + "<<<<<<<<<<< </span><br>";
+
+                String[] childJobIds = jobInfo.getChildJobId().split(",");
+                for (int i = 0; i < childJobIds.length; i++) {
+                    int childJobId = (childJobIds[i] != null && childJobIds[i].trim().length() > 0 && isNumeric(childJobIds[i])) ? Integer.valueOf(childJobIds[i]) : -1;
+                    if (childJobId > 0) {
+                        JobTriggerPoolHelper.trigger(childJobId, TriggerTypeEnum.PARENT, -1, null, null,null);
+
+                        ReturnT<String> triggerChildResult = ReturnT.SUCCESS;
+
+                        // add msg
+                        callbackMsg += MessageFormat.format(I18nUtil.getString("jobconf_callback_child_msg1"),
+                                (i + 1),
+                                childJobIds.length,
+                                childJobIds[i],
+                                (triggerChildResult.getCode() == ReturnT.SUCCESS_CODE ? I18nUtil.getString("system_success") : I18nUtil.getString("system_fail")),
+                                triggerChildResult.getMsg());
+                    } else {
+                        callbackMsg += MessageFormat.format(I18nUtil.getString("jobconf_callback_child_msg2"),
+                                (i + 1),
+                                childJobIds.length,
+                                childJobIds[i]);
+                    }
+                }
+
+            }
+        }
         //kill execution timeout DataX process
         if (!StringUtils.isEmpty(log.getProcessId()) && IJobHandler.FAIL_TIMEOUT.getCode() == resultCode) {
-            KillJob.trigger(log.getId(), log.getTriggerTime(), log.getExecutorAddress(), log.getProcessId());
+            KillJob.trigger(log.getId(), log.getTriggerTime(), log.getExecutorAddress(), log.getProcessId(),handleCallbackParam.getJobInfoId());
         }
 
         // handle msg
@@ -144,7 +195,6 @@ public class AdminBizImpl implements AdminBiz {
 
         jobLogMapper.updateHandleInfo(log);
         jobInfoMapper.updateLastHandleCode(log.getJobId(), resultCode);
-
         return ReturnT.SUCCESS;
     }
 

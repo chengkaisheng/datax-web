@@ -10,6 +10,7 @@ import com.wugui.datax.admin.core.util.I18nUtil;
 import com.wugui.datax.admin.dto.DataXBatchJsonBuildDto;
 import com.wugui.datax.admin.dto.TriggerJobDto;
 import com.wugui.datax.admin.entity.JobInfo;
+import com.wugui.datax.admin.entity.JobInfoDetail;
 import com.wugui.datax.admin.service.JobService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -87,13 +88,13 @@ public class JobInfoController extends BaseController{
 
     @PostMapping(value = "/trigger")
     @ApiOperation("触发任务")
-    public ReturnT<String> triggerJob(@RequestBody TriggerJobDto dto) {
+    public ReturnT<String> triggerJob(@RequestBody TriggerJobDto dto) throws IOException {
         // force cover job param
         String executorParam=dto.getExecutorParam();
         if (executorParam == null) {
             executorParam = "";
         }
-        JobTriggerPoolHelper.trigger(dto.getJobId(), TriggerTypeEnum.MANUAL, -1, null, executorParam);
+        JobTriggerPoolHelper.trigger(dto.getJobId(), TriggerTypeEnum.MANUAL, -1, null, executorParam,null);
         return ReturnT.SUCCESS;
     }
 
@@ -125,5 +126,29 @@ public class JobInfoController extends BaseController{
             return new ReturnT<>(ReturnT.FAIL_CODE, (I18nUtil.getString("system_please_choose") + I18nUtil.getString("jobinfo_field_temp")));
         }
         return jobService.batchAdd(dto);
+    }
+
+    @PostMapping("/addVirtualTask")
+    @ApiOperation("保存虚任务")
+    public ReturnT<String> addVirtualTask(HttpServletRequest request, @RequestBody JobInfoDetail jobInfoDetail) {
+        return jobService.addVirtualTask(jobInfoDetail);
+    }
+
+    @PostMapping("/updateVirtualTask")
+    @ApiOperation("更新虚任务")
+    public ReturnT<String> updateVirtualTask(HttpServletRequest request,@RequestBody JobInfoDetail jobInfoDetail) {
+        return jobService.updateVirtualTask(jobInfoDetail);
+    }
+
+    @GetMapping("/listVirtualTask")
+    @ApiOperation("获取虚任务列表")
+    public ReturnT<List<JobInfoDetail>> listVirtualTask(int projectId,String jobInfoId){
+        return new ReturnT<>(jobService.listVirtualTask(projectId,jobInfoId));
+    }
+
+    @PostMapping(value = "/triggerVirtualTask")
+    @ApiOperation("触发虚任务")
+    public ReturnT<String> triggerVirtualTask(@RequestBody JobInfoDetail jobInfoDetail) {
+        return jobService.triggerVirtualTask(jobInfoDetail);
     }
 }

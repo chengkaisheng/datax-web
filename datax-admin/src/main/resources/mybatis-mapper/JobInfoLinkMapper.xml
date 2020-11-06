@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wugui.datax.admin.mapper.JobInfoLinkMapper">
+
+    <resultMap id="JobInfoLink" type="com.wugui.datax.admin.entity.JobInfoLink" >
+        <result column="id" property="id" />
+
+        <result column="child_jobid" property="childJobId" />
+        <result column="parent_jobid" property="parentJobId" />
+        <result column="trigger_status" property="triggerStatus" />
+        <result column="jobInfoId" property="jobInfoId" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+		t.id,
+		t.child_jobid,
+        t.parent_jobid,
+        t.trigger_status,
+        t.jobInfoId
+	</sql>
+
+
+    <insert id="save" parameterType="com.wugui.datax.admin.entity.JobInfoLink" >
+        INSERT INTO job_info_link (
+        id,
+        child_jobid,
+        parent_jobid,
+        trigger_status,
+        jobInfoId
+        ) VALUES (
+        #{id},
+        #{childJobId},
+        #{parentJobId},
+        #{triggerStatus},
+        #{jobInfoId}
+        );
+    </insert>
+
+    <select id="loadById" parameterType="java.util.HashMap" resultMap="JobInfoLink">
+        SELECT <include refid="Base_Column_List" />
+        FROM job_info_link AS t
+        WHERE t.id = #{id}
+    </select>
+    <select id="loadByJobInfoId" parameterType="java.util.HashMap" resultMap="JobInfoLink">
+        SELECT <include refid="Base_Column_List" />
+        FROM job_info_link AS t
+        WHERE t.jobInfoId = #{jobInfoId} and   t.id=#{jobId}
+    </select>
+    <update id="update" parameterType="com.wugui.datax.admin.entity.JobInfoLink" >
+		UPDATE job_info_link
+		SET
+			child_jobid = #{childJobId},
+			parent_jobid=#{parentJobId},
+			trigger_status=#{triggerStatus},
+			jobInfoId=#{jobInfoId}
+		WHERE id = #{id}
+	</update>
+    <update id="updateByIdAndJobInfoId" parameterType="com.wugui.datax.admin.entity.JobInfoLink" >
+		UPDATE job_info_link
+		SET
+			child_jobid = #{childJobId},
+			parent_jobid=#{parentJobId},
+			trigger_status=#{triggerStatus}
+		WHERE id = #{id} and jobInfoId=#{jobInfoId}
+	</update>
+    <delete id="delete" parameterType="java.util.HashMap">
+		DELETE
+		FROM job_info_link
+		WHERE id = #{id}
+	</delete>
+
+    <select id="loadTriggerVirtualTask" parameterType="java.util.HashMap" resultMap="JobInfoLink">
+        SELECT <include refid="Base_Column_List" />
+        FROM job_info_link AS t
+        where t.parent_jobid='' and  t.jobInfoId=#{jobInfoId}
+    </select>
+</mapper>

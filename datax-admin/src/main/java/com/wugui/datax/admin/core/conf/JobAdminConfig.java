@@ -1,6 +1,7 @@
 package com.wugui.datax.admin.core.conf;
 
 import com.wugui.datax.admin.core.scheduler.JobScheduler;
+import com.wugui.datax.admin.entity.JobInfoLink;
 import com.wugui.datax.admin.mapper.*;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -87,7 +88,10 @@ public class JobAdminConfig implements InitializingBean, DisposableBean {
     private DataSource dataSource;
     @Resource
     private JobDatasourceMapper jobDatasourceMapper;
-
+    @Resource
+    private JobInfoLinkMapper jobInfoLinkMapper;
+    @Resource
+    private JobInfoDetailMapper jobInfoDetailMapper;
     public String getI18n() {
         return i18n;
     }
@@ -119,7 +123,12 @@ public class JobAdminConfig implements InitializingBean, DisposableBean {
     public JobInfoMapper getJobInfoMapper() {
         return jobInfoMapper;
     }
-
+    public JobInfoDetailMapper getJobInfoDetailMapper() {
+        return jobInfoDetailMapper;
+    }
+    public JobInfoLinkMapper getJobInfoLinkMapper() {
+        return jobInfoLinkMapper;
+    }
     public JobRegistryMapper getJobRegistryMapper() {
         return jobRegistryMapper;
     }
