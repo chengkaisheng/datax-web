@@ -677,8 +677,8 @@ public abstract class BaseQueryTool implements QueryToolInterface {
                 columnMsgs.add(columnMsg);
                 columnMsg.setName(name);
                 columnMsg.setComment(comment);
-                columnMsg.setIndicator(getIndicator(name,tableName));
                 String showType=this.judgeShowType(type);
+                columnMsg.setIndicator(getIndicator(name,tableName,showType));
                 logger.info("*************************showType: "+showType);
                 if("dateType".equals(showType)){
                     columnMsg.setType("date");
@@ -702,30 +702,34 @@ public abstract class BaseQueryTool implements QueryToolInterface {
         return columnMsgs;
     }
 
-    public Map<String,Map<String,Object>> getIndicator(String fieldName,String tableName){
-        Long valid=0L;
+    public Map<String,Map<String,Object>> getIndicator(String fieldName,String tableName,String showType){
+        Long missing=0L;
         Long num=0L;
         Object fieldVal=null;
+        Object maximum=null;
+        Object minimum=null;
         Map<String,Map<String,Object>> map=new HashMap<>();
         Map<String,Object> validMap=new HashMap<>();
         Map<String,Object> missingMap=new HashMap<>();
         Map<String,Object> uniqueMap=new HashMap<>();
         Map<String,Object> mostCommonMap=new HashMap<>();
+        Map<String,Object> maximumMap=new HashMap<>();
+        Map<String,Object> minimumMap=new HashMap<>();
         Statement stmt = null;
         ResultSet rs = null;
         Long total=getRows(tableName);
         try {
             stmt = connection.createStatement();
             //获取valid数量
-            String sql = sqlBuilder.getValid(fieldName,tableName);
+            String sql = sqlBuilder.getMissing(fieldName,tableName);
             logger.info("=================getValidSql: "+sql);
             rs = stmt.executeQuery(sql);
             if(rs.next()){
-                valid = rs.getLong(1);
-                validMap.put("value",valid);
-                validMap.put("rate",getRate(valid,total));
-                missingMap.put("value",total-valid);
-                missingMap.put("rate",getRate(total-valid,total));
+                missing = rs.getLong(1);
+                missingMap.put("value",missing);
+                missingMap.put("rate",getRate(missing,total));
+                validMap.put("value",total-missing);
+                validMap.put("rate",getRate(total-missing,total));
             }
             sql=sqlBuilder.getMostCommon(fieldName,tableName);
             logger.info("=================getMostCommon: "+sql);
@@ -742,6 +746,18 @@ public abstract class BaseQueryTool implements QueryToolInterface {
             map.put("misssing",missingMap);
             map.put("unique",uniqueMap);
             map.put("mostCommon",mostCommonMap);
+            if("numberType".equals(showType)){
+                sql=sqlBuilder.getMaxMin(fieldName,tableName);
+                rs = stmt.executeQuery(sql);
+                if(rs.next()){
+                    maximum = rs.getObject(1);
+                    minimum=rs.getObject(2);
+                    maximumMap.put("value",maximum);
+                    minimumMap.put("value",minimum);
+                }
+                map.put("maximum",maximumMap);
+                map.put("minimum",minimumMap);
+            }
         } catch (SQLException e) {
             logger.error("[getTableNames Exception] --> "
                     + "the exception message is:" + e.getMessage());

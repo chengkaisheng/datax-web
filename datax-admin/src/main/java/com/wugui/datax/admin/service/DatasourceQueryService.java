@@ -2,6 +2,7 @@ package com.wugui.datax.admin.service;
 
 import com.wugui.datax.admin.entity.ColumnMsg;
 import com.wugui.datax.admin.entity.Search;
+import com.wugui.datax.admin.tool.database.TableInfo;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -93,4 +94,6 @@ public interface DatasourceQueryService {
     List<ColumnMsg> getColumnSchema(Long datasourceId, String tableName);
 
     String getTableSize(Long datasourceId, String tableName);
+
+    List<TableInfo> getTableInfos(Long id, String schema);
 }

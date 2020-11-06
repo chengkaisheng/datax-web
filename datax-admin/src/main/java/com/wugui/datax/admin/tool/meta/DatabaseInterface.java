@@ -80,7 +80,9 @@ public interface DatabaseInterface {
 
     String getTableSize(String tableName,String tableSchema);
 
-    String getValid(String name,String tableName);
+    String getMissing(String name,String tableName);
 
     String getMostCommon(String name,String tableName);
+
+    String getMaxMin(String fieldName, String tableName);
 }
