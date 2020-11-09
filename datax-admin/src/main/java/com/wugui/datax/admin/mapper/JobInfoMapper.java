@@ -62,4 +62,5 @@ public interface JobInfoMapper {
     List<QualityConfDto> pageConfList(@Param("offset") int offset, @Param("pagesize")int pagesize, @Param("name") String name, @Param("jobType") String jobType);
 
     int selectConfCount(@Param("offset") int offset, @Param("pagesize") int pagesize, @Param("name") String name, @Param("jobType") String jobType);
+
 }

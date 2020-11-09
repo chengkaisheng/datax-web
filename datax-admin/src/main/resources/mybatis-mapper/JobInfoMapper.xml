@@ -91,7 +91,8 @@
 		t.inc_start_id,
 		t.increment_type,
 		t.datasource_id,
-		t.job_type
+		t.job_type,
+		t.job_param
 	</sql>
 
 	<sql id="Project_Column_List">
@@ -201,7 +202,8 @@
 			inc_start_id,
 			increment_type,
 			datasource_id,
-			job_type
+			job_type,
+			job_param
 		) VALUES (
 			#{jobGroup},
 			#{jobCron},
@@ -237,7 +239,8 @@
 			#{incStartId},
 			#{incrementType},
 			#{datasourceId},
-			#{jobType}
+			#{jobType},
+			#{jobParam}
 		);
 		<!--<selectKey resultType="java.lang.Integer" order="AFTER" keyProperty="id">
 			SELECT LAST_INSERT_ID()
@@ -287,7 +290,8 @@
 		    inc_start_id = #{incStartId},
 		    increment_type = #{incrementType},
 		    datasource_id= #{datasourceId},
-		    job_type = #{jobType}
+		    job_type = #{jobType},
+		    job_param = #{jobParam}
 		WHERE id = #{id}
 	</update>
 

@@ -58,7 +58,7 @@
         where
         a.is_delete=0
         and b.is_delete=0
-        and a.personalise_type is not null
+            and a.personalise_type is not null
         and a.relation=0
         union all
         select

@@ -1,5 +1,6 @@
 package com.wugui.datax.admin.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.wugui.datatx.core.biz.model.ReturnT;
 import com.wugui.datatx.core.enums.ExecutorBlockStrategyEnum;
@@ -12,6 +13,7 @@ import com.wugui.datax.admin.core.util.I18nUtil;
 import com.wugui.datax.admin.dto.DataXBatchJsonBuildDto;
 import com.wugui.datax.admin.dto.DataXJsonBuildDto;
 import com.wugui.datax.admin.dto.QualityConfDto;
+import com.wugui.datax.admin.dto.QualityJsonBuildDto;
 import com.wugui.datax.admin.entity.JobGroup;
 import com.wugui.datax.admin.entity.JobInfo;
 import com.wugui.datax.admin.entity.JobLogReport;
@@ -20,12 +22,14 @@ import com.wugui.datax.admin.mapper.*;
 import com.wugui.datax.admin.service.DatasourceQueryService;
 import com.wugui.datax.admin.service.DataxJsonService;
 import com.wugui.datax.admin.service.JobService;
+import com.wugui.datax.admin.service.QualityJsonService;
 import com.wugui.datax.admin.util.DateFormatUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.io.IOException;
@@ -58,6 +62,8 @@ public class JobServiceImpl implements JobService {
     private JobTemplateMapper jobTemplateMapper;
     @Resource
     private DataxJsonService dataxJsonService;
+    @Resource
+    private QualityJsonService qualityJsonService;
 
     @Override
     public Map<String, Object> pageList(int start, int length, int jobGroup, int triggerStatus, String jobDesc, String glueType, int userId, Integer[] projectIds) {
@@ -80,6 +86,23 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public ReturnT<String> add(JobInfo jobInfo) {
+        //在添加任务之前 先构建json
+        String jobParam = jobInfo.getJobParam();
+        String jobType = jobInfo.getJobType();
+        String jobJson = null;
+        if(jobType.equals("DQCJOB")){
+            //质量任务
+            QualityJsonBuildDto qualityJsonBuildDto = JSON.parseObject(jobParam,QualityJsonBuildDto.class);
+            checkParam(qualityJsonBuildDto);
+            jobJson = qualityJsonService.buildJobJson(qualityJsonBuildDto);
+
+        }else{
+            //其他任务
+            DataXJsonBuildDto dataXJsonBuildDto = JSON.parseObject(jobParam,DataXJsonBuildDto.class);
+            checkParam(dataXJsonBuildDto);
+            jobJson = dataxJsonService.buildJobJson(dataXJsonBuildDto);
+        }
+
         // valid
         JobGroup group = jobGroupMapper.load(jobInfo.getJobGroup());
         if (group == null) {
@@ -88,9 +111,9 @@ public class JobServiceImpl implements JobService {
         if (!CronExpression.isValidExpression(jobInfo.getJobCron())) {
             return new ReturnT<>(ReturnT.FAIL_CODE, I18nUtil.getString("jobinfo_field_cron_invalid"));
         }
-        if (jobInfo.getGlueType().equals(GlueTypeEnum.BEAN.getDesc()) && jobInfo.getJobJson().trim().length() <= 2) {
+        /*if (jobInfo.getGlueType().equals(GlueTypeEnum.BEAN.getDesc()) && jobInfo.getJobJson().trim().length() <= 2) {
             return new ReturnT<>(ReturnT.FAIL_CODE, (I18nUtil.getString("system_please_input") + I18nUtil.getString("jobinfo_field_jobjson")));
-        }
+        }*/
         if (jobInfo.getJobDesc() == null || jobInfo.getJobDesc().trim().length() == 0) {
             return new ReturnT<>(ReturnT.FAIL_CODE, (I18nUtil.getString("system_please_input") + I18nUtil.getString("jobinfo_field_jobdesc")));
         }
@@ -151,12 +174,32 @@ public class JobServiceImpl implements JobService {
         jobInfo.setJobJson(jobInfo.getJobJson());
         jobInfo.setUpdateTime(new Date());
         jobInfo.setGlueUpdatetime(new Date());
+        jobInfo.setJobJson(jobJson);
+        jobInfo.setJobParam(jobParam);
         jobInfoMapper.save(jobInfo);
         if (jobInfo.getId() < 1) {
             return new ReturnT<>(ReturnT.FAIL_CODE, (I18nUtil.getString("jobinfo_field_add") + I18nUtil.getString("system_fail")));
         }
 
         return new ReturnT<>(String.valueOf(jobInfo.getId()));
+    }
+
+    private ReturnT<String> checkParam(DataXJsonBuildDto dto){
+        String key = "system_please_choose";
+        //对入参的校验
+        if (dto.getReaderDatasourceId() == null) {
+            return new ReturnT<>(I18nUtil.getString(key) + I18nUtil.getString("jobinfo_field_readerDataSource"));
+        }
+        if (dto.getWriterDatasourceId() == null) {
+            return new ReturnT<>(I18nUtil.getString(key) + I18nUtil.getString("jobinfo_field_writerDataSource"));
+        }
+        if (CollectionUtils.isEmpty(dto.getReaderColumns())) {
+            return new ReturnT<>(I18nUtil.getString(key) + I18nUtil.getString("jobinfo_field_readerColumns"));
+        }
+        if (CollectionUtils.isEmpty(dto.getWriterColumns())) {
+            return new ReturnT<>(I18nUtil.getString(key) + I18nUtil.getString("jobinfo_field_writerColumns"));
+        }
+        return null;
     }
 
     private boolean isNumeric(String str) {
@@ -221,6 +264,24 @@ public class JobServiceImpl implements JobService {
             jobInfo.setChildJobId(temp);
         }
 
+        //job json valid
+        String jobParam = jobInfo.getJobParam();
+        String jobType = jobInfoMapper.loadById(jobInfo.getId()).getJobType();
+        String jobJson = null;
+        if(jobType.equals("DQCJOB")){
+            //质量任务
+            QualityJsonBuildDto qualityJsonBuildDto = JSON.parseObject(jobParam,QualityJsonBuildDto.class);
+            checkParam(qualityJsonBuildDto);
+            jobJson = qualityJsonService.buildJobJson(qualityJsonBuildDto);
+
+        }else{
+            //其他任务
+            DataXJsonBuildDto dataXJsonBuildDto = JSON.parseObject(jobParam,DataXJsonBuildDto.class);
+            checkParam(dataXJsonBuildDto);
+            jobJson = dataxJsonService.buildJobJson(dataXJsonBuildDto);
+        }
+        jobInfo.setJobJson(jobJson);
+
         // group valid
         JobGroup jobGroup = jobGroupMapper.load(jobInfo.getJobGroup());
         if (jobGroup == null) {
@@ -254,6 +315,7 @@ public class JobServiceImpl implements JobService {
         }
         exists_jobInfo.setTriggerNextTime(nextTriggerTime);
         exists_jobInfo.setUpdateTime(new Date());
+        exists_jobInfo.setJobParam(jobInfo.getJobParam());
 
         if (GlueTypeEnum.BEAN.getDesc().equals(jobInfo.getGlueType())) {
             exists_jobInfo.setJobJson(jobInfo.getJobJson());

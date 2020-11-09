@@ -1,6 +1,7 @@
 package com.wugui.datax.admin.entity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.wugui.datax.admin.dto.QualityJsonBuildDto;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -125,4 +126,7 @@ public class JobInfo {
 
 	@ApiModelProperty("任务类型")
 	private String jobType;
+
+	@ApiModelProperty("任务参数")
+	private String jobParam;
 }

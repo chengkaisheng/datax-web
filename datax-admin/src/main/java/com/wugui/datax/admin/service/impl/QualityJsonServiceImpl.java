@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static com.wugui.datax.admin.util.JdbcConstants.*;
 
@@ -106,9 +107,12 @@ public class QualityJsonServiceImpl implements QualityJsonService {
                     PersonaliseRule personaliseRule = personaliseRuleMapper.selectByCode(codeArray[codeArray.length-1]);
                     regular = personaliseRule.getRegular();
                 }
+                //替换正则中的column
+                String temp = regular.replace("column",columnName);
 
-                if(dataSource.equalsIgnoreCase(MYSQL) || dataSource.equalsIgnoreCase(IMPALA)){
+                /*if(dataSource.equalsIgnoreCase(MYSQL) || dataSource.equalsIgnoreCase(IMPALA)){
                     list.add(" and " + columnName + " REGEXP " + "'" +regular + "'");
+
                 }else if(dataSource.equalsIgnoreCase(ORACLE)){
                     list.add(" and REGEXP_LIKE(" + "\"" + columnName + "\"" +","+ "'" + regular + "')" );
                 }else if(dataSource.equalsIgnoreCase(POSTGRESQL) || dataSource.equalsIgnoreCase(GREENPLUM)){
@@ -119,7 +123,8 @@ public class QualityJsonServiceImpl implements QualityJsonService {
                     list.add(" and xmlcast(xmlquery('fn:matches($v," + "\""+regular + "\""+ ")' PASSING "+columnName+" as \"v\") as integer) =1 " );
                 }else if(dataSource.equalsIgnoreCase(HIVE)){
                     list.add(" and " + columnName.split("\\:")[1] + " REGEXP " + "'" + regular + "'");
-                }
+                }*/
+                list.add(" and " + temp);
 
             }
         }
