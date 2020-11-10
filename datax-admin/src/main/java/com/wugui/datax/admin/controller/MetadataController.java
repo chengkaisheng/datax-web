@@ -3,6 +3,7 @@ package com.wugui.datax.admin.controller;
 import com.baomidou.mybatisplus.extension.api.R;
 import com.wugui.datax.admin.entity.ColumnMsg;
 import com.wugui.datax.admin.service.DatasourceQueryService;
+import com.wugui.datax.admin.tool.query.HiveQueryTool;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.logging.log4j.core.config.plugins.validation.constraints.Required;
@@ -158,4 +159,10 @@ public class MetadataController extends BaseController {
     public R<List<ColumnMsg>> getColumnSchema(Long datasourceId, String tableName) throws Exception {
         return success(datasourceQueryService.getColumnSchema(datasourceId,tableName));
     }
+
+    @GetMapping("/hive/pathDefault")
+    public R<Map<String,String>> getHivePathDefault(Long datasourceId, String schema, String tableName){
+        return R.ok(datasourceQueryService.getHivePathDefault(datasourceId, schema, tableName));
+    }
+
 }

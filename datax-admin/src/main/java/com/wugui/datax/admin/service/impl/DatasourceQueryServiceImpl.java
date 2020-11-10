@@ -285,5 +285,10 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
         return tableInfos;
     }
 
-
+    @Override
+    public Map<String, String> getHivePathDefault(Long datasourceId, String schema, String tableName) {
+        JobDatasource datasource = jobDatasourceService.getById(datasourceId);
+        BaseQueryTool queryTool = QueryToolFactory.getByDbType(datasource);
+        return queryTool.getHivePathDefault(schema, tableName);
+    }
 }

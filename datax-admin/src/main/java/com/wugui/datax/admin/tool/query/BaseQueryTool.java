@@ -1040,4 +1040,41 @@ public abstract class BaseQueryTool implements QueryToolInterface {
     public Boolean dataSourceTest(String databaseName) {
         return null;
     }
+
+    @Override
+    public Map<String, String> getHivePathDefault(String schema, String tableName) {
+        Statement stmt = null;
+        ResultSet rs = null;
+        Map<String,String> resMap = new HashMap<>();
+        try {
+            stmt = connection.createStatement();
+            //获取sql
+            String sql;
+            if(StringUtils.isEmpty(schema)){
+                sql = "show create table "+tableName;
+            }else {
+                sql = "show create table "+schema+"."+tableName;
+            }
+            rs = stmt.executeQuery(sql);
+            while (rs.next()) {
+                if("LOCATION".equals(rs.getString(1))){
+                    rs.next();
+                    String res = rs.getString(1);
+                    int index = res.indexOf("/", 10);
+                    String path = res.substring(index);
+                    String df = res.substring(0, index);
+                    resMap.put("path", path);
+                    resMap.put("default", df);
+                    return resMap;
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("[getTableNames Exception] --> "
+                    + "the exception message is:" + e.getMessage());
+        } finally {
+            JdbcUtils.close(rs);
+            JdbcUtils.close(stmt);
+        }
+        return resMap;
+    }
 }
