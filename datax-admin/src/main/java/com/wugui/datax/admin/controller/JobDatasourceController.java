@@ -10,6 +10,8 @@ import com.wugui.datax.admin.entity.JobDatasource;
 import com.wugui.datax.admin.service.DatasourceQueryService;
 import com.wugui.datax.admin.service.JobDatasourceService;
 import com.wugui.datax.admin.tool.database.TableInfo;
+import com.wugui.datax.admin.tool.query.BaseQueryTool;
+import com.wugui.datax.admin.tool.query.QueryToolFactory;
 import com.wugui.datax.admin.util.AESUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -207,5 +209,13 @@ public class JobDatasourceController extends BaseController {
                 .like(StringUtils.isNotEmpty(datasourceName),"datasource_name",datasourceName)
                 .in("datasource","hive","impala","spark","flink");
         return success(jobJdbcDatasourceService.list(queryWrapper));
+    }
+
+    @PostMapping("testImpala")
+    public R<String> extentsTest(Long datasourceId){
+        JobDatasource jobDatasource = jobJdbcDatasourceService.getById(datasourceId);
+        BaseQueryTool queryTool = QueryToolFactory.getByDbType(jobDatasource);
+        queryTool.dataSourceTest(jobDatasource.getDatabaseName());
+        return R.ok("成功");
     }
 }

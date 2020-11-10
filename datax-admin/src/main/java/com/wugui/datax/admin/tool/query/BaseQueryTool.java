@@ -95,6 +95,7 @@ public abstract class BaseQueryTool implements QueryToolInterface {
         dataSource.setConnectionTimeout(30000);
         this.datasource = dataSource;
         this.connection = this.datasource.getConnection();
+        logger.info(jobDatasource.getDatasource() + "< connect success >");
     }
 
     //根据connection获取schema
@@ -1033,5 +1034,10 @@ public abstract class BaseQueryTool implements QueryToolInterface {
             JdbcUtils.close(stmt);
         }
         return indexNames;
+    }
+
+    @Override
+    public Boolean dataSourceTest(String databaseName) {
+        return null;
     }
 }

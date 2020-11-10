@@ -249,6 +249,17 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
             tableNames.forEach((tableName)->{
                 tableInfos.add(new TableInfo(tableName));
             });
+        }
+        else if (JdbcConstants.IMPALA.equals(datasource.getDatasource())) {
+            if(StringUtils.isEmpty(schema)) {
+                tableNames = new ImpalaQueryTool(datasource).getTableNames();
+            }
+            else {
+                tableNames = new ImpalaQueryTool(datasource).getTableNames(schema);
+            }
+            tableNames.forEach((tableName)->{
+                tableInfos.add(new TableInfo(tableName));
+            });
         }else {
             BaseQueryTool qTool = QueryToolFactory.getByDbType(datasource);
             if(StringUtils.isBlank(schema)){

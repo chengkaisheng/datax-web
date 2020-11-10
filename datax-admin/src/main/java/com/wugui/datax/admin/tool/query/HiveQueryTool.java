@@ -31,26 +31,18 @@ public class HiveQueryTool extends BaseQueryTool implements QueryToolInterface {
 
     @Override
     public Object getTableColumns(String tableName, String datasource,String databaseName) {
-
-        Map res = new HashMap();
         Statement stmt = null;
         ResultSet rs = null;
         Map<String, List<Map<String,String>>> result = new HashMap<>();
         List<Map<String,String>> list = new ArrayList<>();
         try {
+            String querySql;
             if(StringUtils.isEmpty(databaseName)){
-                String strsql="select database()";
-                stmt = connection.createStatement();
-                rs = stmt.executeQuery(strsql);
-                JSON dataBaseNameJson= resultSetToJSON(rs);
-                JSONArray jsonArray = JSONArray.parseArray(dataBaseNameJson.toJSONString());
-                if(jsonArray.size()>0){
-                    JSONObject job = jsonArray.getJSONObject(0);  // 遍历 jsonarray 数组，把每一个对象转成 json 对象
-                    databaseName=job.get("database()").toString();  // 得到 每个对象中的属性值
-                }
+                querySql = "desc "+ tableName;
+            }else {
+                querySql = "desc "+databaseName+"."+tableName;
             }
             //获取查询指定表所有字段的sql语句
-            String querySql = "desc "+databaseName+"."+tableName;
             logger.info("querySql: {}", querySql);
 
             //获取所有字段的名称，类型，comment
@@ -66,8 +58,6 @@ public class HiveQueryTool extends BaseQueryTool implements QueryToolInterface {
             }
         } catch (SQLException e) {
             logger.error("[getTableColumnNames Exception] --> "
-                    + "the exception message is:" + e.getMessage());
-            res.put("error","[getTableColumnNames Exception] --> "
                     + "the exception message is:" + e.getMessage());
         } finally {
             JdbcUtils.close(rs);

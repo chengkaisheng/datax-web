@@ -126,4 +126,6 @@ public interface QueryToolInterface {
     List<Map<String,Object>> getIndexesMetadata(String schema, String tableName);
 
     List<String> getIndexName(String schema, String tableName);
+
+    Boolean dataSourceTest(String databaseName);
 }

@@ -29,7 +29,7 @@ import java.util.Map;
 @Component
 public class SqlJobHandler extends IJobHandler {
 
-    private static final String URL = "http://localhost:8979/dbeaver/gql";
+    private static final String URL = "http://localhost:8978/api/gql";
 
     @Override
     public ReturnT<String> execute(TriggerParam tgParam) throws Exception {
