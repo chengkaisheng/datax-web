@@ -97,30 +97,18 @@ public interface JobService {
     ReturnT<String> batchAdd(DataXBatchJsonBuildDto dto) throws IOException;
 
     /**
-     * triggerJob
-     * @param jobId
-     * @param triggerType
-     * @param failRetryCount
-     * @param executorShardingParam
-     * @param executorParam
-     * @return
-     * @throws IOException
-     */
-    ReturnT<String> triggerJob(int jobId, TriggerTypeEnum triggerType, int failRetryCount, String executorShardingParam, String executorParam) throws IOException;
-
-    /**
      * 添加虚任务
-     * @param jobInfoDetail
+     * @param jobInfo
      * @return
      */
-    ReturnT<String> addVirtualTask(JobInfoDetail jobInfoDetail);
+    ReturnT<String> addVirtualTask(JobInfo jobInfo);
 
     /**
      * 更新虚任务
-     * @param jobInfoDetail
+     * @param jobInfo
      * @return
      */
-    ReturnT<String> updateVirtualTask(JobInfoDetail jobInfoDetail);
+    ReturnT<String> updateVirtualTask(JobInfo jobInfo);
 
     /**
      * 获取虚任务列表
@@ -130,8 +118,8 @@ public interface JobService {
 
     /**
      * 触发虚任务
-     * @param jobInfoDetail
+     * @param jobInfo
      * @return
      */
-    ReturnT<String> triggerVirtualTask(JobInfoDetail jobInfoDetail);
+    ReturnT<String> triggerVirtualTask(JobInfo jobInfo);
 }

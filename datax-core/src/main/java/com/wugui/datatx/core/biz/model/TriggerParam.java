@@ -9,8 +9,17 @@ import java.util.Date;
  */
 public class TriggerParam implements Serializable{
     private static final long serialVersionUID = 42L;
-
+    private String infoId;
     private int jobId;
+
+    public String getInfoId() {
+        return infoId;
+    }
+
+    public void setInfoId(String infoId) {
+        this.infoId = infoId;
+    }
+
     private String jobInfoId;
 
     public String getJobInfoId() {

@@ -13,7 +13,8 @@ public interface JobInfoLinkMapper {
 
     JobInfoLink loadById(@Param("id") int id);
 
-    JobInfoLink loadByJobInfoId (@Param("jobInfoId") String id,@Param("jobId") int jobId);
+    JobInfoLink loadByInfoId(@Param("infoId") String infoId,@Param("jobInfoId") String jobInfoId);
+
 
     int update(JobInfoLink jobInfo);
 

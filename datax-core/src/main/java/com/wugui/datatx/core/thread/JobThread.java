@@ -183,11 +183,11 @@ public class JobThread extends Thread {
                     // callback handler info
                     if (!toStop) {
                         // commonm
-                        TriggerCallbackThread.pushCallBack(new HandleCallbackParam(tgParam.getLogId(), tgParam.getLogDateTime(), executeResult,tgParam.getJobInfoId()));
+                        TriggerCallbackThread.pushCallBack(new HandleCallbackParam(tgParam.getLogId(), tgParam.getLogDateTime(), executeResult,tgParam.getJobInfoId(),tgParam.getInfoId()));
                     } else {
                         // is killed
                         ReturnT<String> stopResult = new ReturnT<String>(ReturnT.FAIL_CODE, stopReason + " [job running, killed]");
-                        TriggerCallbackThread.pushCallBack(new HandleCallbackParam(tgParam.getLogId(), tgParam.getLogDateTime(), stopResult,tgParam.getJobInfoId()));
+                        TriggerCallbackThread.pushCallBack(new HandleCallbackParam(tgParam.getLogId(), tgParam.getLogDateTime(), stopResult,tgParam.getJobInfoId(),tgParam.getInfoId()));
                     }
                 }
             }
@@ -199,7 +199,7 @@ public class JobThread extends Thread {
             if (triggerParam != null) {
                 // is killed
                 ReturnT<String> stopResult = new ReturnT<String>(ReturnT.FAIL_CODE, stopReason + " [job not executed, in the job queue, killed.]");
-                TriggerCallbackThread.pushCallBack(new HandleCallbackParam(triggerParam.getLogId(), triggerParam.getLogDateTime(), stopResult,triggerParam.getJobInfoId()));
+                TriggerCallbackThread.pushCallBack(new HandleCallbackParam(triggerParam.getLogId(), triggerParam.getLogDateTime(), stopResult,triggerParam.getJobInfoId(),triggerParam.getInfoId()));
             }
         }
 

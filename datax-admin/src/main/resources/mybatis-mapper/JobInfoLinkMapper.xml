@@ -10,6 +10,7 @@
         <result column="parent_jobid" property="parentJobId" />
         <result column="trigger_status" property="triggerStatus" />
         <result column="jobInfoId" property="jobInfoId" />
+        <result column="infoId" property="infoId" />
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -17,7 +18,8 @@
 		t.child_jobid,
         t.parent_jobid,
         t.trigger_status,
-        t.jobInfoId
+        t.jobInfoId,
+        t.infoId
 	</sql>
 
 
@@ -27,13 +29,15 @@
         child_jobid,
         parent_jobid,
         trigger_status,
-        jobInfoId
+        jobInfoId,
+        infoId
         ) VALUES (
         #{id},
         #{childJobId},
         #{parentJobId},
         #{triggerStatus},
-        #{jobInfoId}
+        #{jobInfoId},
+        #{infoId}
         );
     </insert>
 
@@ -42,10 +46,10 @@
         FROM job_info_link AS t
         WHERE t.id = #{id}
     </select>
-    <select id="loadByJobInfoId" parameterType="java.util.HashMap" resultMap="JobInfoLink">
+    <select id="loadByInfoId" parameterType="java.util.HashMap" resultMap="JobInfoLink">
         SELECT <include refid="Base_Column_List" />
         FROM job_info_link AS t
-        WHERE t.jobInfoId = #{jobInfoId} and   t.id=#{jobId}
+        WHERE t.infoId = #{infoId} and  jobInfoId=#{jobInfoId}
     </select>
     <update id="update" parameterType="com.wugui.datax.admin.entity.JobInfoLink" >
 		UPDATE job_info_link
@@ -53,7 +57,8 @@
 			child_jobid = #{childJobId},
 			parent_jobid=#{parentJobId},
 			trigger_status=#{triggerStatus},
-			jobInfoId=#{jobInfoId}
+			jobInfoId=#{jobInfoId},
+			infoId=#{infoId}
 		WHERE id = #{id}
 	</update>
     <update id="updateByIdAndJobInfoId" parameterType="com.wugui.datax.admin.entity.JobInfoLink" >
@@ -62,7 +67,7 @@
 			child_jobid = #{childJobId},
 			parent_jobid=#{parentJobId},
 			trigger_status=#{triggerStatus}
-		WHERE id = #{id} and jobInfoId=#{jobInfoId}
+		WHERE id = #{id} and jobInfoId=#{jobInfoId} and infoId=#{infoId}
 	</update>
     <delete id="delete" parameterType="java.util.HashMap">
 		DELETE
