@@ -19,4 +19,9 @@ public class ImpalaDatabaseMeta extends BaseDatabaseMeta implements DatabaseInte
     public String getSQLQueryTables() {
         return "show tables";
     }
+
+    @Override
+    public String getSQLQueryTables(String... tableSchema) {
+        return "show tables in "+tableSchema[0];
+    }
 }

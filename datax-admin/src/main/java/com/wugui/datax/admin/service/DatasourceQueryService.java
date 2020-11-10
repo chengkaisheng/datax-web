@@ -96,4 +96,6 @@ public interface DatasourceQueryService {
     String getTableSize(Long datasourceId, String tableName) throws Exception;
 
     List<TableInfo> getTableInfos(Long id, String schema) throws IOException, SQLException;
+
+    Map<String, String> getHivePathDefault(Long datasourceId, String schema, String tableName);
 }

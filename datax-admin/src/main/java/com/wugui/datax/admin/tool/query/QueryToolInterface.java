@@ -128,4 +128,6 @@ public interface QueryToolInterface {
     List<String> getIndexName(String schema, String tableName);
 
     Boolean dataSourceTest(String databaseName);
+
+    Map<String, String> getHivePathDefault(String schema, String tableName);
 }
