@@ -88,33 +88,33 @@ public class AdminBizImpl implements AdminBiz {
         int resultCode = handleCallbackParam.getExecuteResult().getCode();
 
         if (IJobHandler.SUCCESS.getCode() == resultCode && UUIDUtils.notEmpty(handleCallbackParam.getJobInfoId())) {
-            JobInfoLink jobInfoLinkcode=jobInfoLinkMapper.loadByJobInfoId(handleCallbackParam.getJobInfoId(),log.getJobId());
-            jobInfoLinkcode.setTriggerStatus(1);
-            jobInfoLinkMapper.updateByIdAndJobInfoId(jobInfoLinkcode);
+            JobInfoLink jobInfoLinkInfo=jobInfoLinkMapper.loadByInfoId(handleCallbackParam.getInfoId(),handleCallbackParam.getJobInfoId());
+            jobInfoLinkInfo.setTriggerStatus(1);
+            jobInfoLinkMapper.updateByIdAndJobInfoId(jobInfoLinkInfo);
             JobInfo jobInfo = jobInfoMapper.loadById(log.getJobId());
             updateIncrementParam(log, jobInfo.getIncrementType());
 
-            if (jobInfo!=null && jobInfoLinkcode.getChildJobId() != null && jobInfoLinkcode.getChildJobId().trim().length() > 0) {
+            if (jobInfo!=null && jobInfoLinkInfo.getChildJobId() != null && jobInfoLinkInfo.getChildJobId().trim().length() > 0) {
                 callbackMsg = "<br><br><span style=\"color:#00c0ef;\" > >>>>>>>>>>>" + I18nUtil.getString("jobconf_trigger_child_run") + "<<<<<<<<<<< </span><br>";
 
-                String[] childJobIds = jobInfoLinkcode.getChildJobId().split(",");
+                String[] childJobIds = jobInfoLinkInfo.getChildJobId().split(",");
                 for (int i = 0; i < childJobIds.length; i++) {
-                    int childJobId = (childJobIds[i] != null && childJobIds[i].trim().length() > 0 && isNumeric(childJobIds[i])) ? Integer.valueOf(childJobIds[i]) : -1;
-                    if (childJobId > 0) {
-                        JobInfoLink jobInfoLink=jobInfoLinkMapper.loadByJobInfoId(handleCallbackParam.getJobInfoId(),childJobId);
-                        String[] parentJobIds = jobInfoLink.getParentJobId().split(",");
+                    String childJobId = (childJobIds[i] != null && childJobIds[i].trim().length() > 0) ? childJobIds[i] : "-1";
+                    if (!childJobId.equals("-1")) {
+                        JobInfoLink jobInfoLink=jobInfoLinkMapper.loadByInfoId(childJobId,handleCallbackParam.getJobInfoId());
+                        String[] parentJobs = jobInfoLink.getParentJobId().split(",");
                         boolean code=true;
-                        for (int  j= 0; j < parentJobIds.length; j++) {
-                            int parentJobId = (parentJobIds[j] != null && parentJobIds[j].trim().length() > 0 && isNumeric(parentJobIds[j])) ? Integer.valueOf(parentJobIds[j]) : -1;
-                            if(parentJobId>0){
-                                JobInfoLink jobInfoLinkParent=jobInfoLinkMapper.loadByJobInfoId(handleCallbackParam.getJobInfoId(),parentJobId);
+                        for (int  j= 0; j < parentJobs.length; j++) {
+                            String infoId = (parentJobs[j] != null && parentJobs[j].trim().length() > 0 && isNumeric(parentJobs[j])) ? parentJobs[j] : "-1";
+                            if(!infoId.equals("-1")){
+                                JobInfoLink jobInfoLinkParent=jobInfoLinkMapper.loadByInfoId(infoId,jobInfoLink.getJobInfoId());
                                 if(jobInfoLinkParent.getTriggerStatus()==0){
                                     code=false;
                                 }
                             }
                         }
-                        if(code&&jobInfoLink.getTriggerStatus()==0){
-                            JobTriggerPoolHelper.trigger(childJobId, TriggerTypeEnum.PARENT, -1, null, null,jobInfoLink.getJobInfoId());
+                        if(code && jobInfoLink.getTriggerStatus()==0){
+                            JobTriggerPoolHelper.trigger(jobInfoLink.getId(), TriggerTypeEnum.PARENT, -1, null, null,jobInfoLink.getJobInfoId(),jobInfoLink.getInfoId());
                         }
                         ReturnT<String> triggerChildResult = ReturnT.SUCCESS;
 
@@ -146,7 +146,7 @@ public class AdminBizImpl implements AdminBiz {
                 for (int i = 0; i < childJobIds.length; i++) {
                     int childJobId = (childJobIds[i] != null && childJobIds[i].trim().length() > 0 && isNumeric(childJobIds[i])) ? Integer.valueOf(childJobIds[i]) : -1;
                     if (childJobId > 0) {
-                        JobTriggerPoolHelper.trigger(childJobId, TriggerTypeEnum.PARENT, -1, null, null,null);
+                        JobTriggerPoolHelper.trigger(childJobId, TriggerTypeEnum.PARENT, -1, null, null,null,null);
 
                         ReturnT<String> triggerChildResult = ReturnT.SUCCESS;
 

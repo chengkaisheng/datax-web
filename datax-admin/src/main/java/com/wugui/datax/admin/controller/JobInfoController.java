@@ -94,7 +94,7 @@ public class JobInfoController extends BaseController{
         if (executorParam == null) {
             executorParam = "";
         }
-        JobTriggerPoolHelper.trigger(dto.getJobId(), TriggerTypeEnum.MANUAL, -1, null, executorParam,null);
+        JobTriggerPoolHelper.trigger(dto.getJobId(), TriggerTypeEnum.MANUAL, -1, null, executorParam,null,null);
         return ReturnT.SUCCESS;
     }
 
@@ -130,14 +130,15 @@ public class JobInfoController extends BaseController{
 
     @PostMapping("/addVirtualTask")
     @ApiOperation("保存虚任务")
-    public ReturnT<String> addVirtualTask(HttpServletRequest request, @RequestBody JobInfoDetail jobInfoDetail) {
-        return jobService.addVirtualTask(jobInfoDetail);
+    public ReturnT<String> addVirtualTask(HttpServletRequest request, @RequestBody JobInfo jobInfo) {
+        jobInfo.setUserId(getCurrentUserId(request));
+        return jobService.addVirtualTask(jobInfo);
     }
 
     @PostMapping("/updateVirtualTask")
     @ApiOperation("更新虚任务")
-    public ReturnT<String> updateVirtualTask(HttpServletRequest request,@RequestBody JobInfoDetail jobInfoDetail) {
-        return jobService.updateVirtualTask(jobInfoDetail);
+    public ReturnT<String> updateVirtualTask(HttpServletRequest request,@RequestBody JobInfo jobInfo) {
+        return jobService.updateVirtualTask(jobInfo);
     }
 
     @GetMapping("/listVirtualTask")
@@ -148,7 +149,7 @@ public class JobInfoController extends BaseController{
 
     @PostMapping(value = "/triggerVirtualTask")
     @ApiOperation("触发虚任务")
-    public ReturnT<String> triggerVirtualTask(@RequestBody JobInfoDetail jobInfoDetail) {
-        return jobService.triggerVirtualTask(jobInfoDetail);
+    public ReturnT<String> triggerVirtualTask(@RequestBody JobInfo jobInfo) {
+        return jobService.triggerVirtualTask(jobInfo);
     }
 }

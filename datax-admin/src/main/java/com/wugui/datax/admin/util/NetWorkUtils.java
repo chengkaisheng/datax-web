@@ -12,13 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NetWorkUtils {
-    /**
-     * 获取所有节点任务
-     * @param jobId
-     * @param netWork
-     * @return
-     */
-    public static com.wugui.datatx.core.biz.model.NetWork getNetWork(int jobId, com.wugui.datatx.core.biz.model.NetWork netWork){
+   /* public static com.wugui.datatx.core.biz.model.NetWork getNetWork(int jobId, com.wugui.datatx.core.biz.model.NetWork netWork){
         JobInfo jobInfo= JobAdminConfig.getAdminConfig().getJobInfoMapper().loadById(jobId);
         if(jobInfo != null && jobInfo.getChildJobId() != null && jobInfo.getChildJobId().trim().length() > 0){
             String[] childJobIds = jobInfo.getChildJobId().split(",");
@@ -36,8 +30,8 @@ public class NetWorkUtils {
         } catch (NumberFormatException e) {
             return false;
         }
-    }
-    public static void  getJobInfoLink(int jobId, com.wugui.datatx.core.biz.model.NetWork netWork, JobInfoDetail jobInfoDetail){
+    }*/
+    /*public static void  getJobInfoLink(int jobId, com.wugui.datatx.core.biz.model.NetWork netWork, JobInfoDetail jobInfoDetail){
         JobInfo jobInfo = JobAdminConfig.getAdminConfig().getJobInfoMapper().loadById(jobId);
         JobInfoLink jobInfoLink=JobAdminConfig.getAdminConfig().getJobInfoLinkMapper().loadByJobInfoId(jobInfoDetail.getJobInfoId(),jobId);
         if (jobInfo != null) {
@@ -73,25 +67,25 @@ public class NetWorkUtils {
             }
 
         }
-    }
+    }*/
 
-    public static void triggerVirtualTask(String jobInfoId,JobInfoDetail jobInfoDetail){
+    public static void triggerVirtualTask(String jobInfoId,JobInfo jobInfo){
         List<JobInfoLink> jobInfoLinks=new ArrayList<>();
-        JSONObject jSONObject = JSONObject.parseObject(jobInfoDetail.getFlowChatInformation());
+        JSONObject jSONObject = JSONObject.parseObject(jobInfo.getJobJson());
         JSONArray jsonArray = null;
         jsonArray = jSONObject.getJSONArray("linkDataArray");
         JSONArray jsonValues=jSONObject.getJSONArray("nodeDataArray");
         for (int i=0;i<jsonArray.size() ;i++){
             JobInfoLink jobInfoLink=new JobInfoLink();
             jobInfoLink.setJobInfoId(jobInfoId);
-            String str1= jsonArray.getJSONObject(i).get("from").toString();
+            String str1= jsonArray.getJSONObject(i).get("to").toString();
             String childId="";
             jobInfoLink.setId(getValues(str1,jsonValues));
-
+            jobInfoLink.setInfoId(String.valueOf(getInfoId(str1,jsonValues)));
             //查找childId
             for (int j=0;j<jsonArray.size();j++){
                 if(str1.equals(jsonArray.getJSONObject(j).get("from").toString())){
-                    childId+=getValues(jsonArray.getJSONObject(j).get("to").toString(),jsonValues)+",";
+                    childId+=getInfoId(jsonArray.getJSONObject(j).get("to").toString(),jsonValues)+",";
                 }
             }
             if(!childId.equals("")){
@@ -105,7 +99,7 @@ public class NetWorkUtils {
             String parenetId="";
             for (int j=0;j<jsonArray.size();j++){
                 if(str1.equals(jsonArray.getJSONObject(j).get("to").toString())){
-                    parenetId+=getValues(jsonArray.getJSONObject(j).get("from").toString(),jsonValues)+",";
+                    parenetId+=getInfoId(jsonArray.getJSONObject(j).get("from").toString(),jsonValues)+",";
                 }
             }
             if(!parenetId.equals("")){
@@ -115,9 +109,29 @@ public class NetWorkUtils {
                 parenetId="";
             }
             jobInfoLink.setParentJobId(parenetId);
+            //查找parentId主键infoId
+
+            /*String infoIds="";
+            for (int j=0;j<jsonArray.size();j++){
+                if(str1.equals(jsonArray.getJSONObject(j).get("to").toString())){
+                    infoIds+=getInfoId(jsonArray.getJSONObject(j).get("from").toString(),jsonValues)+",";
+                }
+            }
+            if(!infoIds.equals("")){
+                infoIds=infoIds.substring(0,infoIds.length() -1);
+            }
+            if(infoIds.equals("0")){
+                infoIds="";
+            }
+            jobInfoLink.setInfoIds(infoIds);*/
             if(jobInfoLink.getId()!=0 && jobInfoLinks.contains(jobInfoLink)==false){
                 jobInfoLinks.add(jobInfoLink);
-                JobAdminConfig.getAdminConfig().getJobInfoLinkMapper().save(jobInfoLink);
+                JobInfoLink jobInfoLinkInfo=JobAdminConfig.getAdminConfig().getJobInfoLinkMapper().loadByInfoId(jobInfoLink.getInfoId(),jobInfoLink.getJobInfoId());
+                if(UUIDUtils.notEmpty(jobInfoLinkInfo)){
+                    JobAdminConfig.getAdminConfig().getJobInfoLinkMapper().updateByIdAndJobInfoId(jobInfoLink);
+                }else {
+                    JobAdminConfig.getAdminConfig().getJobInfoLinkMapper().save(jobInfoLink);
+                }
             }
 
         }
@@ -125,10 +139,19 @@ public class NetWorkUtils {
 
     public static int getValues(String str,JSONArray jsonValues){
         for (int j=0;j<jsonValues.size();j++){
-            if(str.equals(jsonValues.getJSONObject(j).get("key").toString()) && !jsonValues.getJSONObject(j).get("text").toString().equals("开始")&&!jsonValues.getJSONObject(j).get("text").toString().equals("结束")){
+            if(str.equals(String.valueOf(jsonValues.getJSONObject(j).get("key"))) && !jsonValues.getJSONObject(j).get("text").toString().equals("开始")&&!jsonValues.getJSONObject(j).get("text").toString().equals("结束")){
                 return Integer.parseInt(jsonValues.getJSONObject(j).get("id").toString());
             }
         }
         return 0;
+    }
+
+    public static String getInfoId(String str,JSONArray jsonValues){
+        for (int j=0;j<jsonValues.size();j++){
+            if(str.equals(jsonValues.getJSONObject(j).get("key").toString()) && !jsonValues.getJSONObject(j).get("text").toString().equals("开始")&&!jsonValues.getJSONObject(j).get("text").toString().equals("结束")){
+                return jsonValues.getJSONObject(j).get("infoId").toString();
+            }
+        }
+        return "0";
     }
 }

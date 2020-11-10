@@ -51,6 +51,8 @@ public interface JobInfoMapper {
 
     List<JobInfo> scheduleJobQuery(@Param("maxNextTime") long maxNextTime, @Param("pagesize") int pagesize);
 
+    List<JobInfo> scheduleVirtualJobQuery(@Param("maxNextTime") long maxNextTime, @Param("pagesize") int pagesize);
+
     int scheduleUpdate(JobInfo xxlJobInfo);
 
     int incrementTimeUpdate(@Param("id") int id, @Param("incStartTime") Date incStartTime);

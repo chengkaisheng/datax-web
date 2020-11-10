@@ -7,8 +7,17 @@ import java.io.Serializable;
  */
 public class HandleCallbackParam implements Serializable {
     private static final long serialVersionUID = 42L;
-
+    private String infoId;
     private long logId;
+
+    public String getInfoId() {
+        return infoId;
+    }
+
+    public void setInfoId(String infoId) {
+        this.infoId = infoId;
+    }
+
     private long logDateTim;
     private String jobInfoId;
     private ReturnT<String> executeResult;
@@ -22,11 +31,12 @@ public class HandleCallbackParam implements Serializable {
     }
 
     public HandleCallbackParam(){}
-    public HandleCallbackParam(long logId, long logDateTim, ReturnT<String> executeResult,String jobInfoId) {
+    public HandleCallbackParam(long logId, long logDateTim, ReturnT<String> executeResult,String jobInfoId,String infoId) {
         this.logId = logId;
         this.jobInfoId=jobInfoId;
         this.logDateTim = logDateTim;
         this.executeResult = executeResult;
+        this.infoId=infoId;
     }
 
     public long getLogId() {

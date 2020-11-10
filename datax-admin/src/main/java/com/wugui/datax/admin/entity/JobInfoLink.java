@@ -1,10 +1,7 @@
 package com.wugui.datax.admin.entity;
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-
-import java.util.Date;
 
 @Data
 public class JobInfoLink {
@@ -22,4 +19,7 @@ public class JobInfoLink {
 
     @ApiModelProperty("任务信息")
     private String jobInfoId;
+
+    @ApiModelProperty("任务主键Id")
+    private String infoId;
 }
