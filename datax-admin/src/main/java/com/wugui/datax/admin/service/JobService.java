@@ -97,6 +97,15 @@ public interface JobService {
     ReturnT<String> batchAdd(DataXBatchJsonBuildDto dto) throws IOException;
 
     /**
+     * 查询质量规则的项目
+     * @param current
+     * @param size
+     * @param name
+     * @return
+     */
+    Map<String, Object> getPageConf(int current, int size, String name);
+
+    /**
      * triggerJob
      * @param jobId
      * @param triggerType

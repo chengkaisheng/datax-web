@@ -55,7 +55,7 @@ public interface DatasourceQueryService {
      * @param id
      * @return
      */
-    Object getTableColumns(Long id, String tableName) throws IOException;
+    Object getTableColumns(Long id, String schema, String tableName) throws IOException;
 
 
     /**
@@ -80,7 +80,7 @@ public interface DatasourceQueryService {
      * @param tableName
      * @return
      */
-    Long getRows(Long datasourceId,String tableName);
+    Long getRows(Long datasourceId,String tableName) throws Exception;
 
     /**
      * 根据数据源id和表名获取表所有数据
@@ -89,11 +89,11 @@ public interface DatasourceQueryService {
      * @return
      * @throws IOException
      */
-    List<List<Map<String,Object>>> listAll(Long datasourceId, String tableName,Integer pageNumber,Integer pageSize)throws IOException;
+    Map<String,Object> listAll(Long datasourceId, String tableName,Integer pageNumber,Integer pageSize)throws IOException;
 
-    List<ColumnMsg> getColumnSchema(Long datasourceId, String tableName);
+    List<ColumnMsg> getColumnSchema(Long datasourceId, String tableName) throws IOException;
 
-    String getTableSize(Long datasourceId, String tableName);
+    String getTableSize(Long datasourceId, String tableName) throws Exception;
 
-    List<TableInfo> getTableInfos(Long id, String schema);
+    List<TableInfo> getTableInfos(Long id, String schema) throws IOException, SQLException;
 }

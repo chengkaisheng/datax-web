@@ -9,12 +9,13 @@ import com.google.common.collect.Lists;
 import com.wugui.datatx.core.util.Constants;
 import com.wugui.datax.admin.core.util.LocalCacheUtil;
 import com.wugui.datax.admin.entity.JobDatasource;
-import com.wugui.datax.admin.entity.Search;
 import com.wugui.datax.admin.tool.database.ColumnInfo;
 import com.wugui.datax.admin.tool.database.DasColumn;
 import com.wugui.datax.admin.tool.database.TableInfo;
 import com.wugui.datax.admin.tool.meta.DatabaseInterface;
 import com.wugui.datax.admin.tool.meta.DatabaseMetaFactory;
+import com.wugui.datax.admin.tool.meta.PostgresqlDatabaseMeta;
+import com.wugui.datax.admin.tool.meta.SqlServerDatabaseMeta;
 import com.wugui.datax.admin.util.AESUtil;
 import com.wugui.datax.admin.util.JdbcConstants;
 import com.wugui.datax.admin.util.JdbcUtils;
@@ -26,15 +27,14 @@ import com.wugui.datax.admin.entity.Chart;
 import com.wugui.datax.admin.entity.ColumnMsg;
 import javax.sql.DataSource;
 import java.sql.*;
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
-import java.util.*;
 
 import static com.wugui.datax.admin.datashare.tools.ResultToJsonUtil.resultSetToJSON;
 import com.wugui.datax.admin.datashare.tools.ConnectUtil;
-import com.wugui.datax.admin.datashare.tools.ResultToJsonUtil;
+
 /**
  * 抽象查询工具
  *
@@ -49,16 +49,16 @@ public abstract class BaseQueryTool implements QueryToolInterface {
     /**
      * 用于获取查询语句
      */
-    private DatabaseInterface sqlBuilder;
+    protected DatabaseInterface sqlBuilder;
 
-    private DataSource datasource;
+    protected DataSource datasource;
 
-    private Connection connection;
+    protected Connection connection;
     /**
      * 当前数据库名
      */
-    private String currentSchema;
-    private String currentDatabase;
+    protected String currentSchema;
+    protected String currentDatabase;
 
     /**
      * 构造方法
@@ -95,6 +95,7 @@ public abstract class BaseQueryTool implements QueryToolInterface {
         dataSource.setConnectionTimeout(30000);
         this.datasource = dataSource;
         this.connection = this.datasource.getConnection();
+        logger.info(jobDatasource.getDatasource() + "< connect success >");
     }
 
     //根据connection获取schema
@@ -162,6 +163,42 @@ public abstract class BaseQueryTool implements QueryToolInterface {
         List<Map<String, Object>> res = null;
         try {
             res = JdbcUtils.executeQuery(connection, sqlQueryTableNameComment, ImmutableList.of(currentSchema, tableName));
+        } catch (SQLException e) {
+            logger.error("[getTableInfo Exception] --> "
+                    + "the exception message is:" + e.getMessage());
+        }
+        return res;
+    }
+
+    @Override
+    public List<Map<String, Object>> getTablesInfo(String schema) {
+        String sqlQueryTableNameComment = sqlBuilder.getSQLQueryTablesNameComments(schema);
+        logger.info(sqlQueryTableNameComment);
+        List<Map<String, Object>> res = new ArrayList<>();
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(sqlQueryTableNameComment);
+            while (resultSet.next()){
+                Map<String,Object> map = new HashMap<>();
+                map.put("table_name", resultSet.getString(1));
+                map.put("table_comment", resultSet.getString(2));
+                map.put("data_length", resultSet.getString(3));
+                res.add(map);
+            }
+        } catch (SQLException e) {
+            logger.error("[getTableInfo Exception] --> "
+                    + "the exception message is:" + e.getMessage());
+        }
+        return res;
+    }
+
+    @Override
+    public List<Map<String, Object>> getTablesInfo() {
+        String sqlQueryTableNameComment = sqlBuilder.getSQLQueryTablesNameComments();
+        logger.info(sqlQueryTableNameComment);
+        List<Map<String, Object>> res = null;
+        try {
+            res = JdbcUtils.executeQuery(connection, sqlQueryTableNameComment, ImmutableList.of(currentSchema));
         } catch (SQLException e) {
             logger.error("[getTableInfo Exception] --> "
                     + "the exception message is:" + e.getMessage());
@@ -345,14 +382,16 @@ public abstract class BaseQueryTool implements QueryToolInterface {
         Statement stmt = null;
         ResultSet rs = null;
         try {
-            String strsql="select database()";
-            stmt = connection.createStatement();
-            rs = stmt.executeQuery(strsql);
-            JSON dataBaseNameJson= resultSetToJSON(rs);
-            JSONArray jsonArray = JSONArray.parseArray(dataBaseNameJson.toJSONString());
-            if(jsonArray.size()>0){
-                JSONObject job = jsonArray.getJSONObject(0);  // 遍历 jsonarray 数组，把每一个对象转成 json 对象
-                databaseName=job.get("database()").toString();  // 得到 每个对象中的属性值
+            if(StringUtils.isEmpty(databaseName)){
+                String strsql="select database()";
+                stmt = connection.createStatement();
+                rs = stmt.executeQuery(strsql);
+                JSON dataBaseNameJson= resultSetToJSON(rs);
+                JSONArray jsonArray = JSONArray.parseArray(dataBaseNameJson.toJSONString());
+                if(jsonArray.size()>0){
+                    JSONObject job = jsonArray.getJSONObject(0);  // 遍历 jsonarray 数组，把每一个对象转成 json 对象
+                    databaseName=job.get("database()").toString();  // 得到 每个对象中的属性值
+                }
             }
 
             //获取查询指定表所有字段的sql语句
@@ -587,7 +626,7 @@ public abstract class BaseQueryTool implements QueryToolInterface {
     }
 
     public Long getRows(String tableName) {
-        Long rows=null;
+        Long rows=0L;
         Statement stmt = null;
         ResultSet rs = null;
         try {
@@ -608,8 +647,7 @@ public abstract class BaseQueryTool implements QueryToolInterface {
         return rows;
     }
 
-    public List<List<Map<String,Object>>> listAll(List<String> columns, String tableName,Integer pageNumber,Integer pageSize) {
-        logger.info("*****************************columns: "+columns);
+    public Map<String,Object> listAll(List<String> columns, String tableName,Integer pageNumber,Integer pageSize) {
         List<List<Map<String,Object>>> datas = new ArrayList<>();
         Statement stmt = null;
         ResultSet rs = null;
@@ -635,7 +673,11 @@ public abstract class BaseQueryTool implements QueryToolInterface {
             JdbcUtils.close(rs);
             JdbcUtils.close(stmt);
         }
-        return datas;
+        Map<String,Object> ret=new HashMap(){{
+                this.put("datas",datas);
+                this.put("total",getRows(tableName));
+        }};
+        return ret;
     }
 
     public String getDBName(){
@@ -678,7 +720,7 @@ public abstract class BaseQueryTool implements QueryToolInterface {
                 columnMsg.setName(name);
                 columnMsg.setComment(comment);
                 String showType=this.judgeShowType(type);
-                columnMsg.setIndicator(getIndicator(name,tableName,showType));
+                columnMsg.setIndicator(this.getIndicator(name,tableName,showType));
                 logger.info("*************************showType: "+showType);
                 if("dateType".equals(showType)){
                     columnMsg.setType("date");
@@ -722,7 +764,6 @@ public abstract class BaseQueryTool implements QueryToolInterface {
             stmt = connection.createStatement();
             //获取valid数量
             String sql = sqlBuilder.getMissing(fieldName,tableName);
-            logger.info("=================getValidSql: "+sql);
             rs = stmt.executeQuery(sql);
             if(rs.next()){
                 missing = rs.getLong(1);
@@ -732,7 +773,6 @@ public abstract class BaseQueryTool implements QueryToolInterface {
                 validMap.put("rate",getRate(total-missing,total));
             }
             sql=sqlBuilder.getMostCommon(fieldName,tableName);
-            logger.info("=================getMostCommon: "+sql);
             rs = stmt.executeQuery(sql);
             if(rs.next()){
                 num = rs.getLong(1);
@@ -769,6 +809,13 @@ public abstract class BaseQueryTool implements QueryToolInterface {
     }
 
     private String getRate(Long a,Long b){
+        if(b==0){
+            logger.info("表记录数为0，除数不能为0");
+            throw  new RuntimeException("表记录数为0，除数不能为0");
+        }
+        if (a==0){
+            return "0%";
+        }
         // 创建一个数值格式化对象
         NumberFormat numberFormat = NumberFormat.getInstance();
         // 设置精确到小数点后2位
@@ -777,7 +824,36 @@ public abstract class BaseQueryTool implements QueryToolInterface {
         return result + "%";
     }
 
-    private List<Chart<Date>> getDateChart(String name,String tableName) {
+    private String getDateChart(String name,String tableName) {
+        Date dt=new Date();
+        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = connection.createStatement();
+            //获取sql
+            String sql = sqlBuilder.getDateStatistics(name,tableName);
+            rs = stmt.executeQuery(sql);
+            if (rs.next()) {
+                Date temp=rs.getTimestamp(1);
+                if(temp!=null){
+                    dt=temp;
+                }
+
+            }
+        } catch (SQLException e) {
+            logger.error("[getTableNames Exception] --> "
+                    + "the exception message is:" + e.getMessage());
+        } finally {
+            JdbcUtils.close(rs);
+            JdbcUtils.close(stmt);
+        }
+        logger.info("date-------->"+sdf.format(dt));
+        return sdf.format(dt);
+        //return dt.toString();
+    }
+
+    /*private List<Chart<Date>> getDateChart(String name,String tableName) {
         List<Chart<Date>> charts = new ArrayList<>();
         Statement stmt = null;
         ResultSet rs = null;
@@ -804,7 +880,7 @@ public abstract class BaseQueryTool implements QueryToolInterface {
             JdbcUtils.close(stmt);
         }
         return charts;
-    }
+    }*/
 
     private Long getUnique(String name,String tableName) {
         Long ret = 0L;
@@ -836,7 +912,6 @@ public abstract class BaseQueryTool implements QueryToolInterface {
             stmt = connection.createStatement();
             //获取sql
             String sql = sqlBuilder.getNumberStatistics(name,tableName);
-            logger.info("********************sql: "+sql);
             rs = stmt.executeQuery(sql);
             while (rs.next()) {
                 Chart<Float> chart=new Chart();
@@ -848,7 +923,6 @@ public abstract class BaseQueryTool implements QueryToolInterface {
                 chart.setMax(max);
                 chart.setNumber(number);
             }
-            logger.info("****************************number-charts: "+charts);
         } catch (SQLException e) {
             logger.error("[getTableNames Exception] --> "
                     + "the exception message is:" + e.getMessage());
@@ -883,9 +957,13 @@ public abstract class BaseQueryTool implements QueryToolInterface {
             stmt = connection.createStatement();
             //获取sql
             String sql = sqlBuilder.getTableSize(tableName,tableSchema);
-            logger.info("=========tableSize Sql: "+sql);
             rs = stmt.executeQuery(sql);
             if(rs.next()){
+                if(sqlBuilder.getClass()==SqlServerDatabaseMeta.class){
+                    return  rs.getString(4);
+                }else if(sqlBuilder.getClass()== PostgresqlDatabaseMeta.class){
+                    return  rs.getString(1);
+                }
                 tableSize=rs.getLong(1)/1024;
             }
         } catch (SQLException e) {
@@ -896,5 +974,70 @@ public abstract class BaseQueryTool implements QueryToolInterface {
             JdbcUtils.close(stmt);
         }
         return tableSize+"KB";
+    }
+
+    @Override
+    public Map<String, Object> getSchemaMetadata(String schema) {
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> getTableMetadata(String schema, String tableName) {
+        return null;
+    }
+
+    @Override
+    public List<Map<String, Object>> getTablesMetadata(String schema) {
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> getColumnMetadata(String schema, String tableName, String columnName) {
+        return null;
+    }
+
+    @Override
+    public List<Map<String, Object>> getColumnsMetadata(String schema, String tableName) {
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> getIndexMetadata(String schema, String tableName, String indexName) {
+        return null;
+    }
+
+    @Override
+    public List<Map<String, Object>> getIndexesMetadata(String schema, String tableName) {
+        return null;
+    }
+
+    @Override
+    public List<String> getIndexName(String schema, String tableName) {
+        String indexName;
+        Statement stmt = null;
+        ResultSet rs = null;
+        List<String> indexNames = new ArrayList<>();
+        try {
+            stmt = connection.createStatement();
+            //获取sql
+            String sql = sqlBuilder.getIndexName(schema,tableName);
+            rs = stmt.executeQuery(sql);
+            while (rs.next()) {
+                indexName = rs.getString(1);
+                indexNames.add(indexName);
+            }
+        } catch (SQLException e) {
+            logger.error("[getTableNames Exception] --> "
+                    + "the exception message is:" + e.getMessage());
+        } finally {
+            JdbcUtils.close(rs);
+            JdbcUtils.close(stmt);
+        }
+        return indexNames;
+    }
+
+    @Override
+    public Boolean dataSourceTest(String databaseName) {
+        return null;
     }
 }

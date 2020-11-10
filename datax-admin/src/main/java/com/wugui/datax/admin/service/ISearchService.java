@@ -15,7 +15,7 @@ public interface ISearchService {
 
     List<Search> listSearchs(String keyword, Integer pageNum, Integer pageSize);
 
-    Search getSearchById(Long id);
+    Search getSearchById(Long id) throws Exception;
 
     void remove(Long id);
 }

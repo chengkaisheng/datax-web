@@ -32,5 +32,8 @@ public class HiveDatabaseMeta extends BaseDatabaseMeta implements DatabaseInterf
         return "show databases";
     }
 
-
+    @Override
+    public String getSQLQueryTables(String... tableSchema) {
+        return "show tables in "+tableSchema[0];
+    }
 }

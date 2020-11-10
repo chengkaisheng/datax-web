@@ -122,7 +122,7 @@ public class JobThread extends Thread {
                     ShardingUtil.setShardingVo(new ShardingUtil.ShardingVO(tgParam.getBroadcastIndex(), tgParam.getBroadcastTotal()));
 
                     // execute
-                    JobLogger.log("<br>----------- datax-web job execute start -----------<br>----------- Param:" + tgParam.getExecutorParams());
+                    JobLogger.log("<br>----------- DataElit job execute start -----------<br>----------- Param:" + tgParam.getExecutorParams());
 
                     if (tgParam.getExecutorTimeout() > 0) {
                         // limit timeout
@@ -136,7 +136,7 @@ public class JobThread extends Thread {
                             executeResult = futureTask.get(tgParam.getExecutorTimeout(), TimeUnit.MINUTES);
                         } catch (TimeoutException e) {
 
-                            JobLogger.log("<br>----------- datax-web job execute timeout");
+                            JobLogger.log("<br>----------- DataElit job execute timeout");
                             JobLogger.log(e);
 
                             executeResult = new ReturnT<>(IJobHandler.FAIL_TIMEOUT.getCode(), "job execute timeout ");
@@ -157,7 +157,7 @@ public class JobThread extends Thread {
                                         : executeResult.getMsg());
                         executeResult.setContent(null);    // limit obj size
                     }
-                    JobLogger.log("<br>----------- datax-web job execute end(finish) -----------<br>----------- ReturnT:" + executeResult);
+                    JobLogger.log("<br>----------- DataElit job execute end(finish) -----------<br>----------- ReturnT:" + executeResult);
 
                 } else {
                     if (idleTimes > 30) {
@@ -176,7 +176,7 @@ public class JobThread extends Thread {
                 String errorMsg = stringWriter.toString();
                 executeResult = new ReturnT<>(ReturnT.FAIL_CODE, errorMsg);
 
-                JobLogger.log("<br>----------- JobThread Exception:" + errorMsg + "<br>----------- datax-web job execute end(error) -----------");
+                JobLogger.log("<br>----------- JobThread Exception:" + errorMsg + "<br>----------- DataElit job execute end(error) -----------");
             } finally {
                 // 终止操作暂不监控状态
                 if (tgParam != null && tgParam.getJobId() != -1) {
@@ -210,6 +210,6 @@ public class JobThread extends Thread {
             logger.error(e.getMessage(), e);
         }
 
-        logger.info(">>>>>>>>>>> datax-web JobThread stoped, hashCode:{}", Thread.currentThread());
+        logger.info(">>>>>>>>>>> DataElit JobThread stoped, hashCode:{}", Thread.currentThread());
     }
 }

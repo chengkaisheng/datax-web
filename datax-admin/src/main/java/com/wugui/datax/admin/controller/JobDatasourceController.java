@@ -3,21 +3,28 @@ package com.wugui.datax.admin.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.api.R;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wugui.datax.admin.core.util.LocalCacheUtil;
+import com.wugui.datax.admin.entity.ColumnMsg;
 import com.wugui.datax.admin.entity.JobDatasource;
 import com.wugui.datax.admin.service.DatasourceQueryService;
 import com.wugui.datax.admin.service.JobDatasourceService;
 import com.wugui.datax.admin.tool.database.TableInfo;
+import com.wugui.datax.admin.tool.query.BaseQueryTool;
+import com.wugui.datax.admin.tool.query.QueryToolFactory;
+import com.wugui.datax.admin.util.AESUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.List;
+import java.sql.SQLException;
+import java.util.*;
 
 /**
  * jdbc数据源配置控制器层
@@ -150,8 +157,65 @@ public class JobDatasourceController extends BaseController {
 
     @GetMapping("/tableInfos")
     @ApiOperation("获取一个数据源下的所有表及表的注释信息")
-    public R<List<TableInfo>> datasourceTableInfo(@RequestParam Long id, @RequestParam String schema){
+    public R<List<TableInfo>> datasourceTableInfo(@RequestParam Long id, @RequestParam String schema) throws IOException, SQLException {
         List<TableInfo> tableInfos = datasourceQueryService.getTableInfos(id, schema);
+        Set<TableInfo> tableInfoSet = new HashSet<>(tableInfos);
+        tableInfos.clear();
+        tableInfos.addAll(tableInfoSet);
         return success(tableInfos);
+    }
+
+    @GetMapping("{tableName}/columnInfos")
+    @ApiOperation("获取一张表下的所有字段及注释信息")
+    public R<List<ColumnMsg>> datasourceColumnInfos(@RequestParam Long id, @PathVariable String tableName) throws IOException {
+        return success(datasourceQueryService.getColumnSchema(id, tableName));
+    }
+
+
+    @GetMapping("/project")
+    @ApiOperation("查询一个项目下的所有数据源")
+    @ApiImplicitParams(
+            {@ApiImplicitParam(paramType = "query", dataType = "String", name = "current", value = "当前页", defaultValue = "1", required = true),
+                    @ApiImplicitParam(paramType = "query", dataType = "String", name = "size", value = "一页大小", defaultValue = "10", required = true),
+                    @ApiImplicitParam(paramType = "query", dataType = "Boolean", name = "ifCount", value = "是否查询总数", defaultValue = "true"),
+                    @ApiImplicitParam(paramType = "query", dataType = "String", name = "ascs", value = "升序字段，多个用逗号分隔"),
+                    @ApiImplicitParam(paramType = "query", dataType = "String", name = "descs", value = "降序字段，多个用逗号分隔"),
+                    @ApiImplicitParam(paramType = "query", required = true, dataType = "Integer", name = "projectId", value = "项目id"),
+                    @ApiImplicitParam(paramType = "query", dataType = "String", name = "datasourceName", value = "数据源名称")
+            })
+    public R<IPage<JobDatasource>> selectByProjectId(@RequestParam(value = "projectId",required = true) Integer projectId, @RequestParam(name = "datasourceName", required = false) String datasourceName){
+        BaseForm form = new BaseForm();
+        QueryWrapper<JobDatasource> queryWrapper = new QueryWrapper<JobDatasource>().eq("project_id", projectId);
+        if(!StringUtils.isEmpty(datasourceName)){
+            queryWrapper.like("datasource_name", datasourceName);
+        }
+        QueryWrapper<JobDatasource> query = (QueryWrapper<JobDatasource>) form.pageQueryWrapperCustom(form.getParameters(), queryWrapper);
+        Page<JobDatasource> data = jobJdbcDatasourceService.page(form.getPlusPagingQueryEntity(), query);
+        List<JobDatasource> records = data.getRecords();
+        //为前端测试用
+        records.forEach((jobDatasource -> {
+            Map<String,String> secretMap = new HashMap<>();
+            secretMap.put("u", AESUtil.decrypt(jobDatasource.getJdbcUsername()));
+            secretMap.put("p", AESUtil.decrypt(jobDatasource.getJdbcPassword()));
+            jobDatasource.setSecretMap(secretMap);
+        }));
+        return success(data);
+    }
+
+    @GetMapping("/calculateDataSource")
+    @ApiOperation("获取一个项目的计算数据源")
+    public R<List<JobDatasource>> getCalculateDataSource(@RequestParam(value = "projectId",required = true) Integer projectId,@RequestParam(name = "datasourceName", required = false) String datasourceName){
+        QueryWrapper<JobDatasource> queryWrapper = new QueryWrapper<JobDatasource>().eq("project_id",projectId)
+                .like(StringUtils.isNotEmpty(datasourceName),"datasource_name",datasourceName)
+                .in("datasource","hive","impala","spark","flink");
+        return success(jobJdbcDatasourceService.list(queryWrapper));
+    }
+
+    @PostMapping("testImpala")
+    public R<String> extentsTest(Long datasourceId){
+        JobDatasource jobDatasource = jobJdbcDatasourceService.getById(datasourceId);
+        BaseQueryTool queryTool = QueryToolFactory.getByDbType(jobDatasource);
+        queryTool.dataSourceTest(jobDatasource.getDatabaseName());
+        return R.ok("成功");
     }
 }

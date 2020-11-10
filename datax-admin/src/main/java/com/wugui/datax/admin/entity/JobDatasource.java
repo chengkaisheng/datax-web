@@ -10,6 +10,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * jdbc数据源配置实体类(job_jdbc_datasource)
@@ -140,4 +141,11 @@ public class JobDatasource extends Model<JobDatasource> {
     protected Serializable pkVal() {
         return this.id;
     }
+
+
+    @ApiModelProperty("对应项目id")
+    private int projectId;
+
+    @TableField(exist = false)
+    private Map<String,String> secretMap;
 }

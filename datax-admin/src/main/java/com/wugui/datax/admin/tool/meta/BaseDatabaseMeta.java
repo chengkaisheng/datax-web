@@ -17,7 +17,12 @@ public abstract class BaseDatabaseMeta implements DatabaseInterface {
 
     @Override
     public String getSQLQueryTablesNameComments() {
-        return "select table_name,table_comment from information_schema.tables where table_schema=?";
+        return "select table_name,table_comment,data_length from information_schema.tables where table_schema=?";
+    }
+
+    @Override
+    public String getSQLQueryTablesNameComments(String schema) {
+        return null;
     }
 
     @Override
@@ -80,6 +85,7 @@ public abstract class BaseDatabaseMeta implements DatabaseInterface {
         return "select database()";
     }
 
+    //SQLServer可能存在除数为0错误，step字段
     @Override
     public String getNumberStatistics(String name,String tableName){
         return String.format("select minv+floor((b.%s - a.minv)/step)*step as start_bound,(floor((b.%s - a.minv)/step)+1)*step+minv as end_bound,count(1) from %s b left join (select min(a.%s) minv, (max(a.%s) - min(a.%s))/8 step from %s a) a on 1 = 1 group by floor((b.%s - a.minv)/step),minv,step order by start_bound asc"
@@ -93,7 +99,14 @@ public abstract class BaseDatabaseMeta implements DatabaseInterface {
 
     @Override
     public String getDateStatistics(String name, String tableName) {
-        return "select from_unixtime(UNIX_TIMESTAMP(minv)+floor((UNIX_TIMESTAMP(b."+name+") - UNIX_TIMESTAMP(a.minv))/step)*step,'%Y-%m-%d %H:%i:%S'),from_unixtime((floor((UNIX_TIMESTAMP(b."+name+") - UNIX_TIMESTAMP(a.minv))/step)+1)*step+UNIX_TIMESTAMP(minv),'%Y-%m-%d %H:%i:%S'),count(1) from "+tableName+" b left join (select UNIX_TIMESTAMP(min(a."+name+")) minv, (UNIX_TIMESTAMP(max(a."+name+")) - UNIX_TIMESTAMP(min(a."+name+")))/8 step from "+tableName+" a) a on 1 = 1 group by floor((UNIX_TIMESTAMP(b."+name+") - UNIX_TIMESTAMP(a.minv))/step),minv,step";
+        /*
+            select from_unixtime(minv+floor((UNIX_TIMESTAMP(b.dt) - a.minv)/step)*step,'%Y-%m-%d %H:%i:%S'),
+            from_unixtime((floor((UNIX_TIMESTAMP(b.dt) - a.minv)/step)+1)*step+minv,'%Y-%m-%d %H:%i:%S'),
+            count(1) from pv_day_3 b left join (select UNIX_TIMESTAMP(min(a.dt)) minv,
+            (UNIX_TIMESTAMP(max(a.dt)) - UNIX_TIMESTAMP(min(a.dt)))/8 step from pv_day_3 a) a on 1 = 1 group by
+            floor((UNIX_TIMESTAMP(b.dt) - a.minv)/step),minv,step
+         */
+        return "select max("+name+") from "+tableName;
     }
 
     @Override
@@ -115,5 +128,45 @@ public abstract class BaseDatabaseMeta implements DatabaseInterface {
     @Override
     public String getMaxMin(String fieldName, String tableName) {
         return "select max("+fieldName+"),min("+fieldName+") from "+tableName;
+    }
+
+    @Override
+    public String getSchemaMetadata(String schema) {
+        return null;
+    }
+
+    @Override
+    public String getTableMetadata(String schema, String tableName) {
+        return null;
+    }
+
+    @Override
+    public String getTablesMetadata(String schema) {
+        return null;
+    }
+
+    @Override
+    public String getColumnMetadata(String schema, String tableName, String column) {
+        return null;
+    }
+
+    @Override
+    public String getColumnsMetadata(String schema, String tableName) {
+        return null;
+    }
+
+    @Override
+    public String getIndexesMetadata(String schema, String tableName) {
+        return null;
+    }
+
+    @Override
+    public String getIndexMetadata(String schema, String tableName, String index) {
+        return null;
+    }
+
+    @Override
+    public String getIndexName(String schema, String tableName) {
+        return null;
     }
 }

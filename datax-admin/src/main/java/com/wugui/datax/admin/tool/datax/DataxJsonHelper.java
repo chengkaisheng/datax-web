@@ -112,7 +112,7 @@ public class DataxJsonHelper implements DataxJsonInterface {
         } else if (SQL_SERVER.equals(datasource)) {
             readerPlugin = new SqlServerReader();
             buildReader = buildReader();
-        } else if (POSTGRESQL.equals(datasource)) {
+        } else if (POSTGRESQL.equals(datasource) || GREENPLUM.equals(datasource)) {
             readerPlugin = new PostgresqlReader();
             buildReader = buildReader();
         } else if (CLICKHOUSE.equals(datasource)) {
@@ -127,6 +127,13 @@ public class DataxJsonHelper implements DataxJsonInterface {
         } else if (MONGODB.equals(datasource)) {
             readerPlugin = new MongoDBReader();
             buildReader = buildMongoDBReader();
+        }else if(IMPALA.equals(datasource) || DB2.equals(datasource)){
+            String username = readerDatasource.getJdbcUsername();
+            String password = readerDatasource.getJdbcPassword();
+            readerDatasource.setJdbcUsername((username != null && !"".equals(username)) ? username : "default");
+            readerDatasource.setJdbcPassword((password != null && !"".equals(password)) ? password : "default");
+            readerPlugin = new RdbmsReader();
+            buildReader = buildReader();
         }
     }
 
@@ -157,7 +164,7 @@ public class DataxJsonHelper implements DataxJsonInterface {
         } else if (CLICKHOUSE.equals(datasource)) {
             readerPlugin = new ClickHouseReader();
             buildReader = buildReader();
-        } else if (HIVE.equals(datasource) || IMPALA.equals(datasource)) {
+        } else if (HIVE.equals(datasource) || IMPALA.equals(datasource) || DB2.equals(datasource)) {
             String username = readerDatasource.getJdbcUsername();
             String password = readerDatasource.getJdbcPassword();
             readerDatasource.setJdbcUsername((username != null && !"".equals(username)) ? username : "default");

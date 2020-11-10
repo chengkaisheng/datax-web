@@ -91,7 +91,8 @@
 		t.inc_start_id,
 		t.increment_type,
 		t.datasource_id,
-		t.job_type
+		t.job_type,
+		t.job_param
 	</sql>
 
 	<sql id="Project_Column_List">
@@ -201,7 +202,8 @@
 			inc_start_id,
 			increment_type,
 			datasource_id,
-			job_type
+			job_type,
+			job_param
 		) VALUES (
 			#{jobGroup},
 			#{jobCron},
@@ -237,7 +239,8 @@
 			#{incStartId},
 			#{incrementType},
 			#{datasourceId},
-			#{jobType}
+			#{jobType},
+			#{jobParam}
 		);
 		<!--<selectKey resultType="java.lang.Integer" order="AFTER" keyProperty="id">
 			SELECT LAST_INSERT_ID()
@@ -287,7 +290,8 @@
 		    inc_start_id = #{incStartId},
 		    increment_type = #{incrementType},
 		    datasource_id= #{datasourceId},
-		    job_type = #{jobType}
+		    job_type = #{jobType},
+		    job_param = #{jobParam}
 		WHERE id = #{id}
 	</update>
 
@@ -316,6 +320,37 @@
 			and t.trigger_next_time <![CDATA[ <= ]]> #{maxNextTime}
 		ORDER BY id ASC
 		LIMIT #{pagesize}
+	</select>
+
+	<select id="pageConfList" resultType="com.wugui.datax.admin.dto.QualityConfDto">
+		select a.id as id,b.name as projectName,c.datasource_name as dataSourceName,
+		a.add_time as addTime,d.username as userName,a.job_json as jobJson
+		FROM job_info AS a
+		left join job_project as b on  a.project_id = b.id
+		left join job_jdbc_datasource as c on a.datasource_id = c.id
+		left join job_user as d on a.user_id = d.id
+		<where>
+			<if test="name != null and name != '' ">
+				and a.job_desc = #{name}
+			</if>
+			<if test="jobType != null and jobType != '' ">
+				and a.job_type = #{jobType}
+			</if>
+		</where>
+		order by a.add_time desc
+		limit #{offset}, #{pageSize}
+	</select>
+
+	<select id="selectConfCount" resultType="java.lang.Integer">
+		select count(1) from job_info as t
+		<where>
+			<if test="name != null and name != '' ">
+				and t.job_desc = #{name}
+			</if>
+			<if test="jobType != null and jobType != '' ">
+				and t.job_type = #{jobType}
+			</if>
+		</where>
 	</select>
 
 	<update id="scheduleUpdate" parameterType="com.wugui.datax.admin.entity.JobInfo"  >

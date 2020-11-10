@@ -33,6 +33,16 @@ public interface QueryToolInterface {
     List<Map<String, Object>> getTableInfo(String tableName);
 
     /**
+     * 获取指定schema下的所有表信息
+     *
+     * @return
+     */
+    List<Map<String, Object>> getTablesInfo(String schema);
+
+
+    List<Map<String, Object>> getTablesInfo();
+
+    /**
      * 获取当前schema下的所有表
      *
      * @return
@@ -100,4 +110,22 @@ public interface QueryToolInterface {
     String getDBName();
 
     String getTableSize(String tableName, String tableSchema);
+
+    Map<String,Object> getSchemaMetadata(String schema);
+
+    Map<String,Object> getTableMetadata(String schema, String tableName);
+
+    List<Map<String,Object>> getTablesMetadata(String schema);
+
+    Map<String,Object> getColumnMetadata(String schema,String tableName, String columnName);
+
+    List<Map<String,Object>> getColumnsMetadata(String schema,String tableName);
+
+    Map<String,Object> getIndexMetadata(String schema, String tableName, String indexName);
+
+    List<Map<String,Object>> getIndexesMetadata(String schema, String tableName);
+
+    List<String> getIndexName(String schema, String tableName);
+
+    Boolean dataSourceTest(String databaseName);
 }

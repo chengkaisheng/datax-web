@@ -50,7 +50,7 @@ public class OracleDatabaseMeta extends BaseDatabaseMeta implements DatabaseInte
 
     @Override
     public String getSQLQueryTables(String... tableSchema) {
-        return "select table_name from dba_tables where owner='" + tableSchema[0] + "'";
+        return "select table_name from USER_TABLES where TABLESPACE_NAME='" + tableSchema[0].toUpperCase() + "'";
     }
 
     @Override
@@ -86,12 +86,81 @@ public class OracleDatabaseMeta extends BaseDatabaseMeta implements DatabaseInte
 
     @Override
     public String getDateStatistics(String name, String tableName) {
-        return String.format("select minv+floor((b.%s - a.minv)/step)*step as start,(floor((b.%s - a.minv)/step)+1)*step+minv as end,count(1) from %s b left join (select min(a.%s) minv, (max(a.%s) - min(a.%s))/3 step from %s a) a on 1 = 1 group by floor((b.%s - a.minv)/step),minv,step order by start asc",
-                name,name,tableName,name,name,name,tableName,name);
+        /*return String.format("select minv+floor((b.%s - a.minv)/step)*step as start,(floor((b.%s - a.minv)/step)+1)*step+minv as end,count(1) from %s b left join (select min(a.%s) minv, (max(a.%s) - min(a.%s))/3 step from %s a) a on 1 = 1 group by floor((b.%s - a.minv)/step),minv,step order by start asc",
+                name,name,tableName,name,name,name,tableName,name);*/
+        return "select max("+name+") from "+tableName;
+    }
+
+    @Override
+    public String getTableSize(String tableName, String tableSchema) {
+        return "select round(sum(BYTES)/1024,2) from user_segments where segment_name='"+tableName+"'";
     }
 
     @Override
     public String getListAll(String tableName, Integer pageNumber, Integer pageSize,String columnName) {
-        return String.format("select * from (select ROWNUM AS rowno,t.* from %s t) where rowno > (%s-1)*%s and rowno<=%s*%s",tableName,pageNumber,pageSize,pageNumber,pageSize);
+        return String.format("select b.* from (select rn,ri from (select ROWNUM AS rn,rowid ri from %s t) where rn > (%s-1)*%s and rn<=%s*%s) a,%s b where a.ri=b.rowid"
+                ,tableName,pageNumber,pageSize,pageNumber,pageSize,tableName);
+    }
+
+    @Override
+    public String getMostCommon(String name, String tableName) {
+        return "select * from (select count(*) num,"+name+" from "+tableName+" group by "+name+" ORDER BY num desc) where rownum=1";
+    }
+
+    @Override
+    public String getSchemaMetadata(String schema) {
+        return "SELECT t.USERNAME , t.CREATED FROM USER_USERS t WHERE t.USERNAME = '"+schema+"'";
+    }
+
+    @Override
+    public String getTableMetadata(String schema, String tableName) {
+        return "SELECT a.TABLE_NAME , a.NUM_ROWS , b.COMMENTS ,c.BYTES , a.AVG_ROW_LEN , a.AVG_SPACE " +
+                "FROM USER_TABLES a  " +
+                "INNER JOIN USER_TAB_COMMENTS b " +
+                "ON a.TABLE_NAME = b.TABLE_NAME  " +
+                "INNER JOIN USER_SEGMENTS c " +
+                "ON a.TABLE_NAME = c.SEGMENT_NAME WHERE a.TABLESPACE_NAME = '"+schema+"' AND a.TABLE_NAME='"+tableName+"'";
+    }
+
+    @Override
+    public String getTablesMetadata(String schema) {
+        return "SELECT a.TABLE_NAME , a.NUM_ROWS , b.COMMENTS ,c.BYTES , a.AVG_ROW_LEN , a.AVG_SPACE FROM USER_TABLES a INNER JOIN USER_TAB_COMMENTS b ON a.TABLE_NAME = b.TABLE_NAME  INNER JOIN USER_SEGMENTS c ON a.TABLE_NAME = c.SEGMENT_NAME WHERE a.TABLESPACE_NAME = '"+schema.toUpperCase()+"'";
+    }
+
+    @Override
+    public String getColumnMetadata(String schema, String tableName, String column) {
+        return super.getColumnMetadata(schema, tableName, column);
+    }
+
+    @Override
+    public String getColumnsMetadata(String schema, String tableName) {
+        return "SELECT a.COLUMN_NAME ,a.COMMENTS , b.COLUMN_ID ,a.OWNER  , b.DATA_DEFAULT ,b.DATA_LENGTH , b.DATA_PRECISION , b.DATA_SCALE , b.DATA_TYPE " +
+                "FROM all_col_comments a " +
+                ",all_tab_columns b " +
+                "WHERE a.table_name = b.table_name and a.OWNER = b.OWNER and a.Column_name = b.Column_name and  " +
+                "a.table_name = '"+tableName.toUpperCase()+"' and a.OWNER='"+schema.toUpperCase()+"'";
+    }
+
+    @Override
+    public String getIndexesMetadata(String schema, String tableName) {
+        return "SELECT t.OWNER, t.INDEX_NAME , t.INDEX_TYPE , t.UNIQUENESS , t.COMPRESSION , t.STATUS  FROM ALL_INDEXES t WHERE t.OWNER = '"+schema.toUpperCase()+"' AND  t.TABLE_NAME = '"+tableName.toUpperCase()+"'";
+    }
+
+    @Override
+    public String getIndexMetadata(String schema, String tableName, String index) {
+        return "SELECT t.OWNER, t.INDEX_NAME , t.INDEX_TYPE , t.UNIQUENESS , t.COMPRESSION , t.STATUS  FROM ALL_INDEXES t WHERE t.OWNER = '"+schema.toUpperCase()+"' AND  t.TABLE_NAME = '"+tableName.toUpperCase()+"'";
+    }
+
+    @Override
+    public String getSQLQueryTablesNameComments(String schema) {
+        return "SELECT b.tableName , b.comments , d.BYTES  FROM (select t.table_name tableName, f.comments comments " +
+                "  from user_tables t " +
+                " inner join user_tab_comments f " +
+                "    on t.table_name = f.table_name WHERE t.tablespace_name='"+schema.toUpperCase()+"') b INNER JOIN user_segments d ON b.tableName=d.SEGMENT_NAME";
+    }
+
+    @Override
+    public String getIndexName(String schema, String tableName) {
+        return "SELECT t.INDEX_NAME FROM user_indexes t WHERE t.TABLE_OWNER = '"+schema.toUpperCase()+"' AND t.TABLE_NAME = '"+tableName.toUpperCase()+"'";
     }
 }

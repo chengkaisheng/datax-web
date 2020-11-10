@@ -2,19 +2,28 @@ package com.wugui.datax.admin.tool.query;
 
 
 import com.mongodb.*;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoIterable;
 import com.wugui.datax.admin.core.util.LocalCacheUtil;
+import com.wugui.datax.admin.entity.ColumnMsg;
 import com.wugui.datax.admin.entity.JobDatasource;
+import com.wugui.datax.admin.util.JdbcUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.bson.BsonDocument;
+import org.bson.BsonString;
+import org.bson.BsonValue;
 import org.bson.Document;
+import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.conversions.Bson;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.*;
 
 
 public class MongoDBQueryTool {
@@ -151,5 +160,58 @@ public class MongoDBQueryTool {
             }
         }
         return addressList;
+    }
+
+    public Long getRows(String collectionName){
+        MongoCollection<Document> collection = collections.getCollection(collectionName);
+        return collection.count();
+    }
+
+    public String getTableSize(String collectionName){
+        Document document=collections.runCommand(new Document("collStats",collectionName));
+        Integer tableSize=(Integer) document.get("totalSize")/1024;
+        return tableSize+"KB";
+    }
+
+    public Map<String, Object> listAll(List<String> columns, String tableName) {
+        //List<List<Map<String,Object>>> datas=new ArrayList<>();
+        List<Set> rowList=new ArrayList<>();
+        Map<String,Object> ret=new HashMap();
+        /*List<String> subColumns=new ArrayList<>();
+        for (String column:columns) {
+            subColumns.add(column.substring(0,column.indexOf(':')));
+        }*/
+        MongoCollection<Document> collection=collections.getCollection(tableName);
+        collection.find().forEach(new Block<Document>() {
+            @Override
+            public void apply(Document document) {
+                rowList.add(document.entrySet());
+            }
+        });
+        ret.put("total",getRows(tableName));
+        ret.put("datas",rowList);
+        return ret;
+    }
+
+    public List<ColumnMsg> getColumnSchema(List<String> columns,String tableName) {
+        List<ColumnMsg> columnMsgs = new ArrayList<>();
+        String name="";
+        String type="";
+        for (String column:columns) {
+            ColumnMsg columnMsg=new ColumnMsg();
+            columnMsgs.add(columnMsg);
+            name=column.substring(0,column.indexOf(':'));
+            type=column.substring(column.indexOf(':'));
+            columnMsg.setName(name);
+            columnMsg.setType(type);
+            if("Integer".equals(type)){
+
+            }else if("Date".equals(type)){
+
+            }else {
+
+            }
+        }
+        return columnMsgs;
     }
 }

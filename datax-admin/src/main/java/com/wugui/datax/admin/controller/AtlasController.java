@@ -10,12 +10,16 @@ import com.wugui.datax.admin.entity.JobDatasource;
 import com.wugui.datax.admin.service.ContrastRecordService;
 import com.wugui.datax.admin.service.DatasourceQueryService;
 import com.wugui.datax.admin.service.JobDatasourceService;
+import com.wugui.datax.admin.tool.query.BaseQueryTool;
+import com.wugui.datax.admin.tool.query.MySQLQueryTool;
+import com.wugui.datax.admin.tool.query.QueryToolFactory;
 import com.wugui.datax.admin.util.FastJsonDiff;
 import com.wugui.datax.admin.util.HttpClientHelper;
 import com.wugui.datax.admin.util.MetadataBuildUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.atlas.AtlasClientV2;
+import org.apache.atlas.AtlasException;
 import org.apache.atlas.AtlasServiceException;
 import org.apache.atlas.model.audit.EntityAuditEventV2;
 import org.apache.atlas.model.instance.AtlasEntity;
@@ -23,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -45,23 +50,23 @@ public class AtlasController extends BaseController {
 
     @PostMapping("/import")
     @ApiOperation("导入某一个库下的所有元数据")
-    public ReturnT<String> importMetadata(@RequestParam Long id) throws IOException {
+    public ReturnT<String> importMetadata(@RequestParam Long id) throws IOException, SQLException {
         //查询出该id对应的datasource
         JobDatasource jobDatasource = jobJdbcDatasourceService.getById(id);
         //拼接字符串
-        String[] split = jobDatasource.getJdbcUrl().split("/");
-        String databaseName = split[split.length - 1];
-        System.out.println(databaseName);
-        jobDatasource.setDatabaseName(databaseName);
+        MySQLQueryTool mySQLQueryTool = new MySQLQueryTool(jobDatasource);
+        String schema = mySQLQueryTool.getDBName();
+        System.out.println(schema);
+        jobDatasource.setDatabaseName(schema);
         MetadataBuildUtils.jobDatasource = jobDatasource;
         String coonId = HttpClientHelper.initConnection(jobDatasource);
         AtlasClientV2 atlasClientV2 = new AtlasClientV2(MetadataBuildUtils.getServerUrl(), MetadataBuildUtils.getUserInput());
         Map<String, String> dbGuidMap = MetadataBuildUtils.setRdbmsDb(atlasClientV2, coonId);
         List<String> tables = datasourceQueryService.getTables(id, null);
-        Map<String, String> tableGuidMap = MetadataBuildUtils.setRdbmsTables(atlasClientV2, coonId, databaseName, tables, dbGuidMap.get(databaseName));
+        Map<String, String> tableGuidMap = MetadataBuildUtils.setRdbmsTables(atlasClientV2, coonId, schema, tables, dbGuidMap.get(schema));
         for (String tableName : tables) {
             List<String> columnNames = datasourceQueryService.getColumns(id, tableName);
-            MetadataBuildUtils.setRdbmsColumns(atlasClientV2, coonId, databaseName, tableName, columnNames, tableGuidMap.get(tableName));
+            MetadataBuildUtils.setRdbmsColumns(atlasClientV2, coonId, schema, tableName, columnNames, tableGuidMap.get(tableName));
         }
         return new ReturnT(200, "写入元数据成功");
     }
@@ -69,21 +74,21 @@ public class AtlasController extends BaseController {
 
     @PostMapping("/import1")
     @ApiOperation("优化后批量导入mysql元数据")
-    public ReturnT importMetadata1(@RequestParam Long id) throws IOException {
+    public ReturnT importMetadata1(@RequestParam Long id) throws IOException, SQLException {
         //查询出该id对应的datasource
         JobDatasource jobDatasource = jobJdbcDatasourceService.getById(id);
         //拼接字符串
-        String[] split = jobDatasource.getJdbcUrl().split("/");
-        String databaseName = split[split.length - 1];
-        System.out.println(databaseName);
-        jobDatasource.setDatabaseName(databaseName);
+        MySQLQueryTool mySQLQueryTool = new MySQLQueryTool(jobDatasource);
+        String schema = mySQLQueryTool.getDBName();
+        System.out.println(schema);
+        jobDatasource.setDatabaseName(schema);
         MetadataBuildUtils.jobDatasource = jobDatasource;
         String coonId = HttpClientHelper.initConnection(jobDatasource);
         AtlasClientV2 atlasClientV2 = new AtlasClientV2(MetadataBuildUtils.getServerUrl(), MetadataBuildUtils.getUserInput());
         Map<String, String> dbGuidMap = MetadataBuildUtils.setRdbmsDb(atlasClientV2, coonId);
         Map<String, List<String>> columnToTable = new HashMap<>();
         List<String> tables = datasourceQueryService.getTables(id, null);
-        Map<String, String> tableGuidMap = MetadataBuildUtils.setRdbmsTables(atlasClientV2, coonId, databaseName, tables, dbGuidMap.get(databaseName));
+        Map<String, String> tableGuidMap = MetadataBuildUtils.setRdbmsTables(atlasClientV2, coonId, schema, tables, dbGuidMap.get(schema));
         for (String table : tables) {
             List<String> columnNames = datasourceQueryService.getColumns(id, table);
             columnToTable.put(table, columnNames);
@@ -94,7 +99,7 @@ public class AtlasController extends BaseController {
         {
             try {
                 Map<String, String> relationship = MetadataBuildUtils.buildRelation(tableGuidMap.get(key), "mysql_test1_table");
-                Map<String, Map<String, String>> columnsInfo = HttpClientHelper.getColumnsInfo(coonId, databaseName, key, value);
+                Map<String, Map<String, String>> columnsInfo = HttpClientHelper.getColumnsInfo(coonId, schema, key, value);
                 for (Map.Entry<String, Map<String, String>> stringMapEntry : columnsInfo.entrySet()) {
                     String columnName = stringMapEntry.getKey();
                     Map<String, String> properties = stringMapEntry.getValue();
@@ -244,5 +249,46 @@ public class AtlasController extends BaseController {
         QueryWrapper<ContrastRecord> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("guid", guid);
         return new ReturnT<>(contrastRecordService.list(queryWrapper));
+    }
+
+    @PostMapping("/clickHouse/import")
+    public ReturnT clickHouseMetadata(@RequestParam Long datasourceId) throws AtlasException, IOException {
+        JobDatasource jobDatasource = jobJdbcDatasourceService.getById(datasourceId);
+        jobDatasource.setDatabaseName(getDatabaseName(jobDatasource.getJdbcUrl()));
+        MetadataBuildUtils.jobDatasource = jobDatasource;
+        AtlasClientV2 atlasClientV2 = new AtlasClientV2(MetadataBuildUtils.getServerUrl(), MetadataBuildUtils.getUserInput());
+        String coonId = HttpClientHelper.initConnection(jobDatasource);
+        //创建instance
+        MetadataBuildUtils.setRdbmsInstance(atlasClientV2);
+
+
+        //创建database
+
+
+        //创建table
+
+
+        //创建column
+
+
+        //创建index
+
+
+
+        return ReturnT.SUCCESS;
+    }
+
+    private String getDatabaseName(String url){
+        String[] split = url.split("/");
+        String databaseName = split[split.length - 1];
+        return databaseName;
+    }
+
+    public ReturnT importMetadata2(Long datasourceId){
+        JobDatasource jobDatasource = jobJdbcDatasourceService.getById(datasourceId);
+        BaseQueryTool queryTool = QueryToolFactory.getByDbType(jobDatasource);
+        String dbName = queryTool.getDBName();
+        jobDatasource.setDatabaseName(dbName);
+        return null;
     }
 }

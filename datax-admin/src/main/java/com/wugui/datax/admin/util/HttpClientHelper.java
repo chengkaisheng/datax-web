@@ -25,6 +25,7 @@ public class HttpClientHelper {
 
     private static Log logger = LogFactory.getLog(HttpClientHelper.class);
 
+
     public static String sendPost(String urlParam) throws HttpException, IOException {
         // 创建httpClient实例对象
         HttpClient httpClient = HttpClientUtil.getInstance();
@@ -151,24 +152,10 @@ public class HttpClientHelper {
     public static Map<String, String> parse(String response){
         Map<String, String> mapInfo = new HashMap<>();
         Map<String, JSONObject> map = JSONObject.parseObject(response, HashMap.class);
-        /*System.out.println(map);
-        if(map.get("data") == null){
-            System.out.println("json解析异常：data=null");
-        }*/
         JSONObject jsonObject = map.get("data");
         JSONObject objectInfo = jsonObject.getJSONObject("objectInfo");
         JSONObject object1 = objectInfo.getJSONObject("object");
         List<Property> list = object1.getJSONArray("properties").toJavaList(Property.class);
-        /*JSONArray properties1 = (JSONArray) properties2;
-        System.out.println(jsonObject.toString());
-        String data = jsonObject.toString();
-        Map<String, JSONObject> dataMap = JSONObject.parseObject(data, HashMap.class);
-        String result = dataMap.get("objectInfo").toString();
-        Map<String, JSONObject> resultMap = JSONObject.parseObject(result, HashMap.class);
-        String object = resultMap.get("object").toString();
-        Map<String, JSONArray> objectMap = JSONObject.parseObject(object, HashMap.class);
-        JSONArray properties = objectMap.get("properties");
-        List<Property> list = properties.toJavaList(Property.class);*/
         for (Property property : list) {
             mapInfo.put(property.getId(), property.getValue());
         }
@@ -239,42 +226,7 @@ public class HttpClientHelper {
         return map;
     }
 
-
-    /*public static Map<String, String> getDBObjectInfo(String id) throws HttpException, IOException{
-        String requestBody = "{\"query\":\"\\n    query getDBObjectInfo($navNodeId: ID!, $filter: ObjectPropertyFilter) {\\n  objectInfo: navNodeInfo(nodePath: $navNodeId) {\\n    object {\\n      features\\n      properties(filter: $filter) {\\n        id\\n        category\\n        dataType\\n        description\\n        displayName\\n        features\\n        value\\n      }\\n    }\\n  }\\n}\\n    \",\"variables\":{\"navNodeId\":\"database://"+ id +"\"}}";
-        System.out.println(requestBody);
-        String response = sendPost(URL, requestBody);
-        //解析json
-        Map<String, String> mapInfo = new HashMap<>();
-
-        return parse(response);
+    public static Map<String, Map<String, String>> getIndexesInfo(String connId, String databaseName, String tableName, List<String> indexes) {
+        return null;
     }
-
-    public static Map<String, String> getDatabaseInfo(String id) throws IOException {
-        String requestBody = "{\"query\":\"\\n    query getDBObjectInfo($navNodeId: ID!, $filter: ObjectPropertyFilter) {\\n  objectInfo: navNodeInfo(nodePath: $navNodeId) {\\n    object {\\n      features\\n      properties(filter: $filter) {\\n        id\\n        category\\n        dataType\\n        description\\n        displayName\\n        features\\n        value\\n      }\\n    }\\n  }\\n}\\n    \",\"variables\":{\"navNodeId\":\"database://"+id+"/org.jkiss.dbeaver.ext.mysql.model.MySQLCatalog/datax_web\"}}";
-        String response = sendPost(URL, requestBody);
-        return parse(response);
-    }
-
-    public static Map<String,String> getTableInfo(String id) throws IOException {
-        String requestBody = "{\n" +
-                "    \"query\": \"\\n    query getDBObjectInfo($navNodeId: ID!, $filter: ObjectPropertyFilter) {\\n  objectInfo: navNodeInfo(nodePath: $navNodeId) {\\n    object {\\n      features\\n      properties(filter: $filter) {\\n        id\\n        category\\n        dataType\\n        description\\n        displayName\\n        features\\n        value\\n      }\\n    }\\n  }\\n}\\n    \",\n" +
-                "    \"variables\": {\n" +
-                "        \"navNodeId\": \"database://"+id+"/org.jkiss.dbeaver.ext.mysql.model.MySQLCatalog/datax_web/org.jkiss.dbeaver.ext.mysql.model.MySQLTable/job_group\"\n" +
-                "    }\n" +
-                "}";
-        String response = sendPost(URL, requestBody);
-        return parse(response);
-    }
-
-    public static Map<String,String> getColumnInfo(String id) throws IOException {
-        String requestBody = "{\n" +
-                "    \"query\": \"\\n    query getDBObjectInfo($navNodeId: ID!, $filter: ObjectPropertyFilter) {\\n  objectInfo: navNodeInfo(nodePath: $navNodeId) {\\n    object {\\n      features\\n      properties(filter: $filter) {\\n        id\\n        category\\n        dataType\\n        description\\n        displayName\\n        features\\n        value\\n      }\\n    }\\n  }\\n}\\n    \",\n" +
-                "    \"variables\": {\n" +
-                "        \"navNodeId\": \"database://"+id+"/org.jkiss.dbeaver.ext.mysql.model.MySQLCatalog/datax_web/org.jkiss.dbeaver.ext.mysql.model.MySQLTable/job_group/org.jkiss.dbeaver.ext.mysql.model.MySQLTableColumn/id\"\n" +
-                "    }\n" +
-                "}";
-        String response = sendPost(URL, requestBody);
-        return parse(response);
-    }*/
 }

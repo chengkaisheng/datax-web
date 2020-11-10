@@ -17,4 +17,5 @@ public class Search {
     private Long jdbcDatasourceId;
     private Long rows;
     private String size;
+    private Integer cols;
 }

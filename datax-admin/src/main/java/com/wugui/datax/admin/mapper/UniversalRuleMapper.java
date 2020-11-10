@@ -28,4 +28,6 @@ public interface UniversalRuleMapper extends BaseMapper<UniversalRule> {
     List<UniversalRule> selectUniverToPerson();
 
     int selectCountByCode(@Param("code") String code);
+
+    UniversalRule selectByCode(@Param("code")String code);
 }

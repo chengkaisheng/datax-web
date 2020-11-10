@@ -20,7 +20,7 @@
     </update>
 
     <select id="pageList" resultType="com.wugui.datax.admin.entity.UniversalRule">
-        select a.id,a.name,a.code,a.description,a.type,a.personalise_type
+        select a.id,a.name,a.code,a.description,a.type,a.personalise_type,a.relation,a.regular
         from universal_rule as a
         where a.is_delete = 0
         <if test="name != null and name != '' ">
@@ -44,24 +44,42 @@
     </select>
     <select id="selectUniverToPerson" resultType="com.wugui.datax.admin.entity.UniversalRule">
         select
-        concat(a.code,'$',b.code) as code,
+        concat(a.code,':',b.code) as code,
         concat(case a.type when 0 then '完整性'
         when 1 then '准确性'
         when 2 then '规范性'
         when 3 then '唯一性'
         when 4 then '一致性'
         when 5 then '关联性' end,
-        '+',a.name,'+',b.name) as name from
+        ':',a.name,':',b.name) as name from
         universal_rule as a
         inner join personalise_rule as b
         on a.personalise_type = b.join_type
         where
         a.is_delete=0
         and b.is_delete=0
-        and a.personalise_type is not null
+            and a.personalise_type is not null
+        and a.relation=0
+        union all
+        select
+        c.code as code,
+        concat(case c.type when 0 then '完整性'
+        when 1 then '准确性'
+        when 2 then '规范性'
+        when 3 then '唯一性'
+        when 4 then '一致性'
+        when 5 then '关联性' end,
+        ":",c.name) as name
+        from universal_rule as c
+        where c.relation = 1
+        and c.is_delete = 0
+
     </select>
     <select id="selectCountByCode" resultType="java.lang.Integer">
         select count(1) from universal_rule where is_delete=0 and code = #{code}
+    </select>
+    <select id="selectByCode" resultType="com.wugui.datax.admin.entity.UniversalRule">
+        select * from universal_rule where code=#{code}
     </select>
 
 </mapper>

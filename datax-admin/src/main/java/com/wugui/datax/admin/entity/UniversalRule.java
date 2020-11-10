@@ -58,5 +58,15 @@ public class UniversalRule implements Serializable {
 	 */
 	private Date createTime;
 
+	/**
+	 * 是否关联个性化规则 0可以关联 1不可以关联
+	 */
+	private Integer relation;
+
+	/**
+	 * 正则表达式
+	 */
+	private String regular;
+
 
 }

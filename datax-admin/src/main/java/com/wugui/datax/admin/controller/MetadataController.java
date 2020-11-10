@@ -101,8 +101,8 @@ public class MetadataController extends BaseController {
      */
     @GetMapping("/getTableColumns")
     @ApiOperation("根据数据源id和表名获取所有字段名称，类型，comment")
-    public R<Object> getTableColumns(Long datasourceId, String tableName) throws IOException {
-        return success(datasourceQueryService.getTableColumns(datasourceId, tableName));
+    public R<Object> getTableColumns(Long datasourceId,String schema, String tableName) throws IOException {
+        return success(datasourceQueryService.getTableColumns(datasourceId, schema, tableName));
     }
 
     /**
@@ -127,7 +127,7 @@ public class MetadataController extends BaseController {
      */
     @GetMapping("/getRows")
     @ApiOperation("根据数据源id和表名获取记录数")
-    public R<Long> getRowsByTableName(Long datasourceId, String tableName) throws SQLException {
+    public R<Long> getRowsByTableName(Long datasourceId, String tableName) throws Exception {
         return success(datasourceQueryService.getRows(datasourceId,tableName));
     }
 
@@ -142,7 +142,7 @@ public class MetadataController extends BaseController {
      */
     @RequestMapping("/listAll")
     @ApiOperation("根据数据源id和表名获取表所有数据")
-    public R<List<List<Map<String,Object>>>> listALLByTableName(Long datasourceId, String tableName, @RequestParam(required = false,defaultValue ="1") Integer pageNumber, @RequestParam(required = false,defaultValue = "10") Integer pageSize) throws Exception {
+    public R<Map<String,Object>> listALLByTableName(Long datasourceId, String tableName, @RequestParam(required = false,defaultValue ="1") Integer pageNumber, @RequestParam(required = false,defaultValue = "10") Integer pageSize) throws Exception {
         return success(datasourceQueryService.listAll(datasourceId,tableName,pageNumber,pageSize));
     }
 
@@ -158,5 +158,4 @@ public class MetadataController extends BaseController {
     public R<List<ColumnMsg>> getColumnSchema(Long datasourceId, String tableName) throws Exception {
         return success(datasourceQueryService.getColumnSchema(datasourceId,tableName));
     }
-
 }

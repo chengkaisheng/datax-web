@@ -1,47 +1,33 @@
 package com.wugui.datax.admin.tool.query;
 
-import com.wugui.datax.admin.core.util.LocalCacheUtil;
 import com.wugui.datax.admin.entity.JobDatasource;
-import com.wugui.datax.admin.util.DBUtilErrorCode;
-import com.wugui.datax.admin.util.DataXException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.wugui.datax.admin.util.JdbcUtils;
+import org.apache.commons.lang.StringUtils;
 
-import java.io.IOException;
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-public class ImpalaQueryTool{
-
-    private static final Logger logger = LoggerFactory.getLogger(ImpalaQueryTool.class);
-
-    private static Connection connection = null;
-
-    public ImpalaQueryTool(JobDatasource jobDatasource) throws IOException {
-        if (LocalCacheUtil.get(jobDatasource.getDatasourceName()) == null) {
-            getDataSource(jobDatasource);
-        }else {
-            connection = (Connection) LocalCacheUtil.get(jobDatasource.getDatasourceName());
-            if (connection == null) {
-                LocalCacheUtil.remove(jobDatasource.getDatasourceName());
-                getDataSource(jobDatasource);
-            }
-        }
-
-        LocalCacheUtil.set(jobDatasource.getDatasourceName(), connection, 4 * 60 * 60 * 1000);
-
+/**
+ * @author hf
+ * @creat 2020-11-10-11:03
+ */
+public class ImpalaQueryTool extends BaseQueryTool {
+    /**
+     * 构造方法
+     *
+     * @param jobDatasource
+     */
+    public ImpalaQueryTool(JobDatasource jobDatasource) throws SQLException {
+        super(jobDatasource);
     }
 
-    private void getDataSource(JobDatasource jobDatasource) {
-        //加载驱动
-        try{
-            Class.forName(jobDatasource.getJdbcDriverClass());
-            connection = DriverManager.getConnection(jobDatasource.getJdbcUrl(),jobDatasource.getJdbcUsername(),jobDatasource.getJdbcPassword());
-            logger.info("建立连接");
-        }catch (Exception e){
-            throw new DataXException(DBUtilErrorCode.IMPALA_CONN_ERROR," 具体错误信息为："+e);
-        }
-    }
-
+    @Override
     public Boolean dataSourceTest(String databaseName) {
         ResultSet rs = null;
         PreparedStatement ps = null;
@@ -67,4 +53,41 @@ public class ImpalaQueryTool{
         return false;
     }
 
+    @Override
+    public Object getTableColumns(String tableName, String datasource,String databaseName) {
+        Statement stmt = null;
+        ResultSet rs = null;
+        Map<String, List<Map<String,String>>> result = new HashMap<>();
+        List<Map<String,String>> list = new ArrayList<>();
+        try {
+            String querySql;
+            if(StringUtils.isEmpty(databaseName)){
+                querySql = "describe "+ tableName;
+            }else {
+                querySql = "describe "+databaseName+"."+tableName;
+            }
+            //获取查询指定表所有字段的sql语句
+            logger.info("querySql: {}", querySql);
+
+            //获取所有字段的名称，类型，comment
+            stmt = connection.createStatement();
+            rs = stmt.executeQuery(querySql);
+
+            while (rs.next()){
+                Map<String,String> map = new HashMap<>();
+                map.put("COLUMN_NAME", rs.getString(1));
+                map.put("DATA_TYPE", rs.getString(2));
+                map.put("COLUMN_COMMENT", rs.getString(3));
+                list.add(map);
+            }
+        } catch (SQLException e) {
+            logger.error("[getTableColumnNames Exception] --> "
+                    + "the exception message is:" + e.getMessage());
+        } finally {
+            JdbcUtils.close(rs);
+            JdbcUtils.close(stmt);
+        }
+        result.put("datas", list);
+        return result;
+    }
 }
