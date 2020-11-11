@@ -562,24 +562,6 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public ReturnT<String> triggerJob(int jobId, TriggerTypeEnum triggerType, int failRetryCount,
-                                      String executorShardingParam, String executorParam) {
-        /*NetWork netWork=new NetWork();
-        netWork= NetWorkUtils.getNetWork(jobId,netWork);//获取所有节点任务组成网格图
-        netWork.initJob();//初始化所有节点任务
-        netWork.show();//显示所有任务的执行路径
-        String startPoint = String.valueOf(jobId);//获取任务节点的起点
-        netWork.recursive(netWork, startPoint, new ArrayList<>()); //递归计算所有节点的路径
-        JobInfoDetail jobInfoDetail=new JobInfoDetail();
-        jobInfoDetail.setJobInfoId(UUIDUtils.getUUID());
-        jobInfoDetail.setJobInfoName("测试项目");
-        jobInfoDetailMapper.save(jobInfoDetail);
-        NetWorkUtils.getJobInfoLink(jobId,netWork,jobInfoDetail);
-        JobTriggerPoolHelper.trigger(jobId, triggerType, failRetryCount, executorShardingParam, executorParam,jobInfoDetail.getJobInfoId());*/
-        return ReturnT.SUCCESS;
-    }
-
-    @Override
     public ReturnT<String> addVirtualTask(JobInfo jobInfo) {
         ReturnT<String> result=null;
         if (!CronExpression.isValidExpression(jobInfo.getJobCron())) {
@@ -595,14 +577,14 @@ public class JobServiceImpl implements JobService {
             return new ReturnT<>(ReturnT.FAIL_CODE, "任务所属的项目Id不能为空!");
         }
         jobInfo.setJobGroup(1);
-        jobInfo.setTriggerStatus(0);
         // add in db
         jobInfo.setAddTime(new Date());
         jobInfo.setUpdateTime(new Date());
         jobInfo.setGlueUpdatetime(new Date());
-        jobInfo.setJobType("VIRTUAL");
         jobInfo.setExecutorRouteStrategy("RANDOM");
+        jobInfo.setGlueType("BEAN");
         if (jobInfo.getId() < 1) {
+            jobInfo.setTriggerStatus(0);
             int n=jobInfoMapper.save(jobInfo);
             if(n>0){
                 result= new ReturnT<>(ReturnT.SUCCESS_CODE,"保存成功");
@@ -627,12 +609,12 @@ public class JobServiceImpl implements JobService {
             try {
                 Date nextValidTime = new CronExpression(jobInfo.getJobCron()).getNextValidTimeAfter(new Date(System.currentTimeMillis() + JobScheduleHelper.PRE_READ_MS));
                 if (nextValidTime == null) {
-                    return new ReturnT<String>(ReturnT.FAIL_CODE, "jobinfoDetail_field_cron_never_fire");
+                    return new ReturnT<String>(ReturnT.FAIL_CODE, I18nUtil.getString("jobinfo_field_cron_never_fire"));
                 }
                 nextTriggerTime = nextValidTime.getTime();
             } catch (ParseException e) {
                 logger.error(e.getMessage(), e);
-                return new ReturnT<String>(ReturnT.FAIL_CODE, "jobinfoDetail_field_cron_invalid" + " | " + e.getMessage());
+                return new ReturnT<String>(ReturnT.FAIL_CODE, I18nUtil.getString("jobinfo_field_cron_invalid")+ " | " + e.getMessage());
             }
         }
 
@@ -647,13 +629,7 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public List<JobInfoDetail> listVirtualTask(int projectId,String jobInfoId) {
-        return jobInfoDetailMapper.findAll(projectId,jobInfoId);
-    }
-
-    @Override
     public ReturnT<String> triggerVirtualTask(JobInfo jobInfo) {
-//        JobInfoDetail jobInfoVirtualTask=jobInfoDetailMapper.loadById(jobInfoDetail.getJobInfoId());
         JobInfo jobInfoVirtualTask=jobInfoMapper.loadById(jobInfo.getId());
         String jobInfoId=UUIDUtils.getUUID();
         NetWorkUtils.triggerVirtualTask(jobInfoId,jobInfoVirtualTask);

@@ -358,7 +358,7 @@
 		FROM job_info AS t
 		WHERE t.trigger_status = 1
 		and t.trigger_next_time <![CDATA[ <= ]]> #{maxNextTime}
-		and t.job_type='VIRTUAL'
+		and t.job_type='VJOB'
 		ORDER BY id ASC
 		LIMIT #{pagesize}
 	</select>

@@ -141,12 +141,6 @@ public class JobInfoController extends BaseController{
         return jobService.updateVirtualTask(jobInfo);
     }
 
-    @GetMapping("/listVirtualTask")
-    @ApiOperation("获取虚任务列表")
-    public ReturnT<List<JobInfoDetail>> listVirtualTask(int projectId,String jobInfoId){
-        return new ReturnT<>(jobService.listVirtualTask(projectId,jobInfoId));
-    }
-
     @PostMapping(value = "/triggerVirtualTask")
     @ApiOperation("触发虚任务")
     public ReturnT<String> triggerVirtualTask(@RequestBody JobInfo jobInfo) {

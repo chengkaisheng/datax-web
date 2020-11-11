@@ -106,18 +106,6 @@ public interface JobService {
     Map<String, Object> getPageConf(int current, int size, String name);
 
     /**
-     * triggerJob
-     * @param jobId
-     * @param triggerType
-     * @param failRetryCount
-     * @param executorShardingParam
-     * @param executorParam
-     * @return
-     * @throws IOException
-     */
-    ReturnT<String> triggerJob(int jobId, TriggerTypeEnum triggerType, int failRetryCount, String executorShardingParam, String executorParam) throws IOException;
-
-    /**
      * 添加虚任务
      * @param jobInfo
      * @return
@@ -130,12 +118,6 @@ public interface JobService {
      * @return
      */
     ReturnT<String> updateVirtualTask(JobInfo jobInfo);
-
-    /**
-     * 获取虚任务列表
-     * @return
-     */
-    List<JobInfoDetail> listVirtualTask(int projectId,String jobInfoId);
 
     /**
      * 触发虚任务
