@@ -1118,7 +1118,8 @@ public abstract class BaseQueryTool implements QueryToolInterface {
                 if("LOCATION".equals(rs.getString(1))){
                     rs.next();
                     String res = rs.getString(1);
-                    res = res.substring(1, res.length()-1);
+                    res = res.replace("'", "");
+                    res = res.trim();
                     int index = res.indexOf("/", 10);
                     String path = res.substring(index);
                     String df = res.substring(0, index);
