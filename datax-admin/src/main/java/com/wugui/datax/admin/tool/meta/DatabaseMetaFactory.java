@@ -30,6 +30,8 @@ public class DatabaseMetaFactory {
             return Hbase20xsqlMeta.getInstance();
         }else if(JdbcConstants.IMPALA.equalsIgnoreCase(dbType)){
             return ImpalaDatabaseMeta.getInstance();
+        }else if(JdbcConstants.DB2.equalsIgnoreCase(dbType)){
+            return DB2DatabaseMeta.getInstance();
         }
         else {
             throw new UnsupportedOperationException("暂不支持的类型：".concat(dbType));

@@ -66,7 +66,7 @@ public abstract class BaseDatabaseMeta implements DatabaseInterface {
     }
 
     @Override
-    public String getRows(String tableName) {
+    public String getRows(String tableName,String columnName) {
         return "select count(*) from "+tableName;
     }
 
@@ -128,6 +128,11 @@ public abstract class BaseDatabaseMeta implements DatabaseInterface {
     @Override
     public String getMaxMin(String fieldName, String tableName) {
         return "select max("+fieldName+"),min("+fieldName+") from "+tableName;
+    }
+
+    @Override
+    public String getDBSchema() {
+        return null;
     }
 
     @Override

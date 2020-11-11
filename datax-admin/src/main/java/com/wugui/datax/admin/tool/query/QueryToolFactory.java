@@ -4,6 +4,7 @@ import com.wugui.datax.admin.entity.JobDatasource;
 import com.wugui.datax.admin.util.JdbcConstants;
 import com.wugui.datax.admin.util.RdbmsException;
 
+import java.io.IOException;
 import java.sql.SQLException;
 
 /**
@@ -33,8 +34,10 @@ public class QueryToolFactory {
             return getClickHouseQueryToolInstance(jobDatasource);
         }else if (JdbcConstants.HBASE20XSQL.equals(datasource)) {
             return getHbase20XsqlQueryToolQueryToolInstance(jobDatasource);
-        }else if (JdbcConstants.IMPALA.equals(datasource)) {
+        }else if(JdbcConstants.IMPALA.equals(datasource)){
             return getImpalaQueryToolInstance(jobDatasource);
+        }else if(JdbcConstants.DB2.equals(datasource)){
+            return getDB2QueryToolInstance(jobDatasource);
         }
         throw new UnsupportedOperationException("找不到该类型: ".concat(datasource));
     }
@@ -101,11 +104,20 @@ public class QueryToolFactory {
         }
     }
 
-    private static BaseQueryTool getImpalaQueryToolInstance(JobDatasource jdbcDatasource) {
+    private static ImpalaQueryTool getImpalaQueryToolInstance(JobDatasource jdbcDatasource){
         try {
             return new ImpalaQueryTool(jdbcDatasource);
         } catch (SQLException e) {
             throw RdbmsException.asConnException(JdbcConstants.IMPALA,
+                    e, jdbcDatasource.getJdbcUsername(), jdbcDatasource.getDatasourceName());
+        }
+    }
+
+    private static BaseQueryTool getDB2QueryToolInstance(JobDatasource jdbcDatasource) {
+        try {
+            return new DB2QueryTool(jdbcDatasource);
+        } catch (SQLException e) {
+            throw RdbmsException.asConnException(JdbcConstants.DB2,
                     e, jdbcDatasource.getJdbcUsername(), jdbcDatasource.getDatasourceName());
         }
     }

@@ -17,7 +17,7 @@ import java.util.Map;
  * @author hf
  * @creat 2020-11-10-11:03
  */
-public class ImpalaQueryTool extends BaseQueryTool {
+public class ImpalaQueryTool extends BaseQueryTool implements QueryToolInterface {
     /**
      * 构造方法
      *
@@ -29,28 +29,7 @@ public class ImpalaQueryTool extends BaseQueryTool {
 
     @Override
     public Boolean dataSourceTest(String databaseName) {
-        ResultSet rs = null;
-        PreparedStatement ps = null;
-        try {
-            ps = connection.prepareStatement("show databases");
-            rs = ps.executeQuery();
-            return rs.next();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }finally {
-            try {
-                if(rs != null){
-                    rs.close();
-                }
-                if(ps != null){
-                    ps.close();
-                }
-            }catch (SQLException e){
-                logger.error("关闭连接出错");
-            }
-
-        }
-        return false;
+        return connection != null ? true:false;
     }
 
     @Override

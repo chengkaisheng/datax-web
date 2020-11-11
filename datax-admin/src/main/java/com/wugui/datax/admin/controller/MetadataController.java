@@ -160,6 +160,12 @@ public class MetadataController extends BaseController {
         return success(datasourceQueryService.getColumnSchema(datasourceId,tableName));
     }
 
+    @RequestMapping("/getTableSize")
+    @ApiOperation("根据数据源id和表名获取表所有字段名和字段类型以及字段统计结果")
+    public R<String> getTableSize(Long datasourceId, String tableName) throws Exception {
+        return success(datasourceQueryService.getTableSize(datasourceId,tableName));
+    }
+
     @GetMapping("/hive/pathDefault")
     public R<Map<String,String>> getHivePathDefault(Long datasourceId, String schema, String tableName){
         return R.ok(datasourceQueryService.getHivePathDefault(datasourceId, schema, tableName));

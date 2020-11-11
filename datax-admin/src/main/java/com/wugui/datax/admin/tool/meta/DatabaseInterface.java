@@ -65,7 +65,7 @@ public interface DatabaseInterface {
      */
     String getMaxId(String tableName,String primaryKey);
 
-    String getRows(String tableName);
+    String getRows(String tableName,String columnName);
 
     String getListAll(String tableName,Integer pageNumber,Integer pageSize,String columnName);
 
@@ -102,4 +102,6 @@ public interface DatabaseInterface {
     String getIndexMetadata(String schema,String tableName, String index);
 
     String getIndexName(String schema, String tableName);
+
+    String getDBSchema();
 }

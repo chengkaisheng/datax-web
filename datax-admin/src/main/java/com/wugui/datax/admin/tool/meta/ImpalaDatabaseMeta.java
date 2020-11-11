@@ -21,6 +21,27 @@ public class ImpalaDatabaseMeta extends BaseDatabaseMeta implements DatabaseInte
     }
 
     @Override
+    public String getListAll(String tableName, Integer pageNumber, Integer pageSize, String columnName) {
+        return String.format("select * from %s order by %s asc limit %s offset (%s-1)*%s",tableName,columnName,pageSize,pageNumber,pageSize);
+    }
+
+    @Override
+    public String getColumnSchema(String tableName, String tableSchema) {
+        return "DESCRIBE "+tableName;
+    }
+
+    @Override
+    public String getTableSize(String tableName, String tableSchema) {
+        return "SHOW TABLE STATS "+tableName;
+    }
+
+    @Override
+    public String getMostCommon(String name, String tableName) {
+        return String.format("select top 1 count(*) num,%s from %s group by %s ORDER BY num desc"
+                ,name,tableName,name);
+    }
+
+    @Override
     public String getSQLQueryTables(String... tableSchema) {
         return "show tables in "+tableSchema[0];
     }

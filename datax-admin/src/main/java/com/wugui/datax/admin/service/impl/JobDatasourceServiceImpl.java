@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -32,7 +33,7 @@ public class JobDatasourceServiceImpl extends ServiceImpl<JobDatasourceMapper, J
     }
 
     @Override
-    public Boolean  dataSourceTest(JobDatasource jobDatasource) throws IOException {
+    public Boolean  dataSourceTest(JobDatasource jobDatasource) throws IOException, SQLException {
         if (JdbcConstants.HBASE.equals(jobDatasource.getDatasource())) {
             return new HBaseQueryTool(jobDatasource).dataSourceTest();
         }

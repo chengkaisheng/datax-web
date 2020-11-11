@@ -10,6 +10,7 @@ import com.wugui.datax.admin.entity.Search;
 import com.wugui.datax.admin.service.DatasourceQueryService;
 import com.wugui.datax.admin.service.JobDatasourceService;
 import com.wugui.datax.admin.tool.database.TableInfo;
+import com.wugui.datax.admin.tool.meta.ImpalaDatabaseMeta;
 import com.wugui.datax.admin.tool.query.*;
 import com.wugui.datax.admin.util.JdbcConstants;
 import io.swagger.models.auth.In;
@@ -58,9 +59,9 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
             return new HBaseQueryTool(datasource).getTableNames();
         } else if (JdbcConstants.MONGODB.equals(datasource.getDatasource())) {
             return new MongoDBQueryTool(datasource).getCollectionNames(datasource.getDatabaseName());
-        } else if(JdbcConstants.DB2.equals(datasource.getDatasource())){
+        } /*else if(JdbcConstants.DB2.equals(datasource.getDatasource())){
             return new DB2QueryTool(datasource).getCollectionNames(datasource.getDatabaseName());
-        }
+        }*/
         else {
             BaseQueryTool qTool = QueryToolFactory.getByDbType(datasource);
             if(StringUtils.isBlank(tableSchema)){
@@ -107,8 +108,6 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
             return new HBaseQueryTool(datasource).getColumns(tableName);
         } else if (JdbcConstants.MONGODB.equals(datasource.getDatasource())) {
             return new MongoDBQueryTool(datasource).getColumns(tableName);
-        }else if (JdbcConstants.DB2.equals(datasource.getDatasource())){
-            return new DB2QueryTool(datasource).getColumns(tableName);
         }
         else {
             BaseQueryTool queryTool = QueryToolFactory.getByDbType(datasource);
@@ -148,6 +147,7 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
 
     //获取表的记录数
     public Long getRows(Long datasourceId,String tableName) throws Exception {
+        String columnName=getColumns(datasourceId,tableName).get(0);
         JobDatasource jdbcDatasource = jobDatasourceService.getById(datasourceId);
         if (ObjectUtil.isNull(jdbcDatasource)) {
             return 0L;
@@ -155,10 +155,12 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
         if (JdbcConstants.MONGODB.equals(jdbcDatasource.getDatasource())) {
             return new MongoDBQueryTool(jdbcDatasource).getRows(tableName);
         }else if(JdbcConstants.DB2.equals(jdbcDatasource.getDatasource())){
-            return new DB2QueryTool(jdbcDatasource).getRows(tableName);
+            return new DB2QueryTool(jdbcDatasource).getRows(tableName,columnName);
+        }else if(JdbcConstants.HIVE.equals(jdbcDatasource.getDatasource())){
+            columnName=columnName.substring(columnName.indexOf(':')+1,columnName.lastIndexOf(':'));
         }
         BaseQueryTool queryTool = QueryToolFactory.getByDbType(jdbcDatasource);
-        return queryTool.getRows(tableName);
+        return queryTool.getRows(tableName,columnName);
     }
 
     //获取表的所有数据
@@ -170,8 +172,6 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
         }
         if (JdbcConstants.MONGODB.equals(jdbcDatasource.getDatasource())) {
             return new MongoDBQueryTool(jdbcDatasource).listAll(columns,tableName);
-        }else if(JdbcConstants.DB2.equals(jdbcDatasource.getDatasource())){
-            return new DB2QueryTool(jdbcDatasource).listAll(columns,tableName,pageNumber,pageSize);
         }
         BaseQueryTool queryTool = QueryToolFactory.getByDbType(jdbcDatasource);
         Map<String,Object> maps = queryTool.listAll(columns,tableName,pageNumber,pageSize);
@@ -187,13 +187,8 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
         }
         if (JdbcConstants.MONGODB.equals(jdbcDatasource.getDatasource())) {
             return new MongoDBQueryTool(jdbcDatasource).getColumnSchema(getColumns(datasourceId, tableName),tableName);
-        }else if (JdbcConstants.DB2.equals(jdbcDatasource.getDatasource())) {
-            return new DB2QueryTool(jdbcDatasource).getColumnSchema(tableName,tableSchema);
         }
         BaseQueryTool queryTool = QueryToolFactory.getByDbType(jdbcDatasource);
-        if(queryTool.getClass()==MySQLQueryTool.class){
-            tableSchema=queryTool.getDBName();
-        }
         if(queryTool.getClass()==MySQLQueryTool.class){
             tableSchema=queryTool.getDBName();
         }
@@ -207,13 +202,13 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
             return null;
         }if (JdbcConstants.MONGODB.equals(jdbcDatasource.getDatasource())) {
             return new MongoDBQueryTool(jdbcDatasource).getTableSize(tableName);
-        }else if(JdbcConstants.DB2.equals(jdbcDatasource.getDatasource())){
-            return new DB2QueryTool(jdbcDatasource).getTableSize(tableName,"DB2INST1");
         }
         BaseQueryTool queryTool = QueryToolFactory.getByDbType(jdbcDatasource);
         String tableSchema="";
         if(queryTool.getClass()==MySQLQueryTool.class){
             tableSchema=queryTool.getDBName();
+        }else if(queryTool.getClass()==DB2QueryTool.class){
+            tableSchema=queryTool.getDBSchema();
         }
         return queryTool.getTableSize(tableName,tableSchema);
     }

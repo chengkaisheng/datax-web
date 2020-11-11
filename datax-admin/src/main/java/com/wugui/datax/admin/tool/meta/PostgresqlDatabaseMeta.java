@@ -70,13 +70,18 @@ public class PostgresqlDatabaseMeta extends BaseDatabaseMeta implements Database
                 "col_description(pa.attrelid, pa.attnum) as comment,\n" +
                 "\tformat_type(pa.atttypid, pa.atttypmod) as type\n" +
                 " from pg_class pc,pg_attribute pa \n" +
-                "where pa.attrelid = pc.oid and pc.relname = '%s' and pa.attnum>0;",tableName);
+                "where pa.attrelid = pc.oid and pc.relname = '%s' and pa.attnum>0",tableName);
     }
 
     @Override
     public String getSQLQueryTablesNameComments(String schema) {
         return "select relname as table_name,cast(obj_description(relfilenode,'pg_class') as varchar) as table_comment from pg_class c\n" +
                 "where relname in (select tablename from pg_tables where schemaname='"+schema+"' and position('_2' in tablename)=0 )";
+    }
+
+    @Override
+    public String getMissing(String name, String tableName) {
+        return "select count(*) from "+tableName+" where "+name+" is null";
     }
 
     @Override

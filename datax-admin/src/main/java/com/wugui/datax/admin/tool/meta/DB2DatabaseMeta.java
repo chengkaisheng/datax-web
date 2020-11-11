@@ -16,10 +16,15 @@ public class DB2DatabaseMeta extends BaseDatabaseMeta implements DatabaseInterfa
     }
 
     @Override
+    public String getSQLQueryTables() {
+        return "select TABNAME from SYSCAT.TABLES where TABSCHEMA NOT LIKE  'SYS%' and TYPE='T' ORDER BY TABSCHEMA, TABNAME";
+    }
+
+    @Override
     public String getListAll(String tableName, Integer pageNumber, Integer pageSize, String columnName) {
         return String.format("select * from (\n" +
                 "select t.*,row_number() over(ORDER BY %s ASC) as r\n" +
-                "from %s t)\n" +
+                "from %s t) ret\n" +
                 "where r between %s AND %s",columnName,tableName,(pageNumber-1)*pageSize+1,pageNumber*pageSize);
     }
 
@@ -42,5 +47,10 @@ public class DB2DatabaseMeta extends BaseDatabaseMeta implements DatabaseInterfa
     public String getMostCommon(String name, String tableName) {
         return String.format("select count(*) num,%s from %s group by %s ORDER BY num desc fetch first 1 rows only"
                 ,name,tableName,name);
+    }
+
+    @Override
+    public String getDBSchema() {
+        return "select current schema from sysibm.sysdummy1";
     }
 }

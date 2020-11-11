@@ -24,6 +24,9 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.io.Serializable;
 import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.*;
 
 /**
@@ -139,7 +142,7 @@ public class JobDatasourceController extends BaseController {
      */
     @PostMapping("/test")
     @ApiOperation("测试数据")
-    public R<Boolean> dataSourceTest (@RequestBody JobDatasource jobJdbcDatasource) throws IOException {
+    public R<Boolean> dataSourceTest (@RequestBody JobDatasource jobJdbcDatasource) throws IOException, SQLException {
         return success(jobJdbcDatasourceService.dataSourceTest(jobJdbcDatasource));
     }
 

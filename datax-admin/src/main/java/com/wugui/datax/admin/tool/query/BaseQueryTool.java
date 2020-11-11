@@ -12,10 +12,7 @@ import com.wugui.datax.admin.entity.JobDatasource;
 import com.wugui.datax.admin.tool.database.ColumnInfo;
 import com.wugui.datax.admin.tool.database.DasColumn;
 import com.wugui.datax.admin.tool.database.TableInfo;
-import com.wugui.datax.admin.tool.meta.DatabaseInterface;
-import com.wugui.datax.admin.tool.meta.DatabaseMetaFactory;
-import com.wugui.datax.admin.tool.meta.PostgresqlDatabaseMeta;
-import com.wugui.datax.admin.tool.meta.SqlServerDatabaseMeta;
+import com.wugui.datax.admin.tool.meta.*;
 import com.wugui.datax.admin.util.AESUtil;
 import com.wugui.datax.admin.util.JdbcConstants;
 import com.wugui.datax.admin.util.JdbcUtils;
@@ -625,14 +622,14 @@ public abstract class BaseQueryTool implements QueryToolInterface {
         return map;
     }
 
-    public Long getRows(String tableName) {
+    public Long getRows(String tableName,String columnName) {
         Long rows=0L;
         Statement stmt = null;
         ResultSet rs = null;
         try {
             stmt = connection.createStatement();
             //获取sql
-            String sql = sqlBuilder.getRows(tableName);
+            String sql = sqlBuilder.getRows(tableName,columnName);
             rs = stmt.executeQuery(sql);
             if(rs.next()){
                 rows = rs.getLong(1);
@@ -648,20 +645,30 @@ public abstract class BaseQueryTool implements QueryToolInterface {
     }
 
     public Map<String,Object> listAll(List<String> columns, String tableName,Integer pageNumber,Integer pageSize) {
+        List<String> sourceColumns=columns;
+        String columnName=columns.get(0);
+        List<String> formatColumns=new ArrayList<>();
+        if(sqlBuilder.getClass()==HiveDatabaseMeta.class){
+            for (String column:columns) {
+                formatColumns.add(column.split(":")[1]);
+            }
+            sourceColumns=formatColumns;
+            columnName=formatColumns.get(0);
+        }
         List<List<Map<String,Object>>> datas = new ArrayList<>();
         Statement stmt = null;
         ResultSet rs = null;
         try {
             stmt = connection.createStatement();
             //获取sql
-            String sql = sqlBuilder.getListAll(tableName, pageNumber, pageSize,columns.get(0));
+            String sql = sqlBuilder.getListAll(tableName, pageNumber, pageSize,columnName);
             rs = stmt.executeQuery(sql);
             while (rs.next()) {
                 List<Map<String,Object>> colList=new ArrayList<>();
-                for (int i=1;i<=columns.size();i++) {
+                for (int i=1;i<=sourceColumns.size();i++) {
                     Map<String,Object> map=new HashMap<>();
                     Object value = rs.getObject(i);
-                    map.put(columns.get(i-1),value);
+                    map.put(sourceColumns.get(i-1),value);
                     colList.add(map);
                 }
                 datas.add(colList);
@@ -675,7 +682,7 @@ public abstract class BaseQueryTool implements QueryToolInterface {
         }
         Map<String,Object> ret=new HashMap(){{
                 this.put("datas",datas);
-                this.put("total",getRows(tableName));
+                this.put("total",getRows(tableName,columns.get(0)));
         }};
         return ret;
     }
@@ -706,16 +713,30 @@ public abstract class BaseQueryTool implements QueryToolInterface {
         List<ColumnMsg> columnMsgs = new ArrayList<>();
         Statement stmt = null;
         ResultSet rs = null;
+        boolean flag=false;
         try {
             stmt = connection.createStatement();
             //获取sql
             String sql = sqlBuilder.getColumnSchema(tableName,tableSchema);
             rs = stmt.executeQuery(sql);
+            if(sqlBuilder.getClass()==HiveDatabaseMeta.class||sqlBuilder.getClass()== ImpalaDatabaseMeta.class){
+                flag=true;
+            }
+            String comment="";
+            String type="";
             while (rs.next()) {
+                String name=rs.getString(1);;
                 ColumnMsg columnMsg=new ColumnMsg();
-                String name = rs.getString(1);
-                String comment=rs.getString(2);
-                String type=rs.getString(3);
+                if(flag){
+                    type=rs.getString(2);
+                    comment=rs.getString(3);
+                }else {
+                    comment=rs.getString(2);
+                    type=rs.getString(3);
+                }
+                if("".equals(name)&&type==null&&comment==null){
+                    break;
+                }
                 columnMsgs.add(columnMsg);
                 columnMsg.setName(name);
                 columnMsg.setComment(comment);
@@ -759,7 +780,7 @@ public abstract class BaseQueryTool implements QueryToolInterface {
         Map<String,Object> minimumMap=new HashMap<>();
         Statement stmt = null;
         ResultSet rs = null;
-        Long total=getRows(tableName);
+        Long total=getRows(tableName,fieldName);
         try {
             stmt = connection.createStatement();
             //获取valid数量
@@ -934,9 +955,19 @@ public abstract class BaseQueryTool implements QueryToolInterface {
     }
 
     private String judgeShowType(String type) {
-        type=type.toUpperCase();
+        if(type==null){
+            return "stringType";
+        }
+        if(type.contains(" ")) {
+            type = type.substring(0,type.indexOf(" "));
+        }
+        if(type.contains("(")){
+            type=type.substring(0,type.indexOf("(")).toUpperCase();
+            logger.info("***********the field type is:"+type);
+        }
+        //type=type.toUpperCase();
         //加入oracle特有的字段类型：VARCHAR2，NUMBER
-        String[] stringType={"CHAR","VARCHAR","TINYBLOB","TINYTEXT","BLOB","TEXT","MEDIUMBLOB","MEDIUMTEXT","LONGBLOB","LONGTEXT","VARCHAR2"};
+        String[] stringType={"CHAR","VARCHAR","TINYBLOB","TINYTEXT","BLOB","TEXT","MEDIUMBLOB","MEDIUMTEXT","LONGBLOB","LONGTEXT","VARCHAR2","CHARACTER"};
         String[] dateType={"DATE","TIME","YEAR","DATETIME","TIMESTAMP"};
         String[] numberType={"TINYINT","SMALLINT","MEDIUMINT","INT","INTEGER","BIGINT","FLOAT","DOUBLE","DECIMAL","NUMBER"};
         if (Arrays.asList(stringType).contains(type.toUpperCase())){
@@ -963,6 +994,11 @@ public abstract class BaseQueryTool implements QueryToolInterface {
                     return  rs.getString(4);
                 }else if(sqlBuilder.getClass()== PostgresqlDatabaseMeta.class){
                     return  rs.getString(1);
+                }else if(sqlBuilder.getClass()==ImpalaDatabaseMeta.class){
+                    return rs.getString("Size");
+                }else if(sqlBuilder.getClass()==DB2DatabaseMeta.class){
+                    tableSize=rs.getLong(1);
+                    return tableSize+"KB";
                 }
                 tableSize=rs.getLong(1)/1024;
             }
@@ -974,6 +1010,28 @@ public abstract class BaseQueryTool implements QueryToolInterface {
             JdbcUtils.close(stmt);
         }
         return tableSize+"KB";
+    }
+
+    public String getDBSchema(){
+        String ret = "";
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = connection.createStatement();
+            //获取sql
+            String sql = sqlBuilder.getDBSchema();
+            rs = stmt.executeQuery(sql);
+            if (rs.next()) {
+                ret = rs.getString(1);
+            }
+        } catch (SQLException e) {
+            logger.error("[getTableNames Exception] --> "
+                    + "the exception message is:" + e.getMessage());
+        } finally {
+            JdbcUtils.close(rs);
+            JdbcUtils.close(stmt);
+        }
+        return ret;
     }
 
     @Override
