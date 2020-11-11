@@ -21,7 +21,7 @@ import java.util.Map;
 
 public class HttpClientHelper {
 
-    private static final String URL = "http://localhost:8979/dbeaver/gql";
+    private static final String URL = "http://localhost:8978/api/gql";
 
     private static Log logger = LogFactory.getLog(HttpClientHelper.class);
 
