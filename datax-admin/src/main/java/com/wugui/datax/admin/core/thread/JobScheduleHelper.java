@@ -6,6 +6,7 @@ import com.wugui.datax.admin.core.trigger.TriggerTypeEnum;
 import com.wugui.datax.admin.entity.JobInfo;
 import com.wugui.datax.admin.entity.JobInfoDetail;
 import com.wugui.datax.admin.entity.JobInfoLink;
+import com.wugui.datax.admin.entity.JobLog;
 import com.wugui.datax.admin.util.NetWorkUtils;
 import com.wugui.datax.admin.util.UUIDUtils;
 import org.slf4j.Logger;
@@ -99,7 +100,7 @@ public class JobScheduleHelper {
                                     // 2.2、trigger-expire < 5s：direct-trigger && make next-trigger-time
 
                                     // 1、trigger
-                                    JobTriggerPoolHelper.trigger(jobInfo.getId(), TriggerTypeEnum.CRON, -1, null, null,null,null);
+                                    JobTriggerPoolHelper.trigger(jobInfo.getId(), TriggerTypeEnum.CRON, -1, null, null,null,null,0);
                                     logger.debug(">>>>>>>>>>> datax-web, schedule push trigger : jobId = " + jobInfo.getId());
 
                                     // 2、fresh next
@@ -169,8 +170,9 @@ public class JobScheduleHelper {
                                     List<JobInfoLink> jobInfoLinks=new ArrayList<>();
                                     jobInfoLinks = JobAdminConfig.getAdminConfig().getJobInfoLinkMapper().loadTriggerVirtualTask(jobInfoId);
                                     if (jobInfoLinks != null && jobInfoLinks.size() > 0) {
+                                        JobLog jobLog= NetWorkUtils.createVirtualLog(jobInfo);
                                         for (JobInfoLink jobInfoLink : jobInfoLinks) {
-                                            JobTriggerPoolHelper.trigger(jobInfoLink.getId(),TriggerTypeEnum.MANUAL, -1, null, "",jobInfoId,jobInfoLink.getInfoId());
+                                            JobTriggerPoolHelper.trigger(jobInfoLink.getId(),TriggerTypeEnum.MANUAL, -1, null, "",jobInfoId,jobInfoLink.getInfoId(),jobLog.getId());
                                             logger.debug(">>>>>>>>>>> datax-web, schedule push trigger : id = " + jobInfo.getId());
                                         }
                                     }
@@ -330,13 +332,14 @@ public class JobScheduleHelper {
                                 List<JobInfoLink> jobInfoLinks=new ArrayList<>();
                                 jobInfoLinks = JobAdminConfig.getAdminConfig().getJobInfoLinkMapper().loadTriggerVirtualTask(jobInfoId);
                                 if (jobInfoLinks != null && jobInfoLinks.size() > 0) {
+                                    JobLog jobLog= NetWorkUtils.createVirtualLog(jobInfo);
                                     for (JobInfoLink jobInfoLink : jobInfoLinks) {
-                                        JobTriggerPoolHelper.trigger(jobInfoLink.getId(),TriggerTypeEnum.MANUAL, -1, null, "",jobInfoId,jobInfoLink.getInfoId());
+                                        JobTriggerPoolHelper.trigger(jobInfoLink.getId(),TriggerTypeEnum.MANUAL, -1, null, "",jobInfoId,jobInfoLink.getInfoId(),jobLog.getId());
                                         logger.debug(">>>>>>>>>>> datax-web, schedule push trigger : id = " + jobInfo.getId());
                                     }
                                 }
                             }else {
-                                JobTriggerPoolHelper.trigger(jobId, TriggerTypeEnum.CRON, -1, null, null,null,null);
+                                JobTriggerPoolHelper.trigger(jobId, TriggerTypeEnum.CRON, -1, null, null,null,null,0);
                             }
 
                         }

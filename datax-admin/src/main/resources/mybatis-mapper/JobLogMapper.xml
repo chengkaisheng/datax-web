@@ -145,7 +145,48 @@
 			SELECT LAST_INSERT_ID()
 		</selectKey>-->
 	</insert>
-
+	<insert id="saveJobLog" parameterType="com.wugui.datax.admin.entity.JobLog" useGeneratedKeys="true" keyProperty="id" >
+		INSERT INTO job_log (
+		`job_group`,
+		`job_id`,
+		`job_desc`,
+		`executor_address`,
+		`executor_handler`,
+		`executor_param`,
+		`executor_sharding_param`,
+		`executor_fail_retry_count`,
+		`trigger_time`,
+		`trigger_code`,
+		`trigger_msg`,
+		`handle_time`,
+		`handle_code`,
+		`handle_msg`,
+		`alarm_status`,
+		`process_id`,
+		`max_id`
+		) VALUES (
+		#{jobGroup},
+		#{jobId},
+		#{jobDesc},
+		#{executorAddress},
+		#{executorHandler},
+		#{executorParam},
+		#{executorShardingParam},
+		#{executorFailRetryCount},
+		#{triggerTime},
+		#{triggerCode},
+		#{triggerMsg},
+		#{handleTime},
+		#{handleCode},
+		#{handleMsg},
+		#{alarmStatus},
+		#{processId},
+		#{maxId}
+		);
+		<!--<selectKey resultType="java.lang.Integer" order="AFTER" keyProperty="id">
+			SELECT LAST_INSERT_ID()
+		</selectKey>-->
+	</insert>
 	<update id="updateTriggerInfo" >
 		UPDATE job_log
 		SET

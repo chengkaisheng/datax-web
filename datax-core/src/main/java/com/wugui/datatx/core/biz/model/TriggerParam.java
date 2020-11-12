@@ -11,6 +11,15 @@ public class TriggerParam implements Serializable{
     private static final long serialVersionUID = 42L;
     private String infoId;
     private int jobId;
+    private long virtualLogId;
+
+    public long getVirtualLogId() {
+        return virtualLogId;
+    }
+
+    public void setVirtualLogId(long virtualLogId) {
+        this.virtualLogId = virtualLogId;
+    }
 
     public String getInfoId() {
         return infoId;

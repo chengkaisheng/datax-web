@@ -37,6 +37,8 @@ public interface JobLogMapper {
 
     long save(JobLog jobLog);
 
+    long saveJobLog(JobLog jobLog);
+
     int updateTriggerInfo(JobLog jobLog);
 
     int updateHandleInfo(JobLog jobLog);

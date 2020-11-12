@@ -3,12 +3,16 @@ package com.wugui.datax.admin.util;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.wugui.datatx.core.biz.model.NetWork;
+import com.wugui.datatx.core.biz.model.ReturnT;
+import com.wugui.datatx.core.enums.ExecutorBlockStrategyEnum;
 import com.wugui.datax.admin.core.conf.JobAdminConfig;
-import com.wugui.datax.admin.entity.JobInfo;
-import com.wugui.datax.admin.entity.JobInfoDetail;
-import com.wugui.datax.admin.entity.JobInfoLink;
+import com.wugui.datax.admin.core.route.ExecutorRouteStrategyEnum;
+import com.wugui.datax.admin.datashare.tools.Result;
+import com.wugui.datax.admin.entity.*;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 public class NetWorkUtils {
@@ -153,5 +157,30 @@ public class NetWorkUtils {
             }
         }
         return "0";
+    }
+
+    public static JobLog createVirtualLog(JobInfo jobInfo){
+        JobGroup jobGroup=JobAdminConfig.getAdminConfig().getJobGroupMapper().load(jobInfo.getJobGroup());
+        // 1、save log-id
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(Calendar.MILLISECOND, 0);
+        Date triggerTime = calendar.getTime();
+        JobLog jobLog = new JobLog();
+        jobLog.setJobGroup(jobInfo.getJobGroup());
+        jobLog.setJobId(jobInfo.getId());
+        jobLog.setTriggerTime(triggerTime);
+        jobLog.setJobDesc(jobInfo.getJobDesc());
+        jobLog.setExecutorAddress(jobGroup.getAddressList());
+        jobLog.setExecutorHandler(jobInfo.getExecutorHandler());
+        jobLog.setExecutorParam(jobInfo.getExecutorParam());
+        jobLog.setExecutorFailRetryCount(jobInfo.getExecutorFailRetryCount());
+        jobLog.setTriggerCode(ReturnT.SUCCESS_CODE);
+        jobLog.setTriggerMsg("虚任务调度成功!等待子任务执行!");
+        jobLog.setHandleCode(ReturnT.SUCCESS_CODE);
+        jobLog.setHandleMsg("虚任务执行成功!等待子任务执行结果!");
+        jobLog.setHandleTime(triggerTime);
+        JobAdminConfig.getAdminConfig().getJobLogMapper().saveJobLog(jobLog);
+        return jobLog;
     }
 }

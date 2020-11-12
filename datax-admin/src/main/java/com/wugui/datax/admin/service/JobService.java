@@ -1,12 +1,14 @@
 package com.wugui.datax.admin.service;
 
 
+import com.wugui.datatx.core.biz.model.LogResult;
 import com.wugui.datatx.core.biz.model.ReturnT;
 import com.wugui.datax.admin.core.trigger.TriggerTypeEnum;
 import com.wugui.datax.admin.dto.DataXBatchJsonBuildDto;
 import com.wugui.datax.admin.dto.TaskScheduleDto;
 import com.wugui.datax.admin.entity.JobInfo;
 import com.wugui.datax.admin.entity.JobInfoDetail;
+import com.wugui.datax.admin.entity.JobLog;
 
 import java.io.IOException;
 import java.util.List;
@@ -125,4 +127,11 @@ public interface JobService {
      * @return
      */
     ReturnT<String> triggerVirtualTask(JobInfo jobInfo);
+
+    /**
+     * 加载虚任务日志
+     * @param log
+     * @return
+     */
+    ReturnT<LogResult> loadingVirtualLog(String log, JobLog jobLog);
 }

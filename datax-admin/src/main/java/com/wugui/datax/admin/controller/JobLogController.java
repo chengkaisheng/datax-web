@@ -11,6 +11,7 @@ import com.wugui.datax.admin.entity.JobInfo;
 import com.wugui.datax.admin.entity.JobLog;
 import com.wugui.datax.admin.mapper.JobInfoMapper;
 import com.wugui.datax.admin.mapper.JobLogMapper;
+import com.wugui.datax.admin.service.JobService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -36,6 +37,8 @@ public class JobLogController {
     public JobInfoMapper jobInfoMapper;
     @Resource
     public JobLogMapper jobLogMapper;
+    @Resource
+    private JobService jobService;
 
     @GetMapping("/pageList")
     @ApiOperation("运行日志列表")
@@ -86,6 +89,28 @@ public class JobLogController {
             }
 
             return logResult;
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return new ReturnT<>(ReturnT.FAIL_CODE, e.getMessage());
+        }
+    }
+
+    @RequestMapping(value = "/logDetailCatVirtual", method = RequestMethod.GET)
+    @ApiOperation("虚任务运行日志详情")
+    public ReturnT<LogResult> logDetailCatVirtual(String executorAddress, long triggerTime, long logId, int fromLineNum) {
+        try {
+            ExecutorBiz executorBiz = JobScheduler.getExecutorBiz(executorAddress);
+            ReturnT<LogResult> logResult = executorBiz.log(triggerTime, logId, fromLineNum);
+            JobLog jobLog = jobLogMapper.load(logId);
+            // is end
+            if (logResult.getContent() != null && fromLineNum > logResult.getContent().getToLineNum()) {
+                if (jobLog.getHandleCode() > 0) {
+                    logResult.getContent().setEnd(true);
+                }
+            }
+            ReturnT<LogResult> logResultVirtual= jobService.loadingVirtualLog(logResult.getContent().getLogContent(),jobLog);
+
+            return logResultVirtual;
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             return new ReturnT<>(ReturnT.FAIL_CODE, e.getMessage());

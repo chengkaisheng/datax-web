@@ -115,12 +115,14 @@ public class JobThread extends Thread {
                     running = true;
                     idleTimes = 0;
                     triggerLogIdSet.remove(tgParam.getLogId());
+                    //创建虚任务日志
+                    String virtualLogFileName = JobFileAppender.makeLogFileName(new Date(tgParam.getLogDateTime()), tgParam.getVirtualLogId());
 
                     // log filename, like "logPath/yyyy-MM-dd/9999.log"
                     String logFileName = JobFileAppender.makeLogFileName(new Date(tgParam.getLogDateTime()), tgParam.getLogId());
                     JobFileAppender.contextHolder.set(logFileName);
                     ShardingUtil.setShardingVo(new ShardingUtil.ShardingVO(tgParam.getBroadcastIndex(), tgParam.getBroadcastTotal()));
-
+                    JobFileAppender.appendLog(virtualLogFileName,String.valueOf(tgParam.getLogId())+",");
                     // execute
                     JobLogger.log("<br>----------- DataElit job execute start -----------<br>----------- Param:" + tgParam.getExecutorParams());
 
@@ -183,11 +185,11 @@ public class JobThread extends Thread {
                     // callback handler info
                     if (!toStop) {
                         // commonm
-                        TriggerCallbackThread.pushCallBack(new HandleCallbackParam(tgParam.getLogId(), tgParam.getLogDateTime(), executeResult,tgParam.getJobInfoId(),tgParam.getInfoId()));
+                        TriggerCallbackThread.pushCallBack(new HandleCallbackParam(tgParam.getLogId(), tgParam.getLogDateTime(), executeResult,tgParam.getJobInfoId(),tgParam.getInfoId(),tgParam.getVirtualLogId()));
                     } else {
                         // is killed
                         ReturnT<String> stopResult = new ReturnT<String>(ReturnT.FAIL_CODE, stopReason + " [job running, killed]");
-                        TriggerCallbackThread.pushCallBack(new HandleCallbackParam(tgParam.getLogId(), tgParam.getLogDateTime(), stopResult,tgParam.getJobInfoId(),tgParam.getInfoId()));
+                        TriggerCallbackThread.pushCallBack(new HandleCallbackParam(tgParam.getLogId(), tgParam.getLogDateTime(), stopResult,tgParam.getJobInfoId(),tgParam.getInfoId(),tgParam.getVirtualLogId()));
                     }
                 }
             }
@@ -199,7 +201,7 @@ public class JobThread extends Thread {
             if (triggerParam != null) {
                 // is killed
                 ReturnT<String> stopResult = new ReturnT<String>(ReturnT.FAIL_CODE, stopReason + " [job not executed, in the job queue, killed.]");
-                TriggerCallbackThread.pushCallBack(new HandleCallbackParam(triggerParam.getLogId(), triggerParam.getLogDateTime(), stopResult,triggerParam.getJobInfoId(),triggerParam.getInfoId()));
+                TriggerCallbackThread.pushCallBack(new HandleCallbackParam(triggerParam.getLogId(), triggerParam.getLogDateTime(), stopResult,triggerParam.getJobInfoId(),triggerParam.getInfoId(),triggerParam.getVirtualLogId()));
             }
         }
 

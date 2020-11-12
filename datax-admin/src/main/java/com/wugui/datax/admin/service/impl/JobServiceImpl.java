@@ -5,14 +5,18 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wugui.datatx.core.biz.ExecutorBiz;
+import com.wugui.datatx.core.biz.model.LogResult;
 import com.wugui.datatx.core.biz.model.NetWork;
 import com.wugui.datatx.core.biz.model.ReturnT;
 import com.wugui.datatx.core.enums.ExecutorBlockStrategyEnum;
 import com.wugui.datatx.core.glue.GlueTypeEnum;
+import com.wugui.datatx.core.log.JobFileAppender;
 import com.wugui.datatx.core.util.DateUtil;
 import com.wugui.datax.admin.core.conf.JobAdminConfig;
 import com.wugui.datax.admin.core.cron.CronExpression;
 import com.wugui.datax.admin.core.route.ExecutorRouteStrategyEnum;
+import com.wugui.datax.admin.core.scheduler.JobScheduler;
 import com.wugui.datax.admin.core.thread.JobScheduleHelper;
 import com.wugui.datax.admin.core.thread.JobTriggerPoolHelper;
 import com.wugui.datax.admin.core.trigger.TriggerTypeEnum;
@@ -636,11 +640,43 @@ public class JobServiceImpl implements JobService {
         List<JobInfoLink> scheduleList=new ArrayList<>();
         scheduleList = jobInfoLinkMapper.loadTriggerVirtualTask(jobInfoId);
         if (scheduleList != null && scheduleList.size() > 0) {
+            JobLog jobLog= NetWorkUtils.createVirtualLog(jobInfoVirtualTask);
             for (JobInfoLink jobInfoLink : scheduleList) {
-                JobTriggerPoolHelper.trigger(jobInfoLink.getId(),TriggerTypeEnum.MANUAL, -1, null, "",jobInfoId,jobInfoLink.getInfoId());
+                JobTriggerPoolHelper.trigger(jobInfoLink.getId(),TriggerTypeEnum.MANUAL, -1, null, "",jobInfoId,jobInfoLink.getInfoId(),jobLog.getId());
             }
         }
         return ReturnT.SUCCESS;
+    }
+
+    @Override
+    public ReturnT<LogResult> loadingVirtualLog(String log,JobLog virtualJobLog) {
+        try{
+            LogResult virtualLogResult=new LogResult();
+            virtualLogResult.setEnd(false);
+            virtualLogResult.setFromLineNum(1);
+            String str="------------------------------------------------------------------虚任务开始执行"+"---------------------------------当前任务Id为："+virtualJobLog.getJobId()+"---------------------------------任务名称为："+virtualJobLog.getJobDesc()+"\r\n\n\n";
+            log = log.replaceAll("(\\\r\\\n|\\\r|\\\n|\\\n\\\r)", "");
+            String[] logId = log.split(",");
+            int toLineNum=0;
+            for (int i = 0; i < logId.length; i++) {
+                long virtualLogId = (logId[i] != null && logId[i].trim().length() > 0 && isNumeric(logId[i])) ? Long.parseLong(logId[i]): -1;
+                if(virtualLogId>0){
+                    JobLog jobLog=jobLogMapper.load(virtualLogId);
+                    long triggerTime=jobLog.getTriggerTime().getTime();
+                    String logFileName = JobFileAppender.makeLogFileName(new Date(triggerTime), virtualLogId);
+                    LogResult logResult = JobFileAppender.readLog("./"+logFileName, 1);
+                    str+="---------------------------------子任务Id:"+jobLog.getJobId()+"---------------------------------子任务名称:"+jobLog.getJobDesc()+"开始执行---------------------------------\n"
+                            +logResult.getLogContent()+"---------------------------------子任务Id:"+jobLog.getJobId()+"---------------------------------子任务名称:"+jobLog.getJobDesc()+"执行结束---------------------------------"+"\r\n\n\n";
+                    toLineNum+=logResult.getToLineNum();
+                }
+            }
+            virtualLogResult.setToLineNum(toLineNum);
+            virtualLogResult.setLogContent(str);
+            return new ReturnT<>(virtualLogResult);
+        }catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return new ReturnT<>(ReturnT.FAIL_CODE, e.getMessage());
+        }
     }
 
 

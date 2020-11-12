@@ -114,7 +114,7 @@ public class AdminBizImpl implements AdminBiz {
                             }
                         }
                         if(code && jobInfoLink.getTriggerStatus()==0){
-                            JobTriggerPoolHelper.trigger(jobInfoLink.getId(), TriggerTypeEnum.PARENT, -1, null, null,jobInfoLink.getJobInfoId(),jobInfoLink.getInfoId());
+                            JobTriggerPoolHelper.trigger(jobInfoLink.getId(), TriggerTypeEnum.PARENT, -1, null, null,jobInfoLink.getJobInfoId(),jobInfoLink.getInfoId(),handleCallbackParam.getVirtualLogId());
                         }
                         ReturnT<String> triggerChildResult = ReturnT.SUCCESS;
 
@@ -146,7 +146,7 @@ public class AdminBizImpl implements AdminBiz {
                 for (int i = 0; i < childJobIds.length; i++) {
                     int childJobId = (childJobIds[i] != null && childJobIds[i].trim().length() > 0 && isNumeric(childJobIds[i])) ? Integer.valueOf(childJobIds[i]) : -1;
                     if (childJobId > 0) {
-                        JobTriggerPoolHelper.trigger(childJobId, TriggerTypeEnum.PARENT, -1, null, null,null,null);
+                        JobTriggerPoolHelper.trigger(childJobId, TriggerTypeEnum.PARENT, -1, null, null,null,null,0);
 
                         ReturnT<String> triggerChildResult = ReturnT.SUCCESS;
 

@@ -44,7 +44,7 @@ public class JobTrigger {
      * @param executorParam         null: use job param
      *                              not null: cover job param
      */
-    public static void trigger(int jobId, TriggerTypeEnum triggerType, int failRetryCount, String executorShardingParam, String executorParam,String jobInfoId,String infoId) {
+    public static void trigger(int jobId, TriggerTypeEnum triggerType, int failRetryCount, String executorShardingParam, String executorParam,String jobInfoId,String infoId,long virtualLogId) {
         JobInfo jobInfo = JobAdminConfig.getAdminConfig().getJobInfoMapper().loadById(jobId);
         if (jobInfo == null) {
             logger.warn(">>>>>>>>>>>> trigger fail, jobId invalid，jobId={}", jobId);
@@ -75,13 +75,13 @@ public class JobTrigger {
                 && group.getRegistryList() != null && !group.getRegistryList().isEmpty()
                 && shardingParam == null) {
             for (int i = 0; i < group.getRegistryList().size(); i++) {
-                processTrigger(group, jobInfo, finalFailRetryCount, triggerType, i, group.getRegistryList().size(),jobInfoId,infoId);
+                processTrigger(group, jobInfo, finalFailRetryCount, triggerType, i, group.getRegistryList().size(),jobInfoId,infoId,virtualLogId);
             }
         } else {
             if (shardingParam == null) {
                 shardingParam = new int[]{0, 1};
             }
-            processTrigger(group, jobInfo, finalFailRetryCount, triggerType, shardingParam[0], shardingParam[1],jobInfoId,infoId);
+            processTrigger(group, jobInfo, finalFailRetryCount, triggerType, shardingParam[0], shardingParam[1],jobInfoId,infoId,virtualLogId);
         }
 
     }
@@ -103,7 +103,7 @@ public class JobTrigger {
      * @param index               sharding index
      * @param total               sharding index
      */
-    private static void processTrigger(JobGroup group, JobInfo jobInfo, int finalFailRetryCount, TriggerTypeEnum triggerType, int index, int total,String jobInfoId,String infoId) {
+    private static void processTrigger(JobGroup group, JobInfo jobInfo, int finalFailRetryCount, TriggerTypeEnum triggerType, int index, int total,String jobInfoId,String infoId,long virtualLogId) {
 
         TriggerParam triggerParam = new TriggerParam();
 
@@ -142,6 +142,7 @@ public class JobTrigger {
         triggerParam.setJobJson(jobInfo.getJobJson());
         triggerParam.setJobInfoId(jobInfoId);
         triggerParam.setInfoId(infoId);
+        triggerParam.setVirtualLogId(virtualLogId);
         //increment parameter
         Integer incrementType = jobInfo.getIncrementType();
         if (incrementType != null) {
