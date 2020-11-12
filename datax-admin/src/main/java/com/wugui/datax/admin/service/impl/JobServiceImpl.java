@@ -664,7 +664,7 @@ public class JobServiceImpl implements JobService {
                     JobLog jobLog=jobLogMapper.load(virtualLogId);
                     long triggerTime=jobLog.getTriggerTime().getTime();
                     String logFileName = JobFileAppender.makeLogFileName(new Date(triggerTime), virtualLogId);
-                    LogResult logResult = JobFileAppender.readLog(logFileName, 1);
+                    LogResult logResult = JobFileAppender.readLog("../datax-executor/"+logFileName, 1);
                     str+="---------------------------------子任务Id:"+jobLog.getJobId()+"---------------------------------子任务名称:"+jobLog.getJobDesc()+"开始执行---------------------------------\n"
                             +logResult.getLogContent()+"---------------------------------子任务Id:"+jobLog.getJobId()+"---------------------------------子任务名称:"+jobLog.getJobDesc()+"执行结束---------------------------------"+"\r\n\n\n";
                     toLineNum+=logResult.getToLineNum();
