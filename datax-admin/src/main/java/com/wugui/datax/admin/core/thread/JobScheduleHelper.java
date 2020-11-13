@@ -4,7 +4,6 @@ import com.wugui.datax.admin.core.conf.JobAdminConfig;
 import com.wugui.datax.admin.core.cron.CronExpression;
 import com.wugui.datax.admin.core.trigger.TriggerTypeEnum;
 import com.wugui.datax.admin.entity.JobInfo;
-import com.wugui.datax.admin.entity.JobInfoDetail;
 import com.wugui.datax.admin.entity.JobInfoLink;
 import com.wugui.datax.admin.entity.JobLog;
 import com.wugui.datax.admin.util.NetWorkUtils;
@@ -39,7 +38,6 @@ public class JobScheduleHelper {
     private volatile boolean scheduleThreadToStop = false;
     private volatile boolean ringThreadToStop = false;
     private volatile static Map<Integer, List<Integer>> ringData = new ConcurrentHashMap<>();
-    private volatile static Map<Integer, List<String>> ringDataVirtualTask = new ConcurrentHashMap<>();
     public void start() {
 
         // schedule thread
@@ -100,7 +98,21 @@ public class JobScheduleHelper {
                                     // 2.2、trigger-expire < 5s：direct-trigger && make next-trigger-time
 
                                     // 1、trigger
-                                    JobTriggerPoolHelper.trigger(jobInfo.getId(), TriggerTypeEnum.CRON, -1, null, null,null,null,0);
+                                    if(jobInfo.getJobType().equals("VJOB")){
+                                        String jobInfoId= UUIDUtils.getUUID();
+                                        NetWorkUtils.triggerVirtualTask(jobInfoId,jobInfo);
+                                        List<JobInfoLink> jobInfoLinks=new ArrayList<>();
+                                        jobInfoLinks = JobAdminConfig.getAdminConfig().getJobInfoLinkMapper().loadTriggerVirtualTask(jobInfoId);
+                                        if (jobInfoLinks != null && jobInfoLinks.size() > 0) {
+                                            JobLog jobLog= NetWorkUtils.createVirtualLog(jobInfo);
+                                            for (JobInfoLink jobInfoLink : jobInfoLinks) {
+                                                JobTriggerPoolHelper.trigger(jobInfoLink.getId(),TriggerTypeEnum.MANUAL, -1, null, "",jobInfoId,jobInfoLink.getInfoId(),jobLog.getId());
+                                                logger.debug(">>>>>>>>>>> datax-web, schedule push trigger : id = " + jobInfo.getId());
+                                            }
+                                        }
+                                    }else {
+                                        JobTriggerPoolHelper.trigger(jobInfo.getId(), TriggerTypeEnum.CRON, -1, null, null,null,null,0);
+                                    }
                                     logger.debug(">>>>>>>>>>> datax-web, schedule push trigger : jobId = " + jobInfo.getId());
 
                                     // 2、fresh next
@@ -146,79 +158,6 @@ public class JobScheduleHelper {
                         }
 
                         // tx stop
-//                        List<JobInfoDetail> scheduledList = JobAdminConfig.getAdminConfig().getJobInfoDetailMapper().scheduleJobQuery(nowTime + PRE_READ_MS, preReadCount);
-                        List<JobInfo> scheduledList = JobAdminConfig.getAdminConfig().getJobInfoMapper().scheduleVirtualJobQuery(nowTime + PRE_READ_MS, preReadCount);
-                        if (scheduledList != null && scheduledList.size() > 0) {
-                            // 2、push time-ring
-                            for (JobInfo jobInfo : scheduledList) {
-
-                                // time-ring jump
-                                if (nowTime > jobInfo.getTriggerNextTime() + PRE_READ_MS) {
-                                    // 2.1、trigger-expire > 5s：pass && make next-trigger-time
-                                    logger.warn(">>>>>>>>>>> datax-web, schedule misfire, id = " + jobInfo.getId());
-
-                                    // fresh next
-                                    refreshNextValidTime(jobInfo, new Date());
-
-                                } else if (nowTime > jobInfo.getTriggerNextTime()) {
-                                    // 2.2、trigger-expire < 5s：direct-trigger && make next-trigger-time
-
-                                    // 1、trigger
-//                                    JobInfoDetail jobInfoDetail1=JobAdminConfig.getAdminConfig().getJobInfoDetailMapper().loadById(jobInfoDetail.getJobInfoId());
-                                    String jobInfoId= UUIDUtils.getUUID();
-                                    NetWorkUtils.triggerVirtualTask(jobInfoId,jobInfo);
-                                    List<JobInfoLink> jobInfoLinks=new ArrayList<>();
-                                    jobInfoLinks = JobAdminConfig.getAdminConfig().getJobInfoLinkMapper().loadTriggerVirtualTask(jobInfoId);
-                                    if (jobInfoLinks != null && jobInfoLinks.size() > 0) {
-                                        JobLog jobLog= NetWorkUtils.createVirtualLog(jobInfo);
-                                        for (JobInfoLink jobInfoLink : jobInfoLinks) {
-                                            JobTriggerPoolHelper.trigger(jobInfoLink.getId(),TriggerTypeEnum.MANUAL, -1, null, "",jobInfoId,jobInfoLink.getInfoId(),jobLog.getId());
-                                            logger.debug(">>>>>>>>>>> datax-web, schedule push trigger : id = " + jobInfo.getId());
-                                        }
-                                    }
-//                                    JobTriggerPoolHelper.trigger(jobInfod.getId(), TriggerTypeEnum.CRON, -1, null, null,null);
-
-                                    // 2、fresh next
-                                    refreshNextValidTime(jobInfo, new Date());
-
-                                    // next-trigger-time in 5s, pre-read again
-                                    if (nowTime + PRE_READ_MS > jobInfo.getTriggerNextTime()) {
-
-                                        // 1、make ring second
-                                        int ringSecond = (int) ((jobInfo.getTriggerNextTime() / 1000) % 60);
-
-                                        // 2、push time ring
-                                        pushTimeRing(ringSecond, jobInfo.getId());
-
-                                        // 3、fresh next
-                                        refreshNextValidTime(jobInfo, new Date(jobInfo.getTriggerNextTime()));
-
-                                    }
-
-                                } else {
-                                    // 2.3、trigger-pre-read：time-ring trigger && make next-trigger-time
-
-                                    // 1、make ring second
-                                    int ringSecond = (int) ((jobInfo.getTriggerNextTime() / 1000) % 60);
-
-                                    // 2、push time ring
-                                    pushTimeRing(ringSecond, jobInfo.getId());
-
-                                    // 3、fresh next
-                                    refreshNextValidTime(jobInfo, new Date(jobInfo.getTriggerNextTime()));
-
-                                }
-
-                            }
-
-                            // 3、update trigger info
-                            for (JobInfo jobInfo : scheduledList) {
-                                JobAdminConfig.getAdminConfig().getJobInfoMapper().scheduleUpdate(jobInfo);
-                            }
-
-                        } else {
-                            preReadSucVirtualTask = false;
-                        }
 
                     } catch (Exception e) {
                         if (!scheduleThreadToStop) {
@@ -313,12 +252,6 @@ public class JobScheduleHelper {
                             ringItemData.addAll(tmpData);
                         }
                     }
-                    for (int i = 0; i < 2; i++) {
-                        List<String> tmpData = ringDataVirtualTask.remove((nowSecond + 60 - i) % 60);
-                        if (tmpData != null) {
-                            ringItemDataVirtualTask.addAll(tmpData);
-                        }
-                    }
                     // ring trigger
                     logger.debug(">>>>>>>>>>> datax-web, time-ring beat : " + nowSecond + " = " + Arrays.asList(ringItemData));
                     if (ringItemData.size() > 0) {
@@ -326,7 +259,7 @@ public class JobScheduleHelper {
                         for (int jobId : ringItemData) {
                             // do trigger
                             JobInfo jobInfo=JobAdminConfig.getAdminConfig().getJobInfoMapper().loadById(jobId);
-                            if(jobInfo.getJobType().equals("VIRTUAL")){
+                            if(jobInfo.getJobType().equals("VJOB")){
                                 String jobInfoId= UUIDUtils.getUUID();
                                 NetWorkUtils.triggerVirtualTask(jobInfoId,jobInfo);
                                 List<JobInfoLink> jobInfoLinks=new ArrayList<>();
@@ -346,25 +279,6 @@ public class JobScheduleHelper {
                         // clear
                         ringItemData.clear();
                     }
-                    /*if (ringItemDataVirtualTask.size() > 0) {
-                        // do trigger
-                        for (String jobId : ringItemDataVirtualTask) {
-                            // 1、trigger
-                            JobInfoDetail jobInfoDetail=JobAdminConfig.getAdminConfig().getJobInfoDetailMapper().loadById(jobId);
-                            String jobInfoId= UUIDUtils.getUUID();
-                            NetWorkUtils.triggerVirtualTask(jobInfoId,jobInfoDetail);
-                            List<JobInfoLink> jobInfoLinks=new ArrayList<>();
-                            jobInfoLinks = JobAdminConfig.getAdminConfig().getJobInfoLinkMapper().loadTriggerVirtualTask(jobInfoId);
-                            if (jobInfoLinks != null && jobInfoLinks.size() > 0) {
-                                for (JobInfoLink jobInfoLink : jobInfoLinks) {
-                                    JobTriggerPoolHelper.trigger(jobInfoLink.getId(),TriggerTypeEnum.MANUAL, -1, null, "",jobInfoId);
-                                    logger.debug(">>>>>>>>>>> datax-web, schedule push trigger : jobInfoId = " + jobInfoDetail.getJobInfoId());
-                                }
-                            }
-                        }
-                        // clear
-                        ringItemDataVirtualTask.clear();
-                    }*/
                 } catch (Exception e) {
                     if (!ringThreadToStop) {
                         logger.error(">>>>>>>>>>> datax-web, JobScheduleHelper#ringThread error:{}", e);
@@ -398,15 +312,7 @@ public class JobScheduleHelper {
             jobInfo.setTriggerNextTime(0);
         }
     }
-    private void refreshNextValidTime(JobInfoDetail jobInfoDetail, Date fromTime) throws ParseException {
-        Date nextValidTime = new CronExpression(jobInfoDetail.getJobCron()).getNextValidTimeAfter(fromTime);
-        if (nextValidTime != null) {
-//            jobInfoDetail.setTriggerLastTime(jobInfo.getTriggerNextTime());
-            jobInfoDetail.setTriggerNextTime(nextValidTime.getTime());
-        } else {
-            jobInfoDetail.setTriggerNextTime(0);
-        }
-    }
+
     private void pushTimeRing(int ringSecond, int jobId) {
         // push async ring
         List<Integer> ringItemData = ringData.get(ringSecond);
@@ -418,17 +324,7 @@ public class JobScheduleHelper {
 
         logger.debug(">>>>>>>>>>> datax-web, schedule push time-ring : " + ringSecond + " = " + Arrays.asList(ringItemData));
     }
-    private void pushTimeRing(int ringSecond, String jobInfoId) {
-        // push async ring
-        List<String> ringItemData = ringDataVirtualTask.get(ringSecond);
-        if (ringItemData == null) {
-            ringItemData = new ArrayList<String>();
-            ringDataVirtualTask.put(ringSecond, ringItemData);
-        }
-        ringItemData.add(jobInfoId);
 
-        logger.debug(">>>>>>>>>>> datax-web, schedule push time-ring : " + ringSecond + " = " + Arrays.asList(ringItemData));
-    }
     public void toStop() {
 
         // 1、stop schedule
