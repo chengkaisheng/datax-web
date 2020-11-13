@@ -37,5 +37,5 @@ public interface JobUserMapper {
     int delete(@Param("id") int id);
 
 
-
+    int updateRole(JobUser jobUser);
 }

@@ -75,8 +75,8 @@ public class PostgresqlDatabaseMeta extends BaseDatabaseMeta implements Database
 
     @Override
     public String getSQLQueryTablesNameComments(String schema) {
-        return "select relname as table_name,cast(obj_description(relfilenode,'pg_class') as varchar) as table_comment from pg_class c\n" +
-                "where relname in (select tablename from pg_tables where schemaname='"+schema+"' and position('_2' in tablename)=0 )";
+        return "select relname as table_name, cast(obj_description(relfilenode,'pg_class') as varchar) as table_comment from pg_class c " +
+                " where relname in (select tablename from pg_tables where schemaname='"+schema+"' and position('_2' in tablename)=0 )";
     }
 
     @Override
