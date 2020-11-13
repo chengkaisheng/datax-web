@@ -59,9 +59,7 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
             return new HBaseQueryTool(datasource).getTableNames();
         } else if (JdbcConstants.MONGODB.equals(datasource.getDatasource())) {
             return new MongoDBQueryTool(datasource).getCollectionNames(datasource.getDatabaseName());
-        } /*else if(JdbcConstants.DB2.equals(datasource.getDatasource())){
-            return new DB2QueryTool(datasource).getCollectionNames(datasource.getDatabaseName());
-        }*/
+        }
         else {
             BaseQueryTool qTool = QueryToolFactory.getByDbType(datasource);
             if(StringUtils.isBlank(tableSchema)){

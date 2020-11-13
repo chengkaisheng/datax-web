@@ -93,7 +93,13 @@ public class QualityJsonServiceImpl implements QualityJsonService {
         //获取规则信息，对规则信息进行拼接
         List<RuleInfoDto> ruleInfoDtoList = dto.getRule();
         for(int i = 0; i < ruleInfoDtoList.size(); i++){
-            String columnName = ruleInfoDtoList.get(i).getColumnName();
+            String columnName = null;
+            if(dataSource.equals(HIVE)){
+                columnName = ruleInfoDtoList.get(i).getColumnName().split("\\:")[1];
+            }else {
+                columnName = ruleInfoDtoList.get(i).getColumnName();
+            }
+
             List<RuleIdInfoDto> ruleIdInfoDtoList = ruleInfoDtoList.get(i).getRuleId();
             for(int j = 0; j < ruleIdInfoDtoList.size(); j++){
                 String[] codeArray = ruleIdInfoDtoList.get(j).getCode().split("\\:");
@@ -108,7 +114,7 @@ public class QualityJsonServiceImpl implements QualityJsonService {
                     regular = personaliseRule.getRegular();
                 }
                 //替换正则中的column
-                String temp = regular.replace("column",columnName);
+                String temp = regular.replaceAll("column",columnName);
 
                 /*if(dataSource.equalsIgnoreCase(MYSQL) || dataSource.equalsIgnoreCase(IMPALA)){
                     list.add(" and " + columnName + " REGEXP " + "'" +regular + "'");
@@ -118,14 +124,48 @@ public class QualityJsonServiceImpl implements QualityJsonService {
                 }else if(dataSource.equalsIgnoreCase(POSTGRESQL) || dataSource.equalsIgnoreCase(GREENPLUM)){
                     list.add(" and " + columnName + " ~ " + "'" +regular + "'" );
                 } else if (dataSource.equalsIgnoreCase(CLICKHOUSE)) {
-                    list.add(" and match(" + columnName + "'" + regular + "')");
+                    list.add(" and match(" + columnName + +", ""'" + regular + "')");
                 }else if(dataSource.equals(DB2)){
                     list.add(" and xmlcast(xmlquery('fn:matches($v," + "\""+regular + "\""+ ")' PASSING "+columnName+" as \"v\") as integer) =1 " );
                 }else if(dataSource.equalsIgnoreCase(HIVE)){
                     list.add(" and " + columnName.split("\\:")[1] + " REGEXP " + "'" + regular + "'");
                 }*/
-                list.add(" and " + temp);
+                //list.add(" and " + temp);
+                switch (dataSource){
+                    case MYSQL :
+                    case IMPALA :
+                        list.add(" and " + temp);
+                        break;
+                    case HIVE :
+                        if (temp.contains("NOW()")) {
+                            list.add(temp.replace("NOW()","from_unixtime(unix_timestamp(),'yyyy-MM-dd HH:mm:ss')"));
+                        }else if(temp.contains("now()")){
+                            list.add(temp.replace("now()","from_unixtime(unix_timestamp(),'yyyy-MM-dd HH:mm:ss')"));
+                        }else {
+                            list.add(" and " + temp);
+                        }
+                        break;
+                    case ORACLE :
+                        if(temp.contains("regexp") || temp.contains("REGEXP")){
+                            String regexp = temp.substring(temp.indexOf("'"),temp.lastIndexOf("'"));
+                            if(temp.contains("not") || temp.contains("NOT")){
+                                list.add(" and NOT REGEXP_LIKE("+"\"" + columnName + "\""+","+"'"+regexp + "')");
+                            }else {
+                                list.add(" and REGEXP_LIKE("+"\"" + columnName + "\""+","+"'"+regexp + "')");
+                            }
 
+                        }else if(temp.contains("NOW()")){
+                            list.add(temp.replace("NOW()","TO_DATE(SYSDATE,'yyyy-mm-dd hh24:mi:ss')"));
+                        }else if(temp.contains("now()")){
+                            list.add(temp.replace("now()","TO_DATE(SYSDATE,'yyyy-mm-dd hh24:mi:ss')"));
+                        }else {
+                            list.add(" and " + temp);
+                        }
+                        break;
+                    default :
+                        logger.error("暂不支持当前数据库");
+                        break;
+                }
             }
         }
 

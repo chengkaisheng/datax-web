@@ -196,6 +196,7 @@ public class JobServiceImpl implements JobService {
         jobInfo.setJobJson(jobJson);
         jobInfo.setJobParam(jobParam);
         jobInfoMapper.save(jobInfo);
+        
         if (jobInfo.getId() < 1) {
             return new ReturnT<>(ReturnT.FAIL_CODE, (I18nUtil.getString("jobinfo_field_add") + I18nUtil.getString("system_fail")));
         }
@@ -664,7 +665,7 @@ public class JobServiceImpl implements JobService {
                     JobLog jobLog=jobLogMapper.load(virtualLogId);
                     long triggerTime=jobLog.getTriggerTime().getTime();
                     String logFileName = JobFileAppender.makeLogFileName(new Date(triggerTime), virtualLogId);
-                    LogResult logResult = JobFileAppender.readLog("../datax-executor/"+logFileName, 1);
+                    LogResult logResult = JobFileAppender.readLog("/root/datax-web-2.1.2/modules/datax-executor"+logFileName, 1);
                     str+="---------------------------------子任务Id:"+jobLog.getJobId()+"---------------------------------子任务名称:"+jobLog.getJobDesc()+"开始执行---------------------------------\n"
                             +logResult.getLogContent()+"---------------------------------子任务Id:"+jobLog.getJobId()+"---------------------------------子任务名称:"+jobLog.getJobDesc()+"执行结束---------------------------------"+"\r\n\n\n";
                     toLineNum+=logResult.getToLineNum();
