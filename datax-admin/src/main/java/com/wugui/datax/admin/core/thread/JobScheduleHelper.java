@@ -106,7 +106,7 @@ public class JobScheduleHelper {
                                         if (jobInfoLinks != null && jobInfoLinks.size() > 0) {
                                             JobLog jobLog= NetWorkUtils.createVirtualLog(jobInfo);
                                             for (JobInfoLink jobInfoLink : jobInfoLinks) {
-                                                JobTriggerPoolHelper.trigger(jobInfoLink.getId(),TriggerTypeEnum.MANUAL, -1, null, "",jobInfoId,jobInfoLink.getInfoId(),jobLog.getId());
+                                                JobTriggerPoolHelper.trigger(jobInfoLink.getId(),TriggerTypeEnum.CRON, -1, null, "",jobInfoId,jobInfoLink.getInfoId(),jobLog.getId());
                                                 logger.debug(">>>>>>>>>>> datax-web, schedule push trigger : id = " + jobInfo.getId());
                                             }
                                         }
@@ -267,7 +267,7 @@ public class JobScheduleHelper {
                                 if (jobInfoLinks != null && jobInfoLinks.size() > 0) {
                                     JobLog jobLog= NetWorkUtils.createVirtualLog(jobInfo);
                                     for (JobInfoLink jobInfoLink : jobInfoLinks) {
-                                        JobTriggerPoolHelper.trigger(jobInfoLink.getId(),TriggerTypeEnum.MANUAL, -1, null, "",jobInfoId,jobInfoLink.getInfoId(),jobLog.getId());
+                                        JobTriggerPoolHelper.trigger(jobInfoLink.getId(),TriggerTypeEnum.CRON, -1, null, "",jobInfoId,jobInfoLink.getInfoId(),jobLog.getId());
                                         logger.debug(">>>>>>>>>>> datax-web, schedule push trigger : id = " + jobInfo.getId());
                                     }
                                 }
