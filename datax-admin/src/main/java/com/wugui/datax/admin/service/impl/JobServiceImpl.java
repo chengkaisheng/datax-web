@@ -22,6 +22,7 @@ import com.wugui.datax.admin.core.thread.JobScheduleHelper;
 import com.wugui.datax.admin.core.thread.JobTriggerPoolHelper;
 import com.wugui.datax.admin.core.trigger.TriggerTypeEnum;
 import com.wugui.datax.admin.core.util.I18nUtil;
+import com.wugui.datax.admin.dto.*;
 import com.wugui.datax.admin.datashare.entity.TInterface;
 import com.wugui.datax.admin.datashare.entity.TInterfaceExample;
 import com.wugui.datax.admin.datashare.mapper.TInterfaceMapper;
@@ -99,6 +100,12 @@ public class JobServiceImpl implements JobService {
     @Resource
     private TInterfaceMapper interfaceMapper;
 
+    @Resource
+    private JobRuleMapper jobRuleMapper;
+
+    @Resource
+    private JobRuleInfoMapper jobRuleInfoMapper;
+
     @Override
     public Map<String, Object> pageList(int start, int length, int jobGroup, int triggerStatus, String jobDesc, String glueType, int userId, Integer[] projectIds) {
 
@@ -124,15 +131,17 @@ public class JobServiceImpl implements JobService {
         String jobParam = jobInfo.getJobParam();
         String jobType = jobInfo.getJobType();
         String jobJson = null;
+        QualityJsonBuildDto qualityJsonBuildDto = null;
+        DataXJsonBuildDto dataXJsonBuildDto = null;
         if(jobType.equals("DQCJOB")){
             //质量任务
-            QualityJsonBuildDto qualityJsonBuildDto = JSON.parseObject(jobParam,QualityJsonBuildDto.class);
+            qualityJsonBuildDto = JSON.parseObject(jobParam,QualityJsonBuildDto.class);
             checkParam(qualityJsonBuildDto);
             jobJson = qualityJsonService.buildJobJson(qualityJsonBuildDto);
 
         }else{
             //其他任务
-            DataXJsonBuildDto dataXJsonBuildDto = JSON.parseObject(jobParam,DataXJsonBuildDto.class);
+            dataXJsonBuildDto = JSON.parseObject(jobParam,DataXJsonBuildDto.class);
             checkParam(dataXJsonBuildDto);
             jobJson = dataxJsonService.buildJobJson(dataXJsonBuildDto);
         }
@@ -211,6 +220,33 @@ public class JobServiceImpl implements JobService {
         jobInfo.setJobJson(jobJson);
         jobInfo.setJobParam(jobParam);
         jobInfoMapper.save(jobInfo);
+
+        if(jobType.equals("DQCJOB")){
+            //创建实体
+            JobRule jobRule = new JobRule();
+            jobRule.setJobInfoId(jobInfo.getId());
+            jobRule.setDatasourceId(qualityJsonBuildDto.getReaderDatasourceId().intValue());
+            jobRule.setTables(qualityJsonBuildDto.getReaderTables().get(0));
+            jobRule.setCreateTime(new Date());
+            jobRule.setCreateUserId(jobInfo.getUserId());
+            jobRuleMapper.insert(jobRule);
+
+            JobRuleInfo jobRuleInfo = new JobRuleInfo();
+            jobRuleInfo.setJobRuleId(jobRule.getId());
+            jobRuleInfo.setCreateUserId(jobInfo.getUserId());
+            jobRuleInfo.setCreateTime(new Date());
+            for(RuleInfoDto ruleInfoDto : qualityJsonBuildDto.getRule()){
+                String columnName = ruleInfoDto.getColumnName();
+                jobRuleInfo.setColumns(columnName);
+                List<RuleIdInfoDto> list = ruleInfoDto.getRuleId();
+                for (RuleIdInfoDto ruleIdInfoDto : list) {
+                    String code = ruleIdInfoDto.getCode();
+                    jobRuleInfo.setRuleCode(code);
+                    jobRuleInfoMapper.insert(jobRuleInfo);
+                }
+            }
+
+        }
 
         if (jobInfo.getId() < 1) {
             return new ReturnT<>(ReturnT.FAIL_CODE, (I18nUtil.getString("jobinfo_field_add") + I18nUtil.getString("system_fail")));

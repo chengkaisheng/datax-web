@@ -138,16 +138,16 @@ public class QualityJsonServiceImpl implements QualityJsonService {
                         break;
                     case HIVE :
                         if (temp.contains("NOW()")) {
-                            list.add(temp.replace("NOW()","from_unixtime(unix_timestamp(),'yyyy-MM-dd HH:mm:ss')"));
+                            list.add(" and " + temp.replace("NOW()","from_unixtime(unix_timestamp(),'yyyy-MM-dd HH:mm:ss')"));
                         }else if(temp.contains("now()")){
-                            list.add(temp.replace("now()","from_unixtime(unix_timestamp(),'yyyy-MM-dd HH:mm:ss')"));
+                            list.add(" and " + temp.replace("now()","from_unixtime(unix_timestamp(),'yyyy-MM-dd HH:mm:ss')"));
                         }else {
                             list.add(" and " + temp);
                         }
                         break;
                     case ORACLE :
                         if(temp.contains("regexp") || temp.contains("REGEXP")){
-                            String regexp = temp.substring(temp.indexOf("'"),temp.lastIndexOf("'"));
+                            String regexp = temp.substring(temp.indexOf("'")+1,temp.lastIndexOf("'"));
                             if(temp.contains("not") || temp.contains("NOT")){
                                 list.add(" and NOT REGEXP_LIKE("+"\"" + columnName + "\""+","+"'"+regexp + "')");
                             }else {
@@ -155,9 +155,9 @@ public class QualityJsonServiceImpl implements QualityJsonService {
                             }
 
                         }else if(temp.contains("NOW()")){
-                            list.add(temp.replace("NOW()","TO_DATE(SYSDATE,'yyyy-mm-dd hh24:mi:ss')"));
+                            list.add(" and " + temp.replace("NOW()","TO_DATE(SYSDATE,'yyyy-mm-dd hh24:mi:ss')"));
                         }else if(temp.contains("now()")){
-                            list.add(temp.replace("now()","TO_DATE(SYSDATE,'yyyy-mm-dd hh24:mi:ss')"));
+                            list.add(" and " + temp.replace("now()","TO_DATE(SYSDATE,'yyyy-mm-dd hh24:mi:ss')"));
                         }else {
                             list.add(" and " + temp);
                         }
