@@ -2,10 +2,12 @@ package com.wugui.datax.admin.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.wugui.datax.admin.entity.JobDatasource;
 import com.wugui.datax.admin.entity.JobProject;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Project
@@ -24,4 +26,18 @@ public interface JobProjectMapper extends BaseMapper<JobProject> {
      */
     IPage<JobProject> getProjectListPaging(IPage<JobProject> page,
                                           @Param("searchName") String searchName);
+
+    Integer queryDataSourceCountByProject();
+
+    Integer queryUserCountByProject();
+
+    Integer queryTaskCountByProject();
+
+    List<Map<String,Object>> getItemTaskDistribution();
+
+    List<Map<String,Object>> getItemTaskRunStateDistribution();
+
+    List<Map<String,Object>> getItemTaskTypeDistribution();
+
+    List<Map<String,Object>> getTaskExecutorDistribution();
 }

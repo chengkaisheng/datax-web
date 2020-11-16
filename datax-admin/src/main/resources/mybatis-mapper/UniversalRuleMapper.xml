@@ -82,4 +82,7 @@
         select * from universal_rule where code=#{code}
     </select>
 
+    <select id="getUsedRuleDistribution" resultType="map">
+        select rule_code ruleCode,count(1) num from job_rule_info group by rule_code
+    </select>
 </mapper>

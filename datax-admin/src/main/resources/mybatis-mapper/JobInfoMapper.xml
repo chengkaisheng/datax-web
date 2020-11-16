@@ -391,4 +391,12 @@
 		inc_start_id = #{incStartId}
 		WHERE id = #{id}
 	</update>
+
+
+	<select id="getConfigedRuleCount" resultType="int">
+		select count(1) from job_info where job_type='DQCJOB'
+	</select>
+	<select id="getTaskTypeDistribution" resultType="map">
+		select glue_type type,count(1) num from job_info group by glue_type;
+	</select>
 </mapper>

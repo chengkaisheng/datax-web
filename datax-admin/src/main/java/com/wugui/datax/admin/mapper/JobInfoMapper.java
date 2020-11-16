@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -65,4 +66,7 @@ public interface JobInfoMapper {
 
     int selectConfCount(@Param("offset") int offset, @Param("pagesize") int pagesize, @Param("name") String name, @Param("jobType") String jobType);
 
+    Integer getConfigedRuleCount();
+
+    List<Map<String,Object>> getTaskTypeDistribution();
 }

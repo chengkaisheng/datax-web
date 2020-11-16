@@ -45,4 +45,9 @@ public interface TInterfaceMapper {
 
     int getInterfaceTotal(ApplyResourceQuery applyResourceQuery);
 
+    Integer getApprovingInterfaceCount();
+
+    Integer getPassInterfaceCount();
+
+    Integer getRejectInterfaceCount();
 }

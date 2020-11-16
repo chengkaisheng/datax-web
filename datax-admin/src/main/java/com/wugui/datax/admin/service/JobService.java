@@ -6,6 +6,7 @@ import com.wugui.datatx.core.biz.model.ReturnT;
 import com.wugui.datax.admin.core.trigger.TriggerTypeEnum;
 import com.wugui.datax.admin.dto.DataXBatchJsonBuildDto;
 import com.wugui.datax.admin.dto.TaskScheduleDto;
+import com.wugui.datax.admin.entity.Dashboard;
 import com.wugui.datax.admin.entity.JobInfo;
 import com.wugui.datax.admin.entity.JobInfoDetail;
 import com.wugui.datax.admin.entity.JobLog;
@@ -134,4 +135,6 @@ public interface JobService {
      * @return
      */
     ReturnT<LogResult> loadingVirtualLog(String log, JobLog jobLog);
+
+    ReturnT<Dashboard> getRunReport() throws IOException;
 }

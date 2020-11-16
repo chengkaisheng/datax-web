@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wugui.datatx.core.biz.ExecutorBiz;
 import com.wugui.datatx.core.biz.model.LogResult;
@@ -21,6 +22,10 @@ import com.wugui.datax.admin.core.thread.JobScheduleHelper;
 import com.wugui.datax.admin.core.thread.JobTriggerPoolHelper;
 import com.wugui.datax.admin.core.trigger.TriggerTypeEnum;
 import com.wugui.datax.admin.core.util.I18nUtil;
+import com.wugui.datax.admin.datashare.entity.TInterface;
+import com.wugui.datax.admin.datashare.entity.TInterfaceExample;
+import com.wugui.datax.admin.datashare.mapper.TInterfaceMapper;
+import com.wugui.datax.admin.datashare.service.InterfaceInfoSevice;
 import com.wugui.datax.admin.dto.DataXBatchJsonBuildDto;
 import com.wugui.datax.admin.dto.DataXJsonBuildDto;
 import com.wugui.datax.admin.dto.QualityConfDto;
@@ -31,10 +36,7 @@ import com.wugui.datax.admin.entity.JobLogReport;
 import com.wugui.datax.admin.entity.JobTemplate;
 import com.wugui.datax.admin.entity.*;
 import com.wugui.datax.admin.mapper.*;
-import com.wugui.datax.admin.service.DatasourceQueryService;
-import com.wugui.datax.admin.service.DataxJsonService;
-import com.wugui.datax.admin.service.JobService;
-import com.wugui.datax.admin.service.QualityJsonService;
+import com.wugui.datax.admin.service.*;
 import com.wugui.datax.admin.util.DateFormatUtils;
 import com.wugui.datax.admin.util.NetWorkUtils;
 import com.wugui.datax.admin.util.UUIDUtils;
@@ -43,6 +45,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -83,6 +86,18 @@ public class JobServiceImpl implements JobService {
     private DataxJsonService dataxJsonService;
     @Resource
     private QualityJsonService qualityJsonService;
+    @Resource
+    private JobProjectService jobProjectService;
+    @Resource
+    private JobProjectMapper jobProjectMapper;
+    @Resource
+    private JobDatasourceMapper jobDatasourceMapper;
+    @Resource
+    private UniversalRuleMapper universalRuleMapper;
+    @Resource
+    private PersonaliseRuleMapper personaliseRuleMapper;
+    @Resource
+    private TInterfaceMapper interfaceMapper;
 
     @Override
     public Map<String, Object> pageList(int start, int length, int jobGroup, int triggerStatus, String jobDesc, String glueType, int userId, Integer[] projectIds) {
@@ -196,7 +211,7 @@ public class JobServiceImpl implements JobService {
         jobInfo.setJobJson(jobJson);
         jobInfo.setJobParam(jobParam);
         jobInfoMapper.save(jobInfo);
-        
+
         if (jobInfo.getId() < 1) {
             return new ReturnT<>(ReturnT.FAIL_CODE, (I18nUtil.getString("jobinfo_field_add") + I18nUtil.getString("system_fail")));
         }
@@ -680,5 +695,41 @@ public class JobServiceImpl implements JobService {
         }
     }
 
+    @Override
+    public ReturnT<Dashboard> getRunReport() throws IOException {
+        Dashboard dashboard=new Dashboard();
+        dashboard.setItem(jobProjectService.count());
+        dashboard.setItemDataSource(jobProjectMapper.queryDataSourceCountByProject());
+        dashboard.setItemUser(jobProjectMapper.queryUserCountByProject());
+        dashboard.setItemTask(jobProjectMapper.queryTaskCountByProject());
+        dashboard.setTaskTypeDistribution(jobInfoMapper.getTaskTypeDistribution());
+        dashboard.setConnectDataSource(jobDatasourceMapper.selectCount(new QueryWrapper<>()));
+        List<JobDatasource> datasources=jobDatasourceMapper.selectList(new QueryWrapper<>());
+        Integer dbCount=0;
+        Integer tableCount=0;
+        for(JobDatasource jobDatasource:datasources){
+            //int dbRet=datasourceQueryService.getDBs(jobDatasource.getId()).size();
+            int tableRet=datasourceQueryService.getTables(jobDatasource.getId(),"").size();
+            //dbCount+=dbRet;
+            tableCount+=tableRet;
+        }
+        dashboard.setDatabase(dbCount);
+        dashboard.setTable(tableCount);
+        List<Map<String,Object>> distributions=jobProjectMapper.getItemTaskDistribution();
+        dashboard.setItemTaskDistribution(distributions);
+        dashboard.setItemTaskRunStateDistribution(jobProjectMapper.getItemTaskRunStateDistribution());
+        dashboard.setItemTaskTypeDistribution(jobProjectMapper.getItemTaskTypeDistribution());
+        dashboard.setTaskExecutorDistribution(jobProjectMapper.getTaskExecutorDistribution());
+        dashboard.setGeneralRule(universalRuleMapper.pageListCount(""));
+        dashboard.setPersonalRule(personaliseRuleMapper.pageListCount(null,null,null));
+        dashboard.setConfigedRule(jobInfoMapper.getConfigedRuleCount());
+        dashboard.setUsedRule(universalRuleMapper.getUsedRuleDistribution());
+        TInterfaceExample example=new TInterfaceExample(TInterface.class);
+        dashboard.setInterfaceNum(interfaceMapper.countByExample(example));
+        dashboard.setApprovingInterface(interfaceMapper.getApprovingInterfaceCount());
+        dashboard.setPassInterface(interfaceMapper.getPassInterfaceCount());
+        dashboard.setRejectInterface(interfaceMapper.getRejectInterfaceCount());
+        return new ReturnT<>(dashboard);
+    }
 
 }

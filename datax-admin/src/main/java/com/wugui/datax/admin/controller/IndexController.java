@@ -1,6 +1,7 @@
 package com.wugui.datax.admin.controller;
 
 import com.wugui.datatx.core.biz.model.ReturnT;
+import com.wugui.datax.admin.entity.Dashboard;
 import com.wugui.datax.admin.service.JobService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
@@ -46,4 +48,8 @@ public class IndexController {
         binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, true));
     }
 
+    @RequestMapping("/getRunReport")
+    public ReturnT<Dashboard> getRunReport() throws IOException {
+        return jobService.getRunReport();
+    }
 }

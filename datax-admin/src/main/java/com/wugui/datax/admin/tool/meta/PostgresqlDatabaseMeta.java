@@ -60,8 +60,8 @@ public class PostgresqlDatabaseMeta extends BaseDatabaseMeta implements Database
 
     @Override
     public String getListAll(String tableName, Integer pageNumber, Integer pageSize, String columnName) {
-        return String.format("select * from %s limit %s offset (%s-1)*%s"
-                ,tableName,pageSize,pageNumber,pageSize);
+        return String.format("select * from %s order by %s ASC limit %s offset (%s-1)*%s"
+                ,tableName,columnName,pageSize,pageNumber,pageSize);
     }
 
     @Override

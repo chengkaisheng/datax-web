@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 通用规则表
@@ -30,4 +31,6 @@ public interface UniversalRuleMapper extends BaseMapper<UniversalRule> {
     int selectCountByCode(@Param("code") String code);
 
     UniversalRule selectByCode(@Param("code")String code);
+
+    List<Map<String,Object>> getUsedRuleDistribution();
 }

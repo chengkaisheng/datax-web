@@ -77,6 +77,7 @@ public class MetadataController extends BaseController {
     @GetMapping("/getTables")
     @ApiOperation("根据数据源id获取可用表名")
     public R<List<String>> getTableNames(Long datasourceId,String tableSchema) throws IOException {
+        logger.info("888888888888888888888888:"+tableSchema);
         return success(datasourceQueryService.getTables(datasourceId,tableSchema));
     }
 

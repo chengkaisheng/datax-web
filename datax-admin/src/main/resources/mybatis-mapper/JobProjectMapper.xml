@@ -13,4 +13,32 @@
         </if>
         order by p.create_time desc
     </select>
+    
+    <select id="queryDataSourceCountByProject" resultType="int">
+        select count(1) from job_jdbc_datasource where project_id in (select id from job_project)
+    </select>
+
+    <select id="queryUserCountByProject" resultType="int">
+        select count(1) from (select DISTINCT user_id from job_project LEFT JOIN job_user on user_id=job_user.id) a
+    </select>
+
+    <select id="queryTaskCountByProject" resultType="int">
+        select count(1) from job_info where project_id in (select id from job_project)
+    </select>
+
+    <select id="getItemTaskDistribution" resultType="map">
+        select p.name name,COUNT(1) num from job_project p LEFT JOIN job_info i on p.id=i.project_id GROUP BY p.id
+    </select>
+
+    <select id="getItemTaskRunStateDistribution" resultType="map">
+        select p.name name,i.trigger_status status,DATE_FORMAT(add_time,'%Y-%m-%d') date,COUNT(1) num from job_project p LEFT JOIN job_info i on p.id=i.project_id GROUP BY p.name,i.trigger_status,date
+    </select>
+
+    <select id="getItemTaskTypeDistribution" resultType="map">
+        select p.name name,i.job_type type,COUNT(1) num from job_project p LEFT JOIN job_info i on p.id=i.project_id GROUP BY p.name,i.job_type
+    </select>
+
+    <select id="getTaskExecutorDistribution" resultType="map">
+        select i.executor_handler name,COUNT(1) num from job_project p LEFT JOIN job_info i on p.id=i.project_id GROUP BY i.executor_handler
+    </select>
 </mapper>
