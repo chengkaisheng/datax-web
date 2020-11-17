@@ -61,5 +61,4 @@ public class JobRoleController {
         jobRoleMapper.deleteById(id);
         return new ReturnT<>("删除成功");
     }
-
 }

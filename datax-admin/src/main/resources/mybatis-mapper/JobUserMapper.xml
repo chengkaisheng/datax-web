@@ -7,7 +7,7 @@
         <result column="id" property="id"/>
         <result column="username" property="username"/>
         <result column="password" property="password"/>
-        <result column="role" property="role" />
+        <result column="role_id" property="roleId" />
         <result column="permission" property="permission" />
     </resultMap>
 
@@ -15,14 +15,14 @@
 		t.id,
 		t.username,
 		t.password,
-		t.role,
+		t.role_id,
 		t.permission
 	</sql>
 
     <sql id="Show_Column_List">
 		t.id,
 		t.username,
-		t.role,
+		t.role_id,
 		t.permission
 	</sql>
 
@@ -88,12 +88,12 @@
 		INSERT INTO job_user (
 			username,
 			password,
-			role,
+			role_id,
 			permission
 		) VALUES (
 			#{username},
 			#{password},
-			#{role},
+			#{roleId},
 			#{permission}
 		);
 	</insert>
@@ -104,7 +104,7 @@
         <if test="password != null and password != ''">
             password = #{password},
         </if>
-        role = #{role},
+        role_id = #{roleId},
         permission = #{permission}
         WHERE id = #{id}
     </update>
@@ -114,5 +114,12 @@
 		FROM job_user
 		WHERE id = #{id}
 	</delete>
+
+    <update id="updateRole" parameterType="com.wugui.datax.admin.entity.JobUser">
+        update job_user
+        set
+        role_id = #{roleId}
+        WHERE id = #{id}
+    </update>
 
 </mapper>
