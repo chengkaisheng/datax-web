@@ -1,5 +1,6 @@
 package com.wugui.datax.admin.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
@@ -51,5 +52,11 @@ public class JobRule implements Serializable {
 	 * 创建人ID
 	 */
 	private Integer createUserId;
+
+	@TableField(exist = false)
+	private String jobDesc;
+
+	@TableField(exist = false)
+	private String username;
 
 }

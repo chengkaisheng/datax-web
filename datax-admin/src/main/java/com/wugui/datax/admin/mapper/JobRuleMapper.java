@@ -4,6 +4,9 @@ package com.wugui.datax.admin.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.wugui.datax.admin.entity.JobRule;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * 任务规则关系表
@@ -14,5 +17,8 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface JobRuleMapper extends BaseMapper<JobRule> {
-	
+
+    List<JobRule> pageList(@Param("offset") int offset, @Param("pageSize") int pageSize);
+
+    int pageListCount();
 }

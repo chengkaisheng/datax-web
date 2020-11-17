@@ -7,13 +7,26 @@
     <resultMap type="com.wugui.datax.admin.entity.JobRule" id="jobRuleMap">
         <result property="id" column="id"/>
         <result property="jobInfoId" column="job_info_id"/>
-        <result property="datasourceid" column="dataSourceId"/>
+        <result property="datasourceId" column="datasource_id"/>
         <result property="tables" column="tables"/>
-        <result property="columns" column="columns"/>
-        <result property="rules" column="rules"/>
         <result property="createTime" column="create_time"/>
         <result property="createUserId" column="create_user_id"/>
     </resultMap>
+    <sql id="Base_Sql">
+        id,job_info_id,datasource_id,tables,create_time,create_user_id
+    </sql>
+    <select id="pageList" resultType="com.wugui.datax.admin.entity.JobRule">
+        select <include refid="Base_Sql"/>,
+        b.job_desc as jobDesc,
+        c.username as username
+        from job_rule as a left join job_info as b on a.job_info_id = b.id
+        left join job_user as c on a.create_user_id = c.id
+        order by create_time
+        limit #{offset},#{pageSize}
+    </select>
+    <select id="pageListCount" resultType="java.lang.Integer">
+        select count(1) from job_rule
+    </select>
 
 
 </mapper>

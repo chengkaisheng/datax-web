@@ -3,6 +3,10 @@ package com.wugui.datax.admin.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.wugui.datax.admin.entity.JobRuleInfo;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import org.springframework.web.bind.annotation.PathVariable;
+
+import java.util.List;
 
 /**
  * 
@@ -13,5 +17,7 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface JobRuleInfoMapper extends BaseMapper<JobRuleInfo> {
+
+    List<JobRuleInfo> selectByJobRuleId(@Param("id") Integer id);
 
 }

@@ -15,5 +15,6 @@ import java.util.Map;
  */
 public interface JobRuleInfoService extends IService<JobRuleInfo> {
 
+    Map<String, Object> selectByJobRuleId(Integer id);
 }
 

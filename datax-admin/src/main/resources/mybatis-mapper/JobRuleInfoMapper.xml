@@ -13,6 +13,14 @@
         <result property="createTime" column="create_time"/>
     </resultMap>
 
+    <sql id="Base_Sql">
+      id,job_rule_id,column,rule_code,create_user_id,create_time
+    </sql>
+
+    <select id="selectByJobRuleId" resultType="com.wugui.datax.admin.entity.JobRuleInfo">
+        select <include refid="Base_Sql" /> from job_role_info
+        where job_rule_id = #{id}
+    </select>
 
 
 </mapper>

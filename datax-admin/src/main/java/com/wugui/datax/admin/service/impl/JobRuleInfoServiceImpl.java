@@ -6,10 +6,24 @@ import com.wugui.datax.admin.mapper.JobRuleInfoMapper;
 import com.wugui.datax.admin.service.JobRuleInfoService;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 @Service("jobRuleInfoService")
 public class JobRuleInfoServiceImpl extends ServiceImpl<JobRuleInfoMapper, JobRuleInfo> implements JobRuleInfoService {
 
 
+    private JobRuleInfoMapper jobRuleInfoMapper;
+
+    @Override
+    public Map<String, Object> selectByJobRuleId(Integer id) {
+        Map<String,Object> map = new HashMap<>();
+
+        List<JobRuleInfo> list = jobRuleInfoMapper.selectByJobRuleId(id);
+        map.put("data",list);
+
+        return map;
+    }
 }
