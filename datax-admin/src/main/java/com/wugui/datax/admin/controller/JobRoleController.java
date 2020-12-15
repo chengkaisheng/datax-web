@@ -1,4 +1,4 @@
-package com.wugui.datax.admin.controller;
+/*package com.wugui.datax.admin.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.api.R;
@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
+*//**
  * @author hf
  * @creat 2020-11-13-18:53
- */
+ *//*
 @RestController
 @RequestMapping("api/jobRole")
 @Api("角色管理接口")
@@ -61,4 +61,4 @@ public class JobRoleController {
         jobRoleMapper.deleteById(id);
         return new ReturnT<>("删除成功");
     }
-}
+}*/

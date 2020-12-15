@@ -41,4 +41,7 @@ public class JobProject {
     @TableField(exist=false)
     private String userName;
 
+    @TableField(exist = false)
+    private List<Integer> userIds;
+
 }

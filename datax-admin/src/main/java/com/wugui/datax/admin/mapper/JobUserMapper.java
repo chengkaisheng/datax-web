@@ -1,5 +1,6 @@
 package com.wugui.datax.admin.mapper;
 
+import com.wugui.datax.admin.entity.JobRole;
 import com.wugui.datax.admin.entity.JobUser;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -37,5 +38,5 @@ public interface JobUserMapper {
     int delete(@Param("id") int id);
 
 
-    int updateRole(JobUser jobUser);
+
 }

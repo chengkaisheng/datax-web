@@ -40,4 +40,6 @@ public interface JobProjectMapper extends BaseMapper<JobProject> {
     List<Map<String,Object>> getItemTaskTypeDistribution();
 
     List<Map<String,Object>> getTaskExecutorDistribution();
+
+
 }

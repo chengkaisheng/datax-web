@@ -21,11 +21,11 @@ public class JwtUser implements UserDetails {
     }
 
     // 写一个能直接使用user创建jwtUser的构造器
-    public JwtUser(JobUser user, String jobRole) {
+    public JwtUser(JobUser user) {
         id = user.getId();
         username = user.getUsername();
         password = user.getPassword();
-        authorities = Collections.singleton(new SimpleGrantedAuthority(jobRole));
+        authorities = Collections.singleton(new SimpleGrantedAuthority(user.getRole()));
     }
 
     @Override
