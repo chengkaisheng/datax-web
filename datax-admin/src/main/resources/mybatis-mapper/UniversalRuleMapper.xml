@@ -24,7 +24,7 @@
         from universal_rule as a
         where a.is_delete = 0
         <if test="name != null and name != '' ">
-            and a.name like CONCAT(CONCAT('%', #{name}), '%')
+        and a.name like CONCAT(CONCAT('%', #{name}), '%')
         </if>
         order by a.create_time desc
         limit #{offset}, #{pageSize}
