@@ -29,8 +29,6 @@ public class ReturnT<T> implements Serializable {
 		this.code = SUCCESS_CODE;
 		this.content = content;
 	}
-
-
 	public int getCode() {
 		return code;
 	}

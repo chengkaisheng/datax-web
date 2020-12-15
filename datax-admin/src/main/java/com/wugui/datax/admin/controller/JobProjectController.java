@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.api.R;
 import com.wugui.datax.admin.entity.JobProject;
 import com.wugui.datax.admin.service.JobProjectService;
+import com.wugui.datax.admin.service.JobProjectUserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ public class JobProjectController extends BaseController {
 
     @Autowired
     private JobProjectService jobProjectService;
+
 
 
     /**
@@ -107,4 +109,14 @@ public class JobProjectController extends BaseController {
     public R<Boolean> delete(@RequestParam("idList") List<Long> idList) {
         return success(this.jobProjectService.removeByIds(idList));
     }
+
+    @PostMapping("/addUser")
+    public R<String> addUser(@RequestBody JobProject jobProject){
+        Boolean flag = jobProjectService.addUser(jobProject);
+        if(flag){
+            return success("保存成功");
+        }
+        return failed("保存失败");
+    }
+
 }

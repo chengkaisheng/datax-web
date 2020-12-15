@@ -7,6 +7,7 @@ import com.wugui.datax.admin.entity.JobProject;
 import org.apache.ibatis.annotations.Param;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Job project
@@ -26,4 +27,15 @@ public interface JobProjectService extends IService<JobProject> {
      */
 
     IPage<JobProject> getProjectListPaging(Integer pageSize, Integer pageNo, String searchName);
+
+    /**
+     * project page
+     * @param jobProject
+     * @return
+     */
+    Boolean addUser(JobProject jobProject);
+
+
+
+
 }

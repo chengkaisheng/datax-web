@@ -147,11 +147,4 @@ public class UserController {
     }
 
 
-    @PostMapping(value = "/updateRole")
-    @ApiOperation("更新用户信息")
-    public ReturnT<String> updateRole(@RequestBody JobUser jobUser) {
-        jobUserMapper.updateRole(jobUser);
-        return ReturnT.SUCCESS;
-    }
-
 }
