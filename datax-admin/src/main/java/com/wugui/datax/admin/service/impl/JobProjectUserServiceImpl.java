@@ -1,5 +1,6 @@
 package com.wugui.datax.admin.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wugui.datax.admin.entity.JobProject;
 import com.wugui.datax.admin.entity.JobProjectUserEntity;
@@ -7,7 +8,9 @@ import com.wugui.datax.admin.mapper.JobProjectUserMapper;
 import com.wugui.datax.admin.service.JobProjectUserService;
 import org.springframework.stereotype.Service;
 
+import java.io.Serializable;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author hf
@@ -37,4 +40,15 @@ public class JobProjectUserServiceImpl extends ServiceImpl<JobProjectUserMapper,
     public void deleteBatch(Integer[] integers) {
         baseMapper.deleteBatch(integers);
     }
+
+    @Override
+    public List<Integer> getUserIds(Serializable projectId) {
+        return baseMapper.selectList(new QueryWrapper<JobProjectUserEntity>()
+                .eq("project_id", projectId))
+                .stream()
+                .map(JobProjectUserEntity::getUserId)
+                .collect(Collectors.toList());
+    }
+
+
 }

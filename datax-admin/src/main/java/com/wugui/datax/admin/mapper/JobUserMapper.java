@@ -1,6 +1,7 @@
 package com.wugui.datax.admin.mapper;
 
-import com.wugui.datax.admin.entity.JobRole;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.wugui.datax.admin.entity.JobUser;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -12,8 +13,7 @@ import java.util.List;
  * @author xuxueli 2019-05-04 16:44:59
  */
 @Mapper
-@Repository
-public interface JobUserMapper {
+public interface JobUserMapper extends BaseMapper<JobUser> {
 
     List<JobUser> pageList(@Param("offset") int offset,
                            @Param("pagesize") int pagesize,
@@ -31,12 +31,16 @@ public interface JobUserMapper {
 
     List<JobUser> getUsersByIds(@Param("ids") String[] ids);
 
-    int save(JobUser jobUser);
+    /*int save(JobUser jobUser);
 
     int update(JobUser jobUser);
 
-    int delete(@Param("id") int id);
+    int delete(@Param("id") int id);*/
 
+    List<Long> queryAllMenuId(Long userId);
 
+    List<String> queryAllPerms(Long userId);
+
+    JobUser queryByUserName(String username);
 
 }

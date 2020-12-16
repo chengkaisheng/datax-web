@@ -66,7 +66,8 @@ public class JobProjectController extends BaseController {
     @ApiOperation("通过主键查询单条数据")
     @GetMapping("{id}")
     public R<JobProject> selectOne(@PathVariable Serializable id) {
-        return success(this.jobProjectService.getById(id));
+        JobProject jobProject = jobProjectService.getProject(id);
+        return success(jobProject);
     }
 
     /**

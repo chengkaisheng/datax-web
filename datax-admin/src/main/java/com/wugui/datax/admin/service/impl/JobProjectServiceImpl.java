@@ -12,6 +12,7 @@ import com.wugui.datax.admin.service.JobProjectUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -38,6 +39,14 @@ public class JobProjectServiceImpl extends ServiceImpl<JobProjectMapper, JobProj
     @Override
     public Boolean addUser(JobProject jobProject) {
         return jobProjectUserService.addUser(jobProject);
+    }
+
+    @Override
+    public JobProject getProject(Serializable id) {
+        JobProject jobProject = jobProjectMapper.selectById(id);
+        List<Integer> userIds = jobProjectUserService.getUserIds( id);
+        jobProject.setUserIds(userIds);
+        return jobProject;
     }
 
 

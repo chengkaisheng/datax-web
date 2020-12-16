@@ -1,20 +1,33 @@
 package com.wugui.datax.admin.controller;
 
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.extension.api.R;
+import com.cloudera.hive.jdbc41.internal.apache.http.HttpRequest;
 import com.wugui.datatx.core.biz.model.ReturnT;
+import com.wugui.datax.admin.constans.Constant;
 import com.wugui.datax.admin.core.util.I18nUtil;
+import com.wugui.datax.admin.entity.JobMenuEntity;
 import com.wugui.datax.admin.entity.JobUser;
 import com.wugui.datax.admin.mapper.JobUserMapper;
+import com.wugui.datax.admin.service.JobMenuService;
+import com.wugui.datax.admin.service.JobUserRoleService;
+import com.wugui.datax.admin.service.JobUserService;
+import com.wugui.datax.admin.util.JwtTokenUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.wugui.datatx.core.biz.model.ReturnT.FAIL_CODE;
 
@@ -24,13 +37,22 @@ import static com.wugui.datatx.core.biz.model.ReturnT.FAIL_CODE;
 @RestController
 @RequestMapping("/api/user")
 @Api(tags = "用户信息接口")
-public class UserController {
+public class UserController extends BaseController{
 
     @Resource
     private JobUserMapper jobUserMapper;
 
     @Resource
     private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    @Autowired
+    private JobMenuService jobMenuService;
+
+    @Autowired
+    private JobUserService jobUserService;
+
+    @Autowired
+    private JobUserRoleService jobUserRoleService;
 
 
     @GetMapping("/pageList")
@@ -53,22 +75,30 @@ public class UserController {
 
     @GetMapping("/list")
     @ApiOperation("用户列表")
-    public ReturnT<List<JobUser>> list(String username) {
+    public R list(@RequestParam Map<String, Object> params, HttpServletRequest request) {
 
         // page list
-        List<JobUser> list = jobUserMapper.findAll(username);
-        return new ReturnT<>(list);
+        if(getCurrentUserId(request) != Constant.SUPER_ADMIN){
+            params.put("createUserId", getCurrentUserId(request));
+        }
+        return R.ok(jobUserService.queryPage(params));
     }
 
     @GetMapping("/getUserById")
     @ApiOperation(value = "根据id获取用户")
-    public ReturnT<JobUser> selectById(@RequestParam("userId") Integer userId) {
-        return new ReturnT<>(jobUserMapper.getUserById(userId));
+    public R selectById(@RequestParam("userId") Integer userId) {
+        JobUser user = jobUserService.getById(userId);
+
+        //获取用户所属的角色列表
+        List<Long> roleIdList = jobUserRoleService.queryRoleIdList(userId.longValue());
+        user.setRoleIdList(roleIdList.stream().distinct().collect(Collectors.toList()));
+
+        return R.ok(user);
     }
 
     @PostMapping("/add")
     @ApiOperation("添加用户")
-    public ReturnT<String> add(@RequestBody JobUser jobUser) {
+    public ReturnT<String> add(@RequestBody JobUser jobUser, HttpServletRequest request) {
 
         // valid username
         if (!StringUtils.hasText(jobUser.getUsername())) {
@@ -94,15 +124,15 @@ public class UserController {
         if (existUser != null) {
             return new ReturnT<>(FAIL_CODE, I18nUtil.getString("user_username_repeat"));
         }
-
+        jobUser.setCreateUserId(getCurrentUserId(request).longValue());
         // write
-        jobUserMapper.save(jobUser);
+        jobUserService.saveUser(jobUser);
         return ReturnT.SUCCESS;
     }
 
     @PostMapping(value = "/update")
     @ApiOperation("更新用户信息")
-    public ReturnT<String> update(@RequestBody JobUser jobUser) {
+    public ReturnT<String> update(@RequestBody JobUser jobUser, HttpServletRequest request) {
         if (StringUtils.hasText(jobUser.getPassword())) {
             String pwd = jobUser.getPassword().trim();
             if (StrUtil.isBlank(pwd)) {
@@ -117,14 +147,15 @@ public class UserController {
             return new ReturnT<>(FAIL_CODE, I18nUtil.getString("system_no_blank") + "密码");
         }
         // write
-        jobUserMapper.update(jobUser);
+        jobUser.setCreateUserId(getCurrentUserId(request).longValue());
+        jobUserService.update(jobUser);
         return ReturnT.SUCCESS;
     }
 
     @RequestMapping(value = "/remove", method = RequestMethod.POST)
     @ApiOperation("删除用户")
     public ReturnT<String> remove(int id) {
-        int result = jobUserMapper.delete(id);
+        int result = jobUserMapper.deleteById(id);
         return result != 1 ? ReturnT.FAIL : ReturnT.SUCCESS;
     }
 
@@ -142,9 +173,25 @@ public class UserController {
         // do write
         JobUser existUser = jobUserMapper.loadByUserName(jobUser.getUsername());
         existUser.setPassword(bCryptPasswordEncoder.encode(password));
-        jobUserMapper.update(existUser);
+        jobUserMapper.updateById(existUser);
         return ReturnT.SUCCESS;
     }
 
+    @GetMapping("/permission")
+    public R<List<JobMenuEntity>> nav(HttpServletRequest request){
+        List<JobMenuEntity> menuList = jobMenuService.getUserMenuList(getCurrentUserId(request).longValue());
+        return R.ok(menuList);
+    }
+
+    @GetMapping("/info/{userId}")
+    public R info(@PathVariable("userId") Long userId){
+        JobUser user = jobUserService.getById(userId);
+
+        //获取用户所属的角色列表
+        List<Long> roleIdList = jobUserRoleService.queryRoleIdList(userId);
+        user.setRoleIdList(roleIdList);
+
+        return R.ok(user);
+    }
 
 }

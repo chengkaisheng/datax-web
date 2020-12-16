@@ -7,23 +7,20 @@
         <result column="id" property="id"/>
         <result column="username" property="username"/>
         <result column="password" property="password"/>
-        <result column="role" property="role" />
-        <result column="permission" property="permission" />
+        <result column="create_user_id" property="createUserId"/>
     </resultMap>
 
     <sql id="Base_Column_List">
 		t.id,
 		t.username,
 		t.password,
-		t.role,
-		t.permission
+		t.create_user_id
 	</sql>
 
     <sql id="Show_Column_List">
 		t.id,
 		t.username,
-		t.role,
-		t.permission
+		t.create_user_id
 	</sql>
 
     <select id="pageList" parameterType="java.util.HashMap" resultMap="JobUser">
@@ -81,10 +78,25 @@
         t.id,
         t.username
         FROM job_user AS t
-        WHERE t.id = #{userId}
+        WHERE t.id = #{id}
+    </select>
+    <select id="queryAllMenuId" resultType="java.lang.Long">
+        select srm.menu_id from job_user_role sur
+        left join job_role_menu srm on sur.role_id = srm.role_id
+         where sur.user_id = #{userId}
+    </select>
+    <select id="queryAllPerms" resultType="java.lang.String">
+        select m.perms from job_user_role ur
+			LEFT JOIN job_role_menu rm on ur.role_id = rm.role_id
+			LEFT JOIN job_menu m on rm.menu_id = m.menu_id
+		where ur.user_id = #{userId}
     </select>
 
-    <insert id="save" parameterType="com.wugui.datax.admin.entity.JobUser" useGeneratedKeys="true" keyProperty="id" >
+    <select id="queryByUserName" resultType="com.wugui.datax.admin.entity.JobUser">
+        select * from job_user where username = #{username}
+    </select>
+
+    <!--<insert id="save" parameterType="com.wugui.datax.admin.entity.JobUser" useGeneratedKeys="true" keyProperty="id" >
 		INSERT INTO job_user (
 			username,
 			password,
@@ -96,9 +108,9 @@
 			#{role},
 			#{permission}
 		);
-	</insert>
+	</insert>-->
 
-    <update id="update" parameterType="com.wugui.datax.admin.entity.JobUser" >
+    <!--<update id="update" parameterType="com.wugui.datax.admin.entity.JobUser" >
         UPDATE job_user
         SET
         <if test="password != null and password != ''">
@@ -113,5 +125,5 @@
 		DELETE
 		FROM job_user
 		WHERE id = #{id}
-	</delete>
+	</delete>-->
 </mapper>

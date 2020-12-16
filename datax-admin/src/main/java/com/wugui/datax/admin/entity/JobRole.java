@@ -1,30 +1,52 @@
 package com.wugui.datax.admin.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+
+import javax.validation.constraints.NotBlank;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author xuxueli 2019-05-04 16:43:12
  */
+@Data
+@TableName("job_role")
 public class JobRole {
 
-    private int id;
-    @ApiModelProperty("账号")
-    private String name;
+    private static final long serialVersionUID = 1L;
 
-    public int getId() {
-        return id;
-    }
+    /**
+     * 角色ID
+     */
+    @TableId
+    private Long roleId;
 
-    public void setId(int id) {
-        this.id = id;
-    }
+    /**
+     * 角色名称
+     */
+    @NotBlank(message="角色名称不能为空")
+    private String roleName;
 
+    /**
+     * 备注
+     */
+    private String remark;
 
-    public String getName() {
-        return name;
-    }
+    /**
+     * 创建者ID
+     */
+    private Long createUserId;
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    @TableField(exist=false)
+    private List<Long> menuIdList;
+
+    /**
+     * 创建时间
+     */
+    private Date createTime;
+
 }

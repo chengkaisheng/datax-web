@@ -1,11 +1,16 @@
 package com.wugui.datax.admin.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 import org.springframework.util.StringUtils;
+
+import java.util.List;
 
 /**
  * @author xuxueli 2019-05-04 16:43:12
  */
+@Data
 public class JobUser {
 
     private int id;
@@ -13,50 +18,24 @@ public class JobUser {
     private String username;
     @ApiModelProperty("密码")
     private String password;
+
     @ApiModelProperty("角色：0-普通用户、1-管理员")
+    @TableField(exist=false)
     private String role;
+
     @ApiModelProperty("权限：执行器ID列表，多个逗号分割")
+    @TableField(exist=false)
     private String permission;
 
-    public int getId() {
-        return id;
-    }
+    @TableField(exist=false)
+    private List<Long> roleIdList;
 
-    public void setId(int id) {
-        this.id = id;
-    }
+    @TableField(exist = false, select = false)
+    private List<String> roleName;
 
-    public String getUsername() {
-        return username;
-    }
+    private Long createUserId;
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
-
-    public String getPermission() {
-        return permission;
-    }
-
-    public void setPermission(String permission) {
-        this.permission = permission;
-    }
 
     // plugin
     public boolean validPermission(int jobGroup){

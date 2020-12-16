@@ -14,6 +14,9 @@ public class DataXException extends RuntimeException {
         super(errorCode.toString() + " - " + errorMessage);
         this.errorCode = errorCode;
     }
+    public DataXException(String errorMessage) {
+        super(errorMessage);
+    }
 
     private DataXException(ErrorCode errorCode, String errorMessage, Throwable cause) {
         super(errorCode.toString() + " - " + getMessage(errorMessage) + " - " + getMessage(cause), cause);

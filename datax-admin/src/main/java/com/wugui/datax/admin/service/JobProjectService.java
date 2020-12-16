@@ -7,6 +7,7 @@ import com.wugui.datax.admin.entity.JobProject;
 import org.apache.ibatis.annotations.Param;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -36,6 +37,5 @@ public interface JobProjectService extends IService<JobProject> {
     Boolean addUser(JobProject jobProject);
 
 
-
-
+    JobProject getProject(Serializable id);
 }
