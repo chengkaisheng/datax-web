@@ -4,8 +4,6 @@ package com.wugui.datax.admin.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.api.R;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wugui.datax.admin.entity.JobRole;
 import com.wugui.datax.admin.mapper.JobRoleMapper;
@@ -13,11 +11,9 @@ import com.wugui.datax.admin.service.JobRoleMenuService;
 import com.wugui.datax.admin.service.JobRoleService;
 import com.wugui.datax.admin.service.JobUserRoleService;
 import com.wugui.datax.admin.util.DataXException;
-import com.wugui.datax.admin.util.PageUtils;
 import com.wugui.datax.admin.util.Query;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,8 +34,6 @@ public class JobRoleServiceImpl extends ServiceImpl<JobRoleMapper, JobRole> impl
     @Autowired
     private JobRoleMenuService jobRoleMenuService;
     @Autowired
-    private UserDetailsService userDetailsService;
-    @Autowired
     private JobUserRoleService jobUserRoleService;
 
     @Override
@@ -53,7 +47,7 @@ public class JobRoleServiceImpl extends ServiceImpl<JobRoleMapper, JobRole> impl
                         .like(StringUtils.isNotBlank(roleName),"role_name", roleName)
                         .eq(createUserId != null,"create_user_id", createUserId)
         );
-
+        page.getRecords().forEach(item->item.setMenuIdList(jobRoleMenuService.queryMenuIdList(item.getRoleId())));
         return page;
     }
 
@@ -74,7 +68,9 @@ public class JobRoleServiceImpl extends ServiceImpl<JobRoleMapper, JobRole> impl
     @Transactional(rollbackFor = Exception.class)
     public void update(JobRole role) {
         this.updateById(role);
-
+        if(role.getMenuIdList() == null || role.getMenuIdList().size() == 0){
+            return;
+        }
         //检查权限是否越权
         checkPrems(role);
 

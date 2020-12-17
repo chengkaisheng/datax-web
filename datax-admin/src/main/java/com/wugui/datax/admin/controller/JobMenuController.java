@@ -12,12 +12,15 @@ package com.wugui.datax.admin.controller;
 import com.baomidou.mybatisplus.extension.api.R;
 import com.wugui.datax.admin.entity.JobMenuEntity;
 import com.wugui.datax.admin.service.JobMenuService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 
+import java.util.ArrayList;
 import java.util.List;
-
+import java.util.stream.Collectors;
 
 
 /**
@@ -25,6 +28,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/jobMenu")
+@Api(tags = "权限接口")
 public class JobMenuController {
 
 	@Autowired
@@ -36,7 +40,8 @@ public class JobMenuController {
 	 * 所有菜单列表
 	 */
 	@GetMapping("/list")
-	public List<JobMenuEntity> list(){
+	@ApiOperation("权限列表")
+	public R list(){
 		List<JobMenuEntity> menuList = jobMenuService.list();
 		for(JobMenuEntity sysMenuEntity : menuList){
 			JobMenuEntity parentMenuEntity = jobMenuService.getById(sysMenuEntity.getParentId());
@@ -44,32 +49,36 @@ public class JobMenuController {
 				sysMenuEntity.setParentName(parentMenuEntity.getName());
 			}
 		}
-		return menuList;
+		return R.ok(menuList);
 	}
 	
 	/**
 	 * 选择菜单(添加、修改菜单)
 	 */
 	@GetMapping("/select")
+	@ApiOperation("权限列表")
 	public R select(){
 		//查询列表数据
 		List<JobMenuEntity> menuList = jobMenuService.queryNotButtonList();
-
-		//添加顶级菜单
-		JobMenuEntity root = new JobMenuEntity();
-		root.setMenuId(0L);
-		root.setName("一级菜单");
-		root.setParentId(-1L);
-		root.setOpen(true);
-		menuList.add(root);
-
-		return R.ok(menuList);
+		List<JobMenuEntity> parentMenu = menuList.stream().filter(item ->item.getParentId() == 0)
+				.collect(Collectors.toList());
+		parentMenu.forEach(item->{
+			ArrayList<JobMenuEntity> jobMenuEntities = new ArrayList<>();
+			menuList.forEach(children->{
+				if(children.getParentId().equals(item.getMenuId())){
+					jobMenuEntities.add(children);
+				}
+			});
+			item.setChildren(jobMenuEntities);
+		});
+		return R.ok(parentMenu);
 	}
 	
 	/**
 	 * 菜单信息
 	 */
 	@GetMapping("/info/{menuId}")
+	@ApiOperation("菜单信息列表")
 	public R info(@PathVariable("menuId") Long menuId){
 		JobMenuEntity menu = jobMenuService.getById(menuId);
 		return R.ok(menu);
@@ -79,6 +88,7 @@ public class JobMenuController {
 	 * 保存
 	 */
 	@PostMapping("/save")
+	@ApiOperation("保存权限")
 	public R save(@RequestBody JobMenuEntity menu){
 		jobMenuService.save(menu);
 		return R.ok("保存成功");
@@ -88,6 +98,7 @@ public class JobMenuController {
 	 * 修改
 	 */
 	@PostMapping("/update")
+	@ApiOperation("更新权限")
 	public R update(@RequestBody JobMenuEntity menu){
 		jobMenuService.updateById(menu);
 
@@ -98,8 +109,9 @@ public class JobMenuController {
 	 * 删除
 	 */
 	@PostMapping("/delete/{menuId}")
+	@ApiOperation("删除权限")
 	public R delete(@PathVariable("menuId") long menuId){
-		if(menuId <= 31){
+		if(menuId <= 37){
 			return R.failed("系统菜单，不能删除");
 		}
 

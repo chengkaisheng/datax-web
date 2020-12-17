@@ -29,24 +29,29 @@ public class JobRole {
      * 角色名称
      */
     @NotBlank(message="角色名称不能为空")
+    @ApiModelProperty("角色名称")
     private String roleName;
 
     /**
      * 备注
      */
+    @ApiModelProperty("备注")
     private String remark;
 
     /**
      * 创建者ID
      */
+    @ApiModelProperty("创建者id")
     private Long createUserId;
 
     @TableField(exist=false)
+    @ApiModelProperty("权限列表")
     private List<Long> menuIdList;
 
     /**
      * 创建时间
      */
+    @ApiModelProperty("创建时间")
     private Date createTime;
 
 }

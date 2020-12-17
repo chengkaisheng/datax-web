@@ -33,6 +33,7 @@ public class JobUser {
     @TableField(exist = false, select = false)
     private List<String> roleName;
 
+    @ApiModelProperty("创建者id")
     private Long createUserId;
 
 

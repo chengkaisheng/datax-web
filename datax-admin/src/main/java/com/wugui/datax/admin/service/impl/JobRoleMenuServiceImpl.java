@@ -32,7 +32,7 @@ public class JobRoleMenuServiceImpl extends ServiceImpl<JobRoleMenuMapper, JobRo
 		//先删除角色与菜单关系
 		deleteBatch(new Long[]{roleId});
 
-		if(menuIdList.size() == 0){
+		if(menuIdList == null || menuIdList.size() == 0){
 			return ;
 		}
 

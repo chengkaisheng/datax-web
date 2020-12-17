@@ -81,7 +81,7 @@
         WHERE t.id = #{id}
     </select>
     <select id="queryAllMenuId" resultType="java.lang.Long">
-        select srm.menu_id from job_user_role sur
+        select distinct srm.menu_id from job_user_role sur
         left join job_role_menu srm on sur.role_id = srm.role_id
          where sur.user_id = #{userId}
     </select>

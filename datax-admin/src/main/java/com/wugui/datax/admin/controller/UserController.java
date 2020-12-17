@@ -2,7 +2,6 @@ package com.wugui.datax.admin.controller;
 
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.extension.api.R;
-import com.cloudera.hive.jdbc41.internal.apache.http.HttpRequest;
 import com.wugui.datatx.core.biz.model.ReturnT;
 import com.wugui.datax.admin.constans.Constant;
 import com.wugui.datax.admin.core.util.I18nUtil;
@@ -12,7 +11,6 @@ import com.wugui.datax.admin.mapper.JobUserMapper;
 import com.wugui.datax.admin.service.JobMenuService;
 import com.wugui.datax.admin.service.JobUserRoleService;
 import com.wugui.datax.admin.service.JobUserService;
-import com.wugui.datax.admin.util.JwtTokenUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,12 +19,10 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.wugui.datatx.core.biz.model.ReturnT.FAIL_CODE;
@@ -178,6 +174,7 @@ public class UserController extends BaseController{
     }
 
     @GetMapping("/permission")
+    @ApiOperation("获取该用户对应权限")
     public R<List<JobMenuEntity>> nav(HttpServletRequest request){
         List<JobMenuEntity> menuList = jobMenuService.getUserMenuList(getCurrentUserId(request).longValue());
         return R.ok(menuList);

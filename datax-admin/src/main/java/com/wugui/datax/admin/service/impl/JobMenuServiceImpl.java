@@ -10,17 +10,14 @@ package com.wugui.datax.admin.service.impl;
 
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-
+import com.wugui.datax.admin.constans.Constant;
 import com.wugui.datax.admin.constans.MenuType;
 import com.wugui.datax.admin.entity.JobMenuEntity;
 import com.wugui.datax.admin.mapper.JobMenuMapper;
 import com.wugui.datax.admin.mapper.JobUserMapper;
 import com.wugui.datax.admin.service.JobMenuService;
 import com.wugui.datax.admin.service.JobRoleMenuService;
-import com.wugui.datax.admin.service.JobRoleService;
-import org.apache.commons.collections.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -64,6 +61,9 @@ public class JobMenuServiceImpl extends ServiceImpl<JobMenuMapper, JobMenuEntity
 
 	@Override
 	public List<JobMenuEntity> getUserMenuList(Long userId) {
+		if(userId == Constant.SUPER_ADMIN){
+			return getAllMenuList(null);
+		}
 		List<Long> list = jobUserMapper.queryAllMenuId(userId);
 		return getAllMenuList(list);
 	}

@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 public class JobUserServiceImpl extends ServiceImpl<JobUserMapper, JobUser> implements JobUserService {
 	@Autowired
 	private JobUserRoleService jobUserRoleService;
+
 	@Autowired
 	private JobRoleService jobRoleService;
 
@@ -50,6 +51,7 @@ public class JobUserServiceImpl extends ServiceImpl<JobUserMapper, JobUser> impl
 				List<String> roleIdList = jobUserRoleService.queryRoleNames((long) user.getId());
 				roleIdList = roleIdList.stream().distinct().collect(Collectors.toList());
 				user.setRoleName(roleIdList);
+				user.setPassword(null);
 			});
 		}
 		return page;
