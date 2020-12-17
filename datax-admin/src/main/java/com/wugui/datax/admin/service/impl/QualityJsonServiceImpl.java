@@ -61,7 +61,8 @@ public class QualityJsonServiceImpl implements QualityJsonService {
     }
 
     private String buildQuerySql(QualityJsonBuildDto dto, JobDatasource readerDatasource) {
-        List<String> list = new ArrayList<>();
+        List<String> list1 = new ArrayList<>();
+       List<String> list = new ArrayList<>();
         //获取数据库类型
         String dataSource = readerDatasource.getDatasource();
         //先获取列信息
@@ -147,12 +148,38 @@ public class QualityJsonServiceImpl implements QualityJsonService {
                         break;
                     case ORACLE :
                         if(temp.contains("regexp") || temp.contains("REGEXP")){
-                            String regexp = temp.substring(temp.indexOf("'")+1,temp.lastIndexOf("'"));
-                            if(temp.contains("not") || temp.contains("NOT")){
-                                list.add(" and NOT REGEXP_LIKE("+"\"" + columnName + "\""+","+"'"+regexp + "')");
+                            //String regexp = temp.substring(temp.indexOf("'")+1,temp.lastIndexOf("'"));
+                            //可能存在多个regexp
+                            /*Matcher matcher = pattern.matcher(temp);
+                            while (matcher.find()){
+                                regexpList.add(matcher.group());
+                            }*/
+
+                            /*if(temp.contains("not") || temp.contains("NOT")){
+                                list.add(" and NOT REGEXP_LIKE("+"\"" + columnName + "\""+","+"'"+str + "')");
                             }else {
-                                list.add(" and REGEXP_LIKE("+"\"" + columnName + "\""+","+"'"+regexp + "')");
+                                list.add(" and REGEXP_LIKE("+"\"" + columnName + "\""+","+"'"+str + "')");
+                            }*/
+                            //拆分
+                            String[] ands = temp.split("and");
+                            for (String or : ands){
+                                String[] ors = or.split("or");
+                                for (String str : ors){
+                                    list1.add(str);
+                                }
                             }
+
+                            for (String str : list1){
+                                //1.拿到正则表达式的
+                                String regexp = str.substring(str.indexOf("'")+1,str.lastIndexOf("'"));
+                                //2.判断是否包含not
+                                if(str.contains("not") || str.contains("NOT")){
+                                    list.add(" and NOT REGEXP_LIKE("+"\"" + columnName + "\""+","+"'"+regexp + "')");
+                                }else {
+                                    list.add(" and REGEXP_LIKE("+"\"" + columnName + "\""+","+"'"+regexp + "')");
+                                }
+                            }
+
 
                         }else if(temp.contains("NOW()")){
                             list.add(" and " + temp.replace("NOW()","TO_DATE(SYSDATE,'yyyy-mm-dd hh24:mi:ss')"));
