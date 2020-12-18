@@ -17,8 +17,6 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,8 +32,6 @@ public class JobMenuController {
 	@Autowired
 	private JobMenuService jobMenuService;
 
-
-	
 	/**
 	 * 所有菜单列表
 	 */
@@ -63,13 +59,20 @@ public class JobMenuController {
 		List<JobMenuEntity> parentMenu = menuList.stream().filter(item ->item.getParentId() == 0)
 				.collect(Collectors.toList());
 		parentMenu.forEach(item->{
-			ArrayList<JobMenuEntity> jobMenuEntities = new ArrayList<>();
-			menuList.forEach(children->{
+			setChildrenMenu(item, jobMenuService.queryListParentId(item.getMenuId()));
+			/*menuList.forEach(children->{
 				if(children.getParentId().equals(item.getMenuId())){
+					ArrayList<JobMenuEntity> menuEntities = new ArrayList<>();
+					jobMenuService.queryListParentId(children.getMenuId()).forEach(innerChild->{
+						if(innerChild.getParentId().equals(children.getMenuId())){
+							menuEntities.add(innerChild);
+						}
+					});
+					children.setChildren(menuEntities);
 					jobMenuEntities.add(children);
 				}
 			});
-			item.setChildren(jobMenuEntities);
+			item.setChildren(jobMenuEntities);*/
 		});
 		return R.ok(parentMenu);
 	}
@@ -90,6 +93,13 @@ public class JobMenuController {
 	@PostMapping("/save")
 	@ApiOperation("保存权限")
 	public R save(@RequestBody JobMenuEntity menu){
+		if(menu.getParentId() == null || menu.getParentId() == 0){
+			menu.setParentId(0L);
+			menu.setType(0);
+		}
+		if (menu.getType() == null){
+			menu.setType(1);
+		}
 		jobMenuService.save(menu);
 		return R.ok("保存成功");
 	}
@@ -124,6 +134,16 @@ public class JobMenuController {
 		jobMenuService.delete(menuId);
 
 		return R.ok("删除成功");
+	}
+
+	public void setChildrenMenu(JobMenuEntity jobMenuEntity, List<JobMenuEntity> childList){
+		if(childList == null || childList.size() == 0){
+			return;
+		}
+		childList.forEach(child->{
+			setChildrenMenu(child, jobMenuService.queryListParentId(child.getMenuId()));
+		});
+		jobMenuEntity.setChildren(childList);
 	}
 
 }

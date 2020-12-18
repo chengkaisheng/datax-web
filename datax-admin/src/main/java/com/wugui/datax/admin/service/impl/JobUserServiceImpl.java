@@ -17,8 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -37,7 +39,7 @@ public class JobUserServiceImpl extends ServiceImpl<JobUserMapper, JobUser> impl
 	@Override
 	public IPage<JobUser> queryPage(Map<String, Object> params) {
 		String username = (String)params.get("username");
-		Long createUserId = (Long)params.get("createUserId");
+		Integer createUserId = (Integer)params.get("createUserId");
 
 		IPage<JobUser> page = this.page(
 			new Query<JobUser>().getPage(params),
@@ -48,9 +50,10 @@ public class JobUserServiceImpl extends ServiceImpl<JobUserMapper, JobUser> impl
 		List<JobUser> users = page.getRecords();
 		if(users != null && users.size() != 0){
 			users.forEach(user->{
-				List<String> roleIdList = jobUserRoleService.queryRoleNames((long) user.getId());
-				roleIdList = roleIdList.stream().distinct().collect(Collectors.toList());
-				user.setRoleName(roleIdList);
+				List<String> roleNames = jobUserRoleService.queryRoleNames((long) user.getId());
+				List<Long> roleIds = jobUserRoleService.queryRoleIdList((long) user.getId());
+				user.setRoleIdList(roleIds);
+				user.setRoleName(roleNames);
 				user.setPassword(null);
 			});
 		}

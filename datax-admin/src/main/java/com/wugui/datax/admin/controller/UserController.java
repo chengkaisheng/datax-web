@@ -129,7 +129,7 @@ public class UserController extends BaseController{
     @PostMapping(value = "/update")
     @ApiOperation("更新用户信息")
     public ReturnT<String> update(@RequestBody JobUser jobUser, HttpServletRequest request) {
-        if (StringUtils.hasText(jobUser.getPassword())) {
+        if (jobUser.getPassword() != null && StringUtils.hasText(jobUser.getPassword())) {
             String pwd = jobUser.getPassword().trim();
             if (StrUtil.isBlank(pwd)) {
                 return new ReturnT<>(FAIL_CODE, I18nUtil.getString("system_no_blank") + "密码");
@@ -139,8 +139,6 @@ public class UserController extends BaseController{
                 return new ReturnT<>(FAIL_CODE, I18nUtil.getString("system_length_limit") + "[4-20]");
             }
             jobUser.setPassword(bCryptPasswordEncoder.encode(pwd));
-        } else {
-            return new ReturnT<>(FAIL_CODE, I18nUtil.getString("system_no_blank") + "密码");
         }
         // write
         jobUser.setCreateUserId(getCurrentUserId(request).longValue());

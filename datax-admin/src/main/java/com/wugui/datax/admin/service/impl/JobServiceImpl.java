@@ -2,51 +2,33 @@ package com.wugui.datax.admin.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.wugui.datatx.core.biz.ExecutorBiz;
 import com.wugui.datatx.core.biz.model.LogResult;
-import com.wugui.datatx.core.biz.model.NetWork;
 import com.wugui.datatx.core.biz.model.ReturnT;
 import com.wugui.datatx.core.enums.ExecutorBlockStrategyEnum;
 import com.wugui.datatx.core.glue.GlueTypeEnum;
 import com.wugui.datatx.core.log.JobFileAppender;
 import com.wugui.datatx.core.util.DateUtil;
-import com.wugui.datax.admin.core.conf.JobAdminConfig;
 import com.wugui.datax.admin.core.cron.CronExpression;
 import com.wugui.datax.admin.core.route.ExecutorRouteStrategyEnum;
-import com.wugui.datax.admin.core.scheduler.JobScheduler;
 import com.wugui.datax.admin.core.thread.JobScheduleHelper;
 import com.wugui.datax.admin.core.thread.JobTriggerPoolHelper;
 import com.wugui.datax.admin.core.trigger.TriggerTypeEnum;
 import com.wugui.datax.admin.core.util.I18nUtil;
-import com.wugui.datax.admin.dto.*;
 import com.wugui.datax.admin.datashare.entity.TInterface;
 import com.wugui.datax.admin.datashare.entity.TInterfaceExample;
 import com.wugui.datax.admin.datashare.mapper.TInterfaceMapper;
-import com.wugui.datax.admin.datashare.service.InterfaceInfoSevice;
-import com.wugui.datax.admin.dto.DataXBatchJsonBuildDto;
-import com.wugui.datax.admin.dto.DataXJsonBuildDto;
-import com.wugui.datax.admin.dto.QualityConfDto;
-import com.wugui.datax.admin.dto.QualityJsonBuildDto;
-import com.wugui.datax.admin.entity.JobGroup;
-import com.wugui.datax.admin.entity.JobInfo;
-import com.wugui.datax.admin.entity.JobLogReport;
-import com.wugui.datax.admin.entity.JobTemplate;
+import com.wugui.datax.admin.dto.*;
 import com.wugui.datax.admin.entity.*;
 import com.wugui.datax.admin.mapper.*;
 import com.wugui.datax.admin.service.*;
 import com.wugui.datax.admin.util.DateFormatUtils;
 import com.wugui.datax.admin.util.NetWorkUtils;
 import com.wugui.datax.admin.util.UUIDUtils;
-import com.wugui.datax.admin.util.UploadUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -732,7 +714,7 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public ReturnT<Dashboard> getRunReport() throws IOException {
+    public ReturnT<Dashboard> getRunReport() {
         Dashboard dashboard=new Dashboard();
         dashboard.setItem(jobProjectService.count());
         dashboard.setItemDataSource(jobProjectMapper.queryDataSourceCountByProject());
@@ -745,7 +727,12 @@ public class JobServiceImpl implements JobService {
         Integer tableCount=0;
         for(JobDatasource jobDatasource:datasources){
             //int dbRet=datasourceQueryService.getDBs(jobDatasource.getId()).size();
-            int tableRet=datasourceQueryService.getTables(jobDatasource.getId(),"").size();
+            int tableRet = 0;
+            try {
+                tableRet = datasourceQueryService.getTables(jobDatasource.getId(),"").size();
+            } catch (Exception e) {
+                logger.error(jobDatasource.getDatasourceName() + "查询数据源异常");
+            }
             //dbCount+=dbRet;
             tableCount+=tableRet;
         }

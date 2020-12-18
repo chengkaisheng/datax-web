@@ -81,7 +81,7 @@ public class JobMenuServiceImpl extends ServiceImpl<JobMenuMapper, JobMenuEntity
 	/**
 	 * 获取所有菜单列表
 	 */
-	private List<JobMenuEntity> getAllMenuList(List<Long> menuIdList){
+	public List<JobMenuEntity> getAllMenuList(List<Long> menuIdList){
 		//查询根菜单列表
 		List<JobMenuEntity> menuList = queryListParentId(0L, menuIdList);
 		//递归获取子菜单
