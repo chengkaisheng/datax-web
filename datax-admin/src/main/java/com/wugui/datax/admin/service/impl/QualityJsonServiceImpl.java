@@ -135,7 +135,7 @@ public class QualityJsonServiceImpl implements QualityJsonService {
                 switch (dataSource){
                     case MYSQL :
                     case IMPALA :
-                        list.add(" and " + temp);
+                        list.add(" and (" + temp + ")");
                         break;
                     case HIVE :
                         if (temp.contains("NOW()")) {
@@ -143,7 +143,7 @@ public class QualityJsonServiceImpl implements QualityJsonService {
                         }else if(temp.contains("now()")){
                             list.add(" and " + temp.replace("now()","from_unixtime(unix_timestamp(),'yyyy-MM-dd HH:mm:ss')"));
                         }else {
-                            list.add(" and " + temp);
+                            list.add(" and (" + temp + ")");
                         }
                         break;
                     case ORACLE :
@@ -163,10 +163,11 @@ public class QualityJsonServiceImpl implements QualityJsonService {
                             //拆分
                             String[] ands = temp.split("and");
                             for (String or : ands){
-                                String[] ors = or.split("or");
-                                for (String str : ors){
-                                    list1.add(str);
-                                }
+                                //String[] ors = or.split("or");
+                                //for (String str : ors){
+                                    //list1.add(str);
+                                //}
+                                list1.add(or);
                             }
 
                             for (String str : list1){
@@ -180,13 +181,12 @@ public class QualityJsonServiceImpl implements QualityJsonService {
                                 }
                             }
 
-
                         }else if(temp.contains("NOW()")){
                             list.add(" and " + temp.replace("NOW()","TO_DATE(SYSDATE,'yyyy-mm-dd hh24:mi:ss')"));
                         }else if(temp.contains("now()")){
                             list.add(" and " + temp.replace("now()","TO_DATE(SYSDATE,'yyyy-mm-dd hh24:mi:ss')"));
                         }else {
-                            list.add(" and " + temp);
+                            list.add(" and (" + temp + ")");
                         }
                         break;
                     default :
