@@ -1,6 +1,7 @@
 package com.wugui.datax.admin.service;
 
 import com.wugui.datax.admin.entity.ColumnMsg;
+import com.wugui.datax.admin.entity.HiveParameter;
 import com.wugui.datax.admin.entity.Search;
 import com.wugui.datax.admin.tool.database.TableInfo;
 
@@ -57,6 +58,13 @@ public interface DatasourceQueryService {
      */
     Object getTableColumns(Long id, String schema, String tableName) throws IOException;
 
+    /**
+     * 根据数据源id，表名查询出该表所有字段
+     *
+     * @param hiveParameter
+     * @return
+     */
+    Object dbToHive( HiveParameter hiveParameter) throws IOException;
 
     /**
      * 根据 sql 语句获取字段

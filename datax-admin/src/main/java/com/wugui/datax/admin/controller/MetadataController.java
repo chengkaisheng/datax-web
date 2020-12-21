@@ -2,8 +2,10 @@ package com.wugui.datax.admin.controller;
 
 import com.baomidou.mybatisplus.extension.api.R;
 import com.wugui.datax.admin.entity.ColumnMsg;
+import com.wugui.datax.admin.entity.HiveParameter;
 import com.wugui.datax.admin.service.DatasourceQueryService;
 import com.wugui.datax.admin.tool.query.HiveQueryTool;
+import com.wugui.datax.admin.util.UUIDUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.logging.log4j.core.config.plugins.validation.constraints.Required;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -105,6 +108,29 @@ public class MetadataController extends BaseController {
     @ApiOperation("根据数据源id和表名获取所有字段名称，类型，comment")
     public R<Object> getTableColumns(Long datasourceId,String schema, String tableName) throws IOException {
         return success(datasourceQueryService.getTableColumns(datasourceId, schema, tableName));
+    }
+
+    /**
+     * 根据数据源id和表名获取字段的名称,类型，comment
+     *
+     * @param hiveParameter
+     * @return
+     */
+    @PostMapping("/dbToHive")
+    @ApiOperation("根据数据源id和表名获取所有字段名称，类型，comment")
+    public R<Object> dbToHive(@RequestBody HiveParameter hiveParameter) throws IOException {
+        Map map =new HashMap();
+        if(UUIDUtils.isEmpty(hiveParameter.getSchema())){
+            map.put("code","500");
+            map.put("data","数据库schema不能为空");
+            return success(map);
+        }
+        if(UUIDUtils.isEmpty(hiveParameter.getVersion())){
+            map.put("code","500");
+            map.put("data","请选择hive版本");
+            return success(map);
+        }
+        return success(datasourceQueryService.dbToHive(hiveParameter));
     }
 
     /**

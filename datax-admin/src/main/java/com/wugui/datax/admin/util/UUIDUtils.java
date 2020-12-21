@@ -53,4 +53,14 @@ public class UUIDUtils {
     public static boolean isEmpty(String s) {
         return s == null || "".equals(s) || "null".equals(s);
     }
+
+    public static int StringToInteger(String str){
+        String version="";
+        version.replace("hive-","");
+        String[] version_num = str.split("\\.");
+        for (String str1:version_num){
+            version+=str1;
+        }
+        return Integer.parseInt(version);
+    }
 }

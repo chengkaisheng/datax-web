@@ -16,8 +16,19 @@ public class DB2DatabaseMeta extends BaseDatabaseMeta implements DatabaseInterfa
     }
 
     @Override
+    public String getSQLQueryTables(String... tableSchema){
+        return "SELECT TABNAME FROM syscat.tables where TYPE=\'T\' and TABSCHEMA=\'"+tableSchema[0]+"\'";
+    }
+
+
+    @Override
     public String getSQLQueryTables() {
         return "select TABNAME from SYSCAT.TABLES where TABSCHEMA NOT LIKE  'SYS%' and TYPE='T' ORDER BY TABSCHEMA, TABNAME";
+    }
+
+    @Override
+    public String getSQLQueryTableSchema(String... args) {
+        return "select schemaname from syscat.schemata";
     }
 
     @Override

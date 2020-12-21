@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wugui.datax.admin.mapper.DimDDLMapper">
+    <resultMap id="DimDDL" type="com.wugui.datax.admin.entity.DimDDL">
+        <result column="source" property="source"/>
+        <result column="source_type" property="sourceType"/>
+        <result column="target" property="target"/>
+        <result column="target_type" property="targetType"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <select id="select" resultMap="DimDDL" resultType="java.util.Map">
+        SELECT * FROM  DIM_DDL aa  WHERE aa.SOURCE=#{source} AND aa.TARGET=#{target} and source_type=#{sourceType}
+    </select>
+
+</mapper>
