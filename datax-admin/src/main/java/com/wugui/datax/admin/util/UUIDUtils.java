@@ -56,7 +56,7 @@ public class UUIDUtils {
 
     public static int StringToInteger(String str){
         String version="";
-        version.replace("hive-","");
+        str=str.replace("hive-","");
         String[] version_num = str.split("\\.");
         for (String str1:version_num){
             version+=str1;

@@ -12,7 +12,7 @@ import lombok.Data;
 @Data
 public class HiveParameter {
     @ApiModelProperty("hive版本")
-    private String version;
+    private String targetVersion;
 
     @ApiModelProperty("isTemporary")
     private boolean isTemporary;
@@ -20,8 +20,8 @@ public class HiveParameter {
     @ApiModelProperty("isExternal")
     private boolean isExternal;
 
-    @ApiModelProperty("hive表类型")
-    private String type;
+    @ApiModelProperty("是否添加删除语句")
+    private boolean dropAdded;
 
     @ApiModelProperty("与目标源相同的")
     private String dbNameType;
@@ -37,18 +37,6 @@ public class HiveParameter {
 
     @ApiModelProperty("comment")
     private boolean comment;
-
-    @ApiModelProperty("主键约束")
-    private boolean pk;
-
-    @ApiModelProperty("外键约束")
-    private boolean fk;
-
-    @ApiModelProperty("唯一约束")
-    private boolean uk;
-
-    @ApiModelProperty("检查约束")
-    private boolean ck;
 
     @ApiModelProperty("表备注信息")
     private boolean tableComment;
@@ -84,7 +72,7 @@ public class HiveParameter {
     private String rowformatMapKeyTerm;
 
     @ApiModelProperty("空值替换字符")
-    private String rowformatNullDefinndAs;
+    private String rowformatNullDefindAs;
 
     @ApiModelProperty("serder类名")
     private String rowformatSerdeName;
