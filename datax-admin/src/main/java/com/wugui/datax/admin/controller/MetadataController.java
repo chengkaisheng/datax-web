@@ -125,7 +125,7 @@ public class MetadataController extends BaseController {
             map.put("data","数据库schema不能为空");
             return success(map);
         }
-        if(UUIDUtils.isEmpty(hiveParameter.getVersion())){
+        if(UUIDUtils.isEmpty(hiveParameter.getTargetVersion())){
             map.put("code","500");
             map.put("data","请选择hive版本");
             return success(map);

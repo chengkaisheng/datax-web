@@ -191,7 +191,20 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
             boolean isSorted=false;//判断是否进行排序
             boolean isPatition=false;//判断是否进行分区
             Random random = new Random();
+            DB2QueryTool db2QueryTool=new DB2QueryTool(datasource);
+            Map<String, List<Map<String,String>>> result=(Map<String, List<Map<String,String>>>) db2QueryTool.getTableColumns(hiveParameter.getTableName(),datasource.getDatasource(),hiveParameter.getSchema());
+            List<Map<String,String>> list=result.get("datas");
             patition.append("PARTITIONED BY (");
+            if(hiveParameter.isDropAdded()){
+                str.append("drop table if exists ");
+                if(UUIDUtils.notEmpty(hiveParameter.getDbNameType())){//获取数据库名
+                    str.append(hiveParameter.getDbNamePattern().replace("%s",list.get(0).get("TABSCHEMA"))).append(".");
+                }
+                if(UUIDUtils.notEmpty(hiveParameter.getTableNameType())){//获取表名
+                    str.append(hiveParameter.getTableNamePattern().replace("%s",list.get(0).get("TABLENAME")));
+                }
+                str.append("\r");
+            }
             str.append("CREATE ");
             if(hiveParameter.isTemporary()){
                 str.append("TEMPORARY ");
@@ -200,9 +213,6 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
                 str.append("EXTERNAL ");
             }
             str.append(" TABLE IF NOT EXISTS ");
-            DB2QueryTool db2QueryTool=new DB2QueryTool(datasource);
-            Map<String, List<Map<String,String>>> result=(Map<String, List<Map<String,String>>>) db2QueryTool.getTableColumns(hiveParameter.getTableName(),datasource.getDatasource(),hiveParameter.getSchema());
-            List<Map<String,String>> list=result.get("datas");
             sorted.append("(");
             if(UUIDUtils.notEmpty(hiveParameter.getDbNameType())){//获取数据库名
                 str.append(hiveParameter.getDbNamePattern().replace("%s",list.get(0).get("TABSCHEMA"))).append(".");
@@ -251,12 +261,8 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
                     }else {
                         str.append(dimDDL.getTargetType());
                     }
-
-                    if(hiveParameter.isComment()){
-                        if(UUIDUtils.notEmpty(map.get("COLUMN_COMMENT"))){
-                            str.append(" comment '"+map.get("COLUMN_COMMENT")+"'");
-                        }
-
+                    if(UUIDUtils.notEmpty(map.get("COLUMN_COMMENT"))){
+                        str.append(" comment '"+map.get("COLUMN_COMMENT")+"'");
                     }
                     str.append(",\r");
                 }
@@ -271,12 +277,8 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
                     }else {
                         str.append(dimDDL.getTargetType());
                     }
-
-                    if(hiveParameter.isComment()){
-                        if(UUIDUtils.notEmpty(map.get("COLUMN_COMMENT"))){
-                            str.append(" comment '"+map.get("COLUMN_COMMENT")+"'");
-                        }
-
+                    if(UUIDUtils.notEmpty(map.get("COLUMN_COMMENT"))){
+                        str.append(" comment '"+map.get("COLUMN_COMMENT")+"'");
                     }
                     str.append(",\r");
                 }
@@ -291,12 +293,8 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
                     }else {
                         str.append(dimDDL.getTargetType());
                     }
-
-                    if(hiveParameter.isComment()){
-                        if(UUIDUtils.notEmpty(map.get("COLUMN_COMMENT"))){
-                            str.append(" comment '"+map.get("COLUMN_COMMENT")+"'");
-                        }
-
+                    if(UUIDUtils.notEmpty(map.get("COLUMN_COMMENT"))){
+                        str.append(" comment '"+map.get("COLUMN_COMMENT")+"'");
                     }
                     str.append(",\r");
                 }
@@ -311,12 +309,8 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
                     }else {
                         str.append(dimDDL.getTargetType());
                     }
-
-                    if(hiveParameter.isComment()){
-                        if(UUIDUtils.notEmpty(map.get("COLUMN_COMMENT"))){
-                            str.append(" comment '"+map.get("COLUMN_COMMENT")+"'");
-                        }
-
+                    if(UUIDUtils.notEmpty(map.get("COLUMN_COMMENT"))){
+                        str.append(" comment '"+map.get("COLUMN_COMMENT")+"'");
                     }
                     str.append(",\r");
                 }
@@ -374,7 +368,7 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
             patition.append(")\r");
             sorted.append(") ");
             //查询db2主键信息并生成主键sql
-            if(hiveParameter.isPk()&& UUIDUtils.StringToInteger(hiveParameter.getVersion())>=210){
+            if(UUIDUtils.StringToInteger(hiveParameter.getTargetVersion())>=210){
                 wkResult=(Map<String, List<Map<String,String>>>) db2QueryTool.getPKColumns(hiveParameter.getTableName(),datasource.getDatasource(),hiveParameter.getSchema());
                 if(wkResult.get("datas").size()>0){
                     wkList=wkResult.get("datas");
@@ -388,7 +382,7 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
                 }
             }
             //查询db2外键信息并生成外键sql
-            if(hiveParameter.isFk()&&  UUIDUtils.StringToInteger(hiveParameter.getVersion())>=210){
+            if(UUIDUtils.StringToInteger(hiveParameter.getTargetVersion())>=210){
                 wkResult=(Map<String, List<Map<String,String>>>) db2QueryTool.getFKColumns(hiveParameter.getTableName(),datasource.getDatasource(),hiveParameter.getSchema());
                 if(wkResult.get("datas").size()>0){
                     wkList=wkResult.get("datas");
@@ -402,7 +396,7 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
                 }
             }
             //查询db2唯一键信息并生成唯一键sql
-            if(hiveParameter.isUk()&& UUIDUtils.StringToInteger(hiveParameter.getVersion())>=300){
+            if(UUIDUtils.StringToInteger(hiveParameter.getTargetVersion())>=300){
                 wkResult=(Map<String, List<Map<String,String>>>) db2QueryTool.getUKColumns(hiveParameter.getTableName(),datasource.getDatasource(),hiveParameter.getSchema());
                 if(wkResult.get("datas").size()>0){
                     wkList=wkResult.get("datas");
@@ -416,7 +410,7 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
                 }
             }
             //查询db2检查约束信息并生成检查约束sql
-            if(hiveParameter.isCk()&& UUIDUtils.StringToInteger(hiveParameter.getVersion())>=300){
+            if(UUIDUtils.StringToInteger(hiveParameter.getTargetVersion())>=300){
                 wkResult=(Map<String, List<Map<String,String>>>) db2QueryTool.getCKColumns(hiveParameter.getTableName(),datasource.getDatasource(),hiveParameter.getSchema());
                 if(wkResult.get("datas").size()>0){
                     wkList=wkResult.get("datas");
@@ -428,18 +422,15 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
             str=str.deleteCharAt(str.length()-1);
             str=str.deleteCharAt(str.length()-1);
             str.append("\r)").append("\r");
-            if(hiveParameter.isTableComment()){
-                if(UUIDUtils.notEmpty(list.get(0).get("TABLE_COMMENT"))){
-                    str.append("comment ").append("'").append(list.get(0).get("TABLE_COMMENT")).append("'").append("\r");
-                }
-
+            if(UUIDUtils.notEmpty(list.get(0).get("TABLE_COMMENT"))){
+                str.append("comment ").append("'").append(list.get(0).get("TABLE_COMMENT")).append("'").append("\r");
             }
             //设置分区，临时表不能进行分区
             if(isPatition&&!hiveParameter.isTemporary()){
                 str.append(patition.toString());
             }
             //查询db2主键信息并生成hive分桶语句,分桶字段为主键
-            if("primaryKey".equals(hiveParameter.getBucketKey())){
+            if("primarykey".equals(hiveParameter.getBucketKey())){
                 wkResult=(Map<String, List<Map<String,String>>>) db2QueryTool.getPKColumns(hiveParameter.getTableName(),datasource.getDatasource(),hiveParameter.getSchema());
                 if(wkResult.get("datas").size()>0){
                     wkList=wkResult.get("datas");
@@ -465,12 +456,12 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
             //分桶为随机
             if("random".equals(hiveParameter.getBucketKey())){
                 int num = random.nextInt(columRandom.size());
-                str.append(" CLUSTERED BY (");
+                str.append("CLUSTERED BY (");
                 str.append(columRandom.get(num).get("COLUMN_NAME"));
                 str.append(") ");
                 //桶内排序--默认时间字段 desc
                 if(isSorted){
-                    str.append(" SORTED BY ").append(sorted.toString());
+                    str.append("SORTED BY ").append(sorted.toString());
                 }
                 str.append("INTO ");
                 if(hiveParameter.getBucketNum()>0){
@@ -482,21 +473,21 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
             }
             //设置数据分隔符，ROW FORMAT为DELIMITED
             if("DELIMITED".equals(hiveParameter.getRowformat())){
-                str.append("ROW FORMAT ").append(hiveParameter.getRowformat());
+                str.append("ROW FORMAT ").append(hiveParameter.getRowformat()).append("\r");
                 if(UUIDUtils.notEmpty(hiveParameter.getFieldTerm())){
-                    str.append(" FIELDS TERMINATED BY '").append(hiveParameter.getFieldTerm()).append("'\r");
+                    str.append("FIELDS TERMINATED BY '").append(hiveParameter.getFieldTerm()).append("'\r");
                 }
                 if(UUIDUtils.notEmpty(hiveParameter.getRowformatCollectTerm())){
-                    str.append(" COLLECTION ITEMS TERMINATED BY '").append(hiveParameter.getRowformatCollectTerm()).append("'\r");
+                    str.append("COLLECTION ITEMS TERMINATED BY '").append(hiveParameter.getRowformatCollectTerm()).append("'\r");
                 }
                 if(UUIDUtils.notEmpty(hiveParameter.getRowformatMapKeyTerm())){
-                    str.append(" MAP KEYS TERMINATED BY '").append(hiveParameter.getRowformatMapKeyTerm()).append("'\r");
+                    str.append("MAP KEYS TERMINATED BY '").append(hiveParameter.getRowformatMapKeyTerm()).append("'\r");
                 }
                 if(UUIDUtils.notEmpty(hiveParameter.getRowformatLineTerm())){
-                    str.append(" lines terminated by '").append(hiveParameter.getRowformatLineTerm()).append("'\r");
+                    str.append("lines terminated by '").append(hiveParameter.getRowformatLineTerm()).append("'\r");
                 }
-                if(UUIDUtils.notEmpty(hiveParameter.getRowformatNullDefinndAs())){
-                    str.append(" NULL DEFINED AS '").append(hiveParameter.getRowformatNullDefinndAs()).append("'\r");
+                if(UUIDUtils.notEmpty(hiveParameter.getRowformatNullDefindAs())){
+                    str.append("NULL DEFINED AS '").append(hiveParameter.getRowformatNullDefindAs()).append("'\r");
                 }
             }
             //ROW FORMAT为SERDE，设置类名
@@ -511,7 +502,8 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
             if(UUIDUtils.notEmpty(hiveParameter.getLocation())){
                 str.append("LOCATION '").append(hiveParameter.getLocation()).append("'\r");
             }
-            str.append("\r");
+            str=str.deleteCharAt(str.length()-1);
+            str.append(";\r\r");
             return str.toString();
         } catch (SQLException e) {
             e.printStackTrace();
