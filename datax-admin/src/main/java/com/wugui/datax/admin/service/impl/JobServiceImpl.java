@@ -22,6 +22,8 @@ import com.wugui.datax.admin.dto.*;
 import com.wugui.datax.admin.entity.*;
 import com.wugui.datax.admin.mapper.*;
 import com.wugui.datax.admin.service.*;
+import com.wugui.datax.admin.tool.query.BaseQueryTool;
+import com.wugui.datax.admin.tool.query.QueryToolFactory;
 import com.wugui.datax.admin.util.DateFormatUtils;
 import com.wugui.datax.admin.util.NetWorkUtils;
 import com.wugui.datax.admin.util.UUIDUtils;
@@ -117,15 +119,18 @@ public class JobServiceImpl implements JobService {
         DataXJsonBuildDto dataXJsonBuildDto = null;
         if(jobType.equals("DQCJOB")){
             //质量任务
+
             qualityJsonBuildDto = JSON.parseObject(jobParam,QualityJsonBuildDto.class);
             checkParam(qualityJsonBuildDto);
             jobJson = qualityJsonService.buildJobJson(qualityJsonBuildDto);
+            jobInfo.setDatasourceId(qualityJsonBuildDto.getReaderDatasourceId().intValue());
 
         }else{
             //其他任务
             dataXJsonBuildDto = JSON.parseObject(jobParam,DataXJsonBuildDto.class);
             checkParam(dataXJsonBuildDto);
             jobJson = dataxJsonService.buildJobJson(dataXJsonBuildDto);
+            jobInfo.setDatasourceId(dataXJsonBuildDto.getReaderDatasourceId().intValue());
         }
 
         // valid
@@ -753,6 +758,44 @@ public class JobServiceImpl implements JobService {
         dashboard.setPassInterface(interfaceMapper.getPassInterfaceCount());
         dashboard.setRejectInterface(interfaceMapper.getRejectInterfaceCount());
         return new ReturnT<>(dashboard);
+    }
+
+    /**
+     * 查看任务结果
+     * @param taskId
+     * @return
+     */
+    @Override
+    public Map<String,Object> jobResult(Integer taskId) {
+        //查询任务详情
+        JobInfo jobInfo = jobInfoMapper.loadById(taskId);
+        String jobType = jobInfo.getJobType();
+        String jobParam = jobInfo.getJobParam();
+
+        QualityJsonBuildDto qualityJsonBuildDto = null;
+        DataXJsonBuildDto dataXJsonBuildDto = null;
+
+        Long writerDatasourceId;
+        String writerTable;
+        String writerType;
+        List<String> writerColumns;
+        if(jobType.equalsIgnoreCase("DQCJOB")){
+            qualityJsonBuildDto = JSON.parseObject(jobParam,QualityJsonBuildDto.class);
+            writerDatasourceId = qualityJsonBuildDto.getWriterDatasourceId();
+            writerTable = qualityJsonBuildDto.getWriterTables().get(0);
+            writerColumns = qualityJsonBuildDto.getWriterColumns();
+        }else {
+            dataXJsonBuildDto = JSON.parseObject(jobParam,DataXJsonBuildDto.class);
+            writerDatasourceId = dataXJsonBuildDto.getWriterDatasourceId();
+            writerTable = dataXJsonBuildDto.getWriterTables().get(0);
+            writerColumns = dataXJsonBuildDto.getWriterColumns();
+        }
+
+        //获取数据源连接
+        JobDatasource jobDatasource = jobDatasourceMapper.selectById(writerDatasourceId);
+
+        BaseQueryTool queryTool = QueryToolFactory.getByDbType(jobDatasource);
+        return queryTool.getResult(writerTable, writerColumns,jobDatasource);
     }
 
 }

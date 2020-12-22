@@ -12,18 +12,19 @@ import com.wugui.datax.admin.dto.TriggerJobDto;
 import com.wugui.datax.admin.entity.JobInfo;
 import com.wugui.datax.admin.entity.JobInfoDetail;
 import com.wugui.datax.admin.service.JobService;
+import com.wugui.datax.admin.util.ExcelData;
+import com.wugui.datax.admin.util.ExportExcelUtils;
+import com.wugui.datax.admin.util.PageUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * index controller
@@ -145,5 +146,37 @@ public class JobInfoController extends BaseController{
     @ApiOperation("触发虚任务")
     public ReturnT<String> triggerVirtualTask(@RequestBody JobInfo jobInfo) {
         return jobService.triggerVirtualTask(jobInfo);
+    }
+
+    @GetMapping("/jobResult")
+    @ApiOperation("查看任务结果")
+    public ReturnT<Map<String,Object>> jobResult(@RequestParam("taskId") Integer taskId,
+                                              @RequestParam(required = false, defaultValue = "1") int current,
+                                              @RequestParam(required = false, defaultValue = "10") int size){
+        Map<String,Object> map1 = new HashMap();
+        Map<String,Object> map  = jobService.jobResult(taskId);
+        int count = ((List)map.get("list")).size();
+
+        List list1 = PageUtil.startPage((List)map.get("list"), current, size);
+        map1.put("count",count);
+        map1.put("data",list1);
+        map1.put("colums",map.get("colums"));
+        return new ReturnT<>(map1);
+    }
+
+    @GetMapping("/excel")
+    @ApiOperation("导出为excel")
+    public void excel(HttpServletResponse response,@RequestParam("taskId") Integer taskId) throws Exception {
+        ExcelData data = new ExcelData();
+        data.setName("Data");
+
+        Map<String,Object> map  = jobService.jobResult(taskId);
+        data.setTitles((List) map.get("colums"));
+
+        List<List<Object>> list = (List<List<Object>>) map.get("list");
+        data.setRows(list);
+
+        ExportExcelUtils.exportExcel(response,"异常数据.xlsx",data);
+
     }
 }

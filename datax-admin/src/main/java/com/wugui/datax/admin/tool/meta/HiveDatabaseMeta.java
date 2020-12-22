@@ -1,5 +1,7 @@
 package com.wugui.datax.admin.tool.meta;
 
+import java.util.List;
+
 /**
  * hive元数据信息
  *
@@ -72,5 +74,21 @@ public class HiveDatabaseMeta extends BaseDatabaseMeta implements DatabaseInterf
     @Override
     public String getSQLQueryTables(String... tableSchema) {
         return "show tables in "+tableSchema[0];
+    }
+
+    @Override
+    public String getSqlQueryData(String writerTable, List<String> writerColumns){
+        String sql = null;
+        StringBuffer sb = new StringBuffer("SELECT ");
+        for (String str : writerColumns){
+            sb.append(str.split("\\:")[1]+",");
+        }
+
+        if(sb.length() > 0){
+            sql = sb.substring(0,sb.length()-1);
+        }
+        sql = sql + " FROM " + writerTable;
+
+        return sql;
     }
 }

@@ -137,4 +137,11 @@ public interface JobService {
     ReturnT<LogResult> loadingVirtualLog(String log, JobLog jobLog);
 
     ReturnT<Dashboard> getRunReport() throws IOException;
+
+    /**
+     * 查看任务结果
+     * @param taskId
+     * @return
+     */
+    Map<String,Object> jobResult(Integer taskId);
 }

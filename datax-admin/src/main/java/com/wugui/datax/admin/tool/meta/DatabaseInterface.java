@@ -1,5 +1,7 @@
 package com.wugui.datax.admin.tool.meta;
 
+import java.util.List;
+
 public interface DatabaseInterface {
 
     /**
@@ -104,4 +106,6 @@ public interface DatabaseInterface {
     String getIndexName(String schema, String tableName);
 
     String getDBSchema();
+
+    String getSqlQueryData(String writerTable, List<String> writerColumns);
 }

@@ -1,5 +1,7 @@
 package com.wugui.datax.admin.tool.meta;
 
+import java.util.List;
+
 /**
  * meta信息interface
  *
@@ -173,5 +175,21 @@ public abstract class BaseDatabaseMeta implements DatabaseInterface {
     @Override
     public String getIndexName(String schema, String tableName) {
         return null;
+    }
+
+    @Override
+    public String getSqlQueryData(String writerTable, List<String> writerColumns){
+        String sql = null;
+        StringBuffer sb = new StringBuffer("SELECT ");
+        for (String str : writerColumns){
+            sb.append(str+",");
+        }
+
+        if(sb.length() > 0){
+            sql = sb.substring(0,sb.length()-1);
+        }
+        sql = sql + " FROM " + writerTable;
+
+        return sql;
     }
 }

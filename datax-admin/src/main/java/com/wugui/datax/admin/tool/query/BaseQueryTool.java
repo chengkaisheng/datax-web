@@ -1137,4 +1137,46 @@ public abstract class BaseQueryTool implements QueryToolInterface {
         }
         return resMap;
     }
+
+    public Map<String,Object> getResult(String writerTable, List<String> writerColumns,JobDatasource jobDatasource){
+        List<Object> list = new ArrayList<>();
+        Map<String,Object> map = new HashMap<>();
+
+        Statement stmt = null;
+        ResultSet rs = null;
+        //构建SQL
+        String sql = sqlBuilder.getSqlQueryData(writerTable,writerColumns);
+        try{
+            stmt = connection.createStatement();
+
+            rs = stmt.executeQuery(sql);
+            while (rs.next()){
+                List<Object> list1 = new ArrayList<>();
+                for (String str : writerColumns){
+                    Object o = null;
+                    if(jobDatasource.getDatasource().equalsIgnoreCase("HIVE")){
+                        o = rs.getObject(str.split("\\:")[1]);
+                        list1.add(o);
+                    }else {
+                        o = rs.getObject(str);
+                        list1.add(o);
+                    }
+                }
+                list.add(list1);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        map.put("list",list);
+        List<String> hiveColumns = new ArrayList<>();
+        if(jobDatasource.getDatasource().equalsIgnoreCase("HIVE")){
+            for (String str : writerColumns){
+                hiveColumns.add(str.split("\\:")[1]);
+            }
+            map.put("colums",hiveColumns);
+        }else {
+            map.put("colums",writerColumns);
+        }
+        return map;
+    }
 }
