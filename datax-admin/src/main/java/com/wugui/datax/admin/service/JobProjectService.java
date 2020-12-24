@@ -2,11 +2,8 @@ package com.wugui.datax.admin.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.wugui.datax.admin.entity.JobDatasource;
 import com.wugui.datax.admin.entity.JobProject;
-import org.apache.ibatis.annotations.Param;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 
@@ -38,4 +35,6 @@ public interface JobProjectService extends IService<JobProject> {
 
 
     JobProject getProject(Serializable id);
+
+    List<Integer> getProjectUserIds(Long projectId);
 }

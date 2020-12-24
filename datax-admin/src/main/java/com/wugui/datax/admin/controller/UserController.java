@@ -80,6 +80,13 @@ public class UserController extends BaseController{
         return R.ok(jobUserService.queryPage(params));
     }
 
+    @GetMapping("/all")
+    public R getAllUser(){
+        List<JobUser> userList = jobUserService.list();
+        userList.forEach(item-> item.setPassword(null));
+        return R.ok(userList);
+    }
+
     @GetMapping("/getUserById")
     @ApiOperation(value = "根据id获取用户")
     public R selectById(@RequestParam("userId") Integer userId) {
