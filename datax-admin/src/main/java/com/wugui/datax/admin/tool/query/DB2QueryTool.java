@@ -26,8 +26,7 @@ public class DB2QueryTool extends BaseQueryTool implements QueryToolInterface{
 //    public Boolean dataSourceTest(String databaseName) {
 //        return connection != null ? true : false;
 //    }
-    @Override
-    public Object getTableColumns(String tableName, String datasource,String databaseName) {
+    public Object getTableColumns(String tableName,String databaseName) {
         Statement stmt = null;
         ResultSet rs = null;
         Map<String, List<Map<String,String>>> result = new HashMap<>();
@@ -73,7 +72,7 @@ public class DB2QueryTool extends BaseQueryTool implements QueryToolInterface{
         return result;
     }
 
-    public Object getPKColumns(String tableName, String datasource,String databaseName) {
+    public Object getPKColumns(String tableName,String databaseName) {
         Statement stmt = null;
         ResultSet rs = null;
         Map<String, List<Map<String,String>>> result = new HashMap<>();
@@ -116,7 +115,7 @@ public class DB2QueryTool extends BaseQueryTool implements QueryToolInterface{
         return result;
     }
 
-    public Object getFKColumns(String tableName, String datasource,String databaseName) {
+    public Object getFKColumns(String tableName, String databaseName) {
         Statement stmt = null;
         ResultSet rs = null;
         Map<String, List<Map<String,String>>> result = new HashMap<>();
@@ -160,7 +159,7 @@ public class DB2QueryTool extends BaseQueryTool implements QueryToolInterface{
         return result;
     }
 
-    public Object getUKColumns(String tableName, String datasource,String databaseName) {
+    public Object getUKColumns(String tableName,String databaseName) {
         Statement stmt = null;
         ResultSet rs = null;
         Map<String, List<Map<String,String>>> result = new HashMap<>();
@@ -203,7 +202,7 @@ public class DB2QueryTool extends BaseQueryTool implements QueryToolInterface{
     }
 
 
-    public Object getCKColumns(String tableName, String datasource,String databaseName) {
+    public Object getCKColumns(String tableName,String databaseName) {
         Statement stmt = null;
         ResultSet rs = null;
         Map<String, List<Map<String,String>>> result = new HashMap<>();

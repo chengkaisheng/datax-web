@@ -22,6 +22,8 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.sql.SQLException;
 import java.util.*;
@@ -153,34 +155,43 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
         if (ObjectUtil.isNull(datasource)) {
             return Lists.newArrayList();
         }
-
-        if (JdbcConstants.DB2.equals(datasource.getDatasource())) {
-            List<TableInfo> tableInfos = null;
-            List<String> hiveSql=new ArrayList<>();
-            try {
-                tableInfos = getTableInfos(hiveParameter.getDatasourceId(), hiveParameter.getSchema());
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+        List<String> hiveSql=new ArrayList<>();
+        try {
+            List<TableInfo> tableInfos =  getTableInfos(hiveParameter.getDatasourceId(), hiveParameter.getSchema());
             if(tableInfos.size()>0){
                 Set<TableInfo> tableInfoSet = new HashSet<>(tableInfos);
                 tableInfos.clear();
                 tableInfos.addAll(tableInfoSet);
+
+            }
+            if (JdbcConstants.DB2.equals(datasource.getDatasource())) {
+                DB2QueryTool db2QueryTool=new DB2QueryTool(datasource);
                 for (TableInfo tableInfo:tableInfos){
                     hiveParameter.setTableName(tableInfo.getName());
-                    String sql=this.getDB2Sql(datasource,hiveParameter).toString();
+                    String sql=this.getDB2Sql(db2QueryTool,datasource,"db2",hiveParameter).toString();
+                    hiveSql.add(sql);
+                }
+            }else if(JdbcConstants.MYSQL.equals(datasource.getDatasource())){
+                MySQLQueryTool mySQLQueryTool=new MySQLQueryTool(datasource);
+                for (TableInfo tableInfo:tableInfos){
+                    hiveParameter.setTableName(tableInfo.getName());
+                    String sql=this.getDB2Sql(mySQLQueryTool,datasource,"mysql",hiveParameter).toString();
                     hiveSql.add(sql);
                 }
             }
-            return hiveSql;
-        } else {
-            BaseQueryTool queryTool = QueryToolFactory.getByDbType(datasource);
-            return queryTool.getTableColumns(hiveParameter.getTableName(), datasource.getDatasource(),hiveParameter.getSchema());
+        }catch (Exception e){
+            e.printStackTrace();
         }
+
+        return hiveSql;
     }
 
-    public Object getDB2Sql(JobDatasource datasource,HiveParameter hiveParameter){
+    public Object getDB2Sql(Object o,JobDatasource datasource,String source,HiveParameter hiveParameter){
         try {
+            Class c = Class.forName(o.getClass().getName());//获取查询的类名
+            Constructor con = c.getConstructor(JobDatasource.class);//对类进行有参构造方法的初始化
+            // 通过带参构造方法对象创建对象
+            Object obj = con.newInstance(datasource);
             Map<String, List<Map<String,String>>> wkResult=null;//主键，外键，唯一键表信息存放位置
             List<Map<String,String>> wkList=null;
             List<Map<String,String>> randomDate=new ArrayList<>();//表时间字段存放，作用于随机取值
@@ -191,8 +202,8 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
             boolean isSorted=false;//判断是否进行排序
             boolean isPatition=false;//判断是否进行分区
             Random random = new Random();
-            DB2QueryTool db2QueryTool=new DB2QueryTool(datasource);
-            Map<String, List<Map<String,String>>> result=(Map<String, List<Map<String,String>>>) db2QueryTool.getTableColumns(hiveParameter.getTableName(),datasource.getDatasource(),hiveParameter.getSchema());
+            Method method = c.getMethod("getTableColumns",String.class,String.class);
+            Map<String, List<Map<String,String>>> result=(Map<String, List<Map<String,String>>>) method.invoke(obj,hiveParameter.getTableName(),hiveParameter.getSchema());
             List<Map<String,String>> list=result.get("datas");
             patition.append("PARTITIONED BY (");
             if(hiveParameter.isDropAdded()){
@@ -239,13 +250,13 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
             int p = (int)(Math.random()*randomDate.size());
             if("random".equals(hiveParameter.getPartitionKey())){//分区为random
                 patition.append(columRandom.get(n).get("COLUMN_NAME")).append(" ");
-                DimDDL dimDDL= dimDDLMapper.select("db2","hive",columRandom.get(n).get("DATA_TYPE").trim());
+                DimDDL dimDDL= dimDDLMapper.select(source,"hive",columRandom.get(n).get("DATA_TYPE").trim());
                 patition.append(dimDDL.getTargetType());
                 isPatition=true;
             }
             if("randomDate".equals(hiveParameter.getPartitionKey())&&randomDate.size()>0){//分区为randomDate
                 patition.append(randomDate.get(p).get("COLUMN_NAME")).append(" ");
-                DimDDL dimDDL= dimDDLMapper.select("db2","hive",randomDate.get(p).get("DATA_TYPE").trim());
+                DimDDL dimDDL= dimDDLMapper.select(source,"hive",randomDate.get(p).get("DATA_TYPE").trim());
                 patition.append(dimDDL.getTargetType());
                 isPatition=true;
             }
@@ -253,7 +264,7 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
                 //分区为随机时，当前列名不能与分区的列名相同
                 if("random".equals(hiveParameter.getPartitionKey())&& !map.get("COLUMN_NAME").equals(columRandom.get(n).get("COLUMN_NAME"))) {
                     str.append(map.get("COLUMN_NAME")).append(" ");
-                    DimDDL dimDDL= dimDDLMapper.select("db2","hive",map.get("DATA_TYPE").trim());
+                    DimDDL dimDDL= dimDDLMapper.select(source,"hive",map.get("DATA_TYPE").trim());
                     if(dimDDL.getTargetType().equals("CHAR")){
                         str.append(dimDDL.getTargetType()).append("(255)");
                     }else if(dimDDL.getTargetType().equals("VARCHAR")) {
@@ -269,7 +280,7 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
                 //当分区为时间字段且当前表存在时间字段，即randomDate>0时,当前列名不能与随机的时间字段相同
                 if("randomDate".equals(hiveParameter.getPartitionKey())&& randomDate.size()>0&&!map.get("COLUMN_NAME").equals(randomDate.get(p).get("COLUMN_NAME"))){
                     str.append(map.get("COLUMN_NAME")).append(" ");
-                    DimDDL dimDDL= dimDDLMapper.select("db2","hive",map.get("DATA_TYPE").trim());
+                    DimDDL dimDDL= dimDDLMapper.select(source,"hive",map.get("DATA_TYPE").trim());
                     if(dimDDL.getTargetType().equals("CHAR")){
                         str.append(dimDDL.getTargetType()).append("(255)");
                     }else if(dimDDL.getTargetType().equals("VARCHAR")) {
@@ -285,7 +296,7 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
                 if("randomDate".equals(hiveParameter.getPartitionKey())&& randomDate.size()<=0) {
                     //当分区为时间字段且当前表不存在时间字段，即randomDate<0
                     str.append(map.get("COLUMN_NAME")).append(" ");
-                    DimDDL dimDDL= dimDDLMapper.select("db2","hive",map.get("DATA_TYPE").trim());
+                    DimDDL dimDDL= dimDDLMapper.select(source,"hive",map.get("DATA_TYPE").trim());
                     if(dimDDL.getTargetType().equals("CHAR")){
                         str.append(dimDDL.getTargetType()).append("(255)");
                     }else if(dimDDL.getTargetType().equals("VARCHAR")) {
@@ -301,7 +312,7 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
                 //不进行分区操作
                 if("none".equals(hiveParameter.getPartitionKey())){
                     str.append(map.get("COLUMN_NAME")).append(" ");
-                    DimDDL dimDDL= dimDDLMapper.select("db2","hive",map.get("DATA_TYPE").trim());
+                    DimDDL dimDDL= dimDDLMapper.select(source,"hive",map.get("DATA_TYPE").trim());
                     if(dimDDL.getTargetType().equals("CHAR")){
                         str.append(dimDDL.getTargetType()).append("(255)");
                     }else if(dimDDL.getTargetType().equals("VARCHAR")) {
@@ -369,7 +380,8 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
             sorted.append(") ");
             //查询db2主键信息并生成主键sql
             if(UUIDUtils.StringToInteger(hiveParameter.getTargetVersion())>=210){
-                wkResult=(Map<String, List<Map<String,String>>>) db2QueryTool.getPKColumns(hiveParameter.getTableName(),datasource.getDatasource(),hiveParameter.getSchema());
+                method = c.getMethod("getPKColumns",String.class,String.class);
+                wkResult=(Map<String, List<Map<String,String>>>) method.invoke(obj,hiveParameter.getTableName(),hiveParameter.getSchema());
                 if(wkResult.get("datas").size()>0){
                     wkList=wkResult.get("datas");
                     str.append(" PRIMARY KEY (");
@@ -383,7 +395,8 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
             }
             //查询db2外键信息并生成外键sql
             if(UUIDUtils.StringToInteger(hiveParameter.getTargetVersion())>=210){
-                wkResult=(Map<String, List<Map<String,String>>>) db2QueryTool.getFKColumns(hiveParameter.getTableName(),datasource.getDatasource(),hiveParameter.getSchema());
+                method = c.getMethod("getFKColumns",String.class,String.class);
+                wkResult=(Map<String, List<Map<String,String>>>) method.invoke(obj,hiveParameter.getTableName(),hiveParameter.getSchema());
                 if(wkResult.get("datas").size()>0){
                     wkList=wkResult.get("datas");
                     for (Map<String,String> map:wkList){
@@ -397,7 +410,8 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
             }
             //查询db2唯一键信息并生成唯一键sql
             if(UUIDUtils.StringToInteger(hiveParameter.getTargetVersion())>=300){
-                wkResult=(Map<String, List<Map<String,String>>>) db2QueryTool.getUKColumns(hiveParameter.getTableName(),datasource.getDatasource(),hiveParameter.getSchema());
+                method = c.getMethod("getUKColumns",String.class,String.class);
+                wkResult=(Map<String, List<Map<String,String>>>) method.invoke(obj,hiveParameter.getTableName(),hiveParameter.getSchema());
                 if(wkResult.get("datas").size()>0){
                     wkList=wkResult.get("datas");
                     str.append("CONSTRAINT ").append(wkList.get(0).get("CONSTNAME")).append(" UNIQUE (");
@@ -411,7 +425,8 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
             }
             //查询db2检查约束信息并生成检查约束sql
             if(UUIDUtils.StringToInteger(hiveParameter.getTargetVersion())>=300){
-                wkResult=(Map<String, List<Map<String,String>>>) db2QueryTool.getCKColumns(hiveParameter.getTableName(),datasource.getDatasource(),hiveParameter.getSchema());
+                method = c.getMethod("getCKColumns",String.class,String.class);
+                wkResult=(Map<String, List<Map<String,String>>>) method.invoke(obj,hiveParameter.getTableName(),hiveParameter.getSchema());
                 if(wkResult.get("datas").size()>0){
                     wkList=wkResult.get("datas");
                     for (Map<String,String> map:wkList){
@@ -431,7 +446,8 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
             }
             //查询db2主键信息并生成hive分桶语句,分桶字段为主键
             if("primarykey".equals(hiveParameter.getBucketKey())){
-                wkResult=(Map<String, List<Map<String,String>>>) db2QueryTool.getPKColumns(hiveParameter.getTableName(),datasource.getDatasource(),hiveParameter.getSchema());
+                method = c.getMethod("getPKColumns",String.class,String.class);
+                wkResult=(Map<String, List<Map<String,String>>>) method.invoke(obj,hiveParameter.getTableName(),hiveParameter.getSchema());
                 if(wkResult.get("datas").size()>0){
                     wkList=wkResult.get("datas");
                     str.append(" CLUSTERED BY (");
@@ -505,7 +521,7 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
             str=str.deleteCharAt(str.length()-1);
             str.append(";\r\r");
             return str.toString();
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return e.getMessage();
         }
@@ -661,7 +677,7 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
                     }else if("table_comment".equals(stringObjectEntry.getKey())){
                         tableInfoTemp.setComment(stringObjectEntry.getValue()==null? "": (String) stringObjectEntry.getValue());
                     }else if("data_length".equals(stringObjectEntry.getKey())){
-                        int i = Integer.parseInt(String.valueOf(stringObjectEntry.getValue()));
+                        int i = Integer.parseInt(String.valueOf(stringObjectEntry.getValue()==null?"0":stringObjectEntry.getValue()));
                         tableInfoTemp.setDataLength(i/1024 + "K");
                     }
                 }
