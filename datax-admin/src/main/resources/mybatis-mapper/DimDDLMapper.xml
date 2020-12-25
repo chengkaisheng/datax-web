@@ -10,7 +10,7 @@
     </resultMap>
 
     <select id="select" resultMap="DimDDL" resultType="java.util.Map">
-        SELECT * FROM  DIM_DDL aa  WHERE aa.SOURCE=#{source} AND aa.TARGET=#{target} and source_type=#{sourceType}
+        SELECT * FROM  dim_ddl aa  WHERE aa.SOURCE=#{source} AND aa.TARGET=#{target} and source_type=#{sourceType}
     </select>
 
 </mapper>
