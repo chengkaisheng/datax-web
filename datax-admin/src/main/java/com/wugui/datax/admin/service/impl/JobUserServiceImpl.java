@@ -3,10 +3,12 @@ package com.wugui.datax.admin.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wugui.datax.admin.constans.Constant;
 import com.wugui.datax.admin.entity.JobUser;
 import com.wugui.datax.admin.mapper.JobUserMapper;
+import com.wugui.datax.admin.service.JobProjectUserService;
 import com.wugui.datax.admin.service.JobRoleService;
 import com.wugui.datax.admin.service.JobUserRoleService;
 import com.wugui.datax.admin.service.JobUserService;
@@ -35,6 +37,9 @@ public class JobUserServiceImpl extends ServiceImpl<JobUserMapper, JobUser> impl
 
 	@Autowired
 	private JobRoleService jobRoleService;
+
+	@Autowired
+	private JobProjectUserService jobProjectUserService;
 
 	@Override
 	public IPage<JobUser> queryPage(Map<String, Object> params) {
@@ -117,7 +122,28 @@ public class JobUserServiceImpl extends ServiceImpl<JobUserMapper, JobUser> impl
 		return this.update(userEntity,
 				new QueryWrapper<JobUser>().eq("user_id", userId).eq("password", password));
 	}
-	
+
+	@Override
+	public IPage<JobUser> userListByProjectId(Long current, Long size, String username, Integer projectId) {
+		List<Integer> userIds = jobProjectUserService.getUserIds(projectId);
+		Page<JobUser> page = new Page<>(current, size);
+		if(userIds == null || userIds .size() == 0){
+			return page;
+		}
+		page = baseMapper.selectPage(page, new QueryWrapper<JobUser>()
+				.in("id", userIds)
+				.like(StringUtils.isNotBlank(username),"username", username));
+		List<JobUser> userList = page.getRecords();
+		if(userList != null && userList.size() != 0) {
+			userList.forEach(user->{
+				user.setPassword(null);
+				user.setRoleName(jobUserRoleService.queryRoleNames((long) user.getId()));
+			});
+			return page;
+		}
+		return page;
+	}
+
 	/**
 	 * 检查角色是否越权
 	 */

@@ -13,7 +13,6 @@ package com.wugui.datax.admin.service;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.wugui.datax.admin.entity.JobUser;
-import com.wugui.datax.admin.util.PageUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -66,4 +65,7 @@ public interface JobUserService extends IService<JobUser> {
 	 * @param newPassword  新密码
 	 */
 	boolean updatePassword(Long userId, String password, String newPassword);
+
+	IPage<JobUser>  userListByProjectId(Long current, Long size, String username, Integer projectId);
+
 }

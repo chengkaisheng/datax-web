@@ -196,4 +196,11 @@ public class UserController extends BaseController{
         return R.ok(user);
     }
 
+    @GetMapping("project/userList")
+    public R userListByProjectId(@RequestParam(required = false, defaultValue = "1") Long current,
+                                 @RequestParam(required = false, defaultValue = "10") Long size,
+                                 String username,
+                                 Integer projectId){
+        return R.ok(jobUserService. userListByProjectId(current, size,username, projectId));
+    }
 }

@@ -4,7 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.api.R;
 import com.wugui.datax.admin.entity.JobProject;
+import com.wugui.datax.admin.entity.JobProjectUserEntity;
 import com.wugui.datax.admin.service.JobProjectService;
+import com.wugui.datax.admin.service.JobProjectUserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,9 @@ public class JobProjectController extends BaseController {
 
     @Autowired
     private JobProjectService jobProjectService;
+
+    @Autowired
+    private JobProjectUserService jobProjectUserService;
 
 
 
@@ -117,6 +122,15 @@ public class JobProjectController extends BaseController {
             return success("保存成功");
         }
         return failed("保存失败");
+    }
+
+    @PostMapping("/deleteUser")
+    public R deleteUser(@RequestBody JobProject jobProject){
+        List<Integer> userIds = jobProject.getUserIds();
+        userIds.forEach(userId->{
+            jobProjectUserService.remove(new QueryWrapper<JobProjectUserEntity>().eq("project_id", jobProject.getId()).eq("user_id", userId));
+        });
+        return R.ok("删除成功");
     }
 
 }
