@@ -31,7 +31,7 @@ public interface JobProjectService extends IService<JobProject> {
      * @param jobProject
      * @return
      */
-    Boolean addUser(JobProject jobProject);
+    void addUser(JobProject jobProject);
 
 
     JobProject getProject(Serializable id);

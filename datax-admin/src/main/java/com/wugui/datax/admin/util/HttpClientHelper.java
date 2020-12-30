@@ -72,6 +72,7 @@ public class HttpClientHelper {
         // 设置post请求超时时间
         getMethod.getParams().setParameter(HttpMethodParams.SO_TIMEOUT, 60000);
         getMethod.addRequestHeader("Content-Type", "application/json");
+        getMethod.setFollowRedirects(true);
         httpClient.executeMethod(getMethod);
         String result = getMethod.getResponseBodyAsString();
         getMethod.releaseConnection();

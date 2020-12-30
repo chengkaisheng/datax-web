@@ -117,11 +117,8 @@ public class JobProjectController extends BaseController {
 
     @PostMapping("/addUser")
     public R<String> addUser(@RequestBody JobProject jobProject){
-        Boolean flag = jobProjectService.addUser(jobProject);
-        if(flag){
-            return success("保存成功");
-        }
-        return failed("保存失败");
+        jobProjectService.addUser(jobProject);
+        return success("保存成功");
     }
 
     @PostMapping("/deleteUser")

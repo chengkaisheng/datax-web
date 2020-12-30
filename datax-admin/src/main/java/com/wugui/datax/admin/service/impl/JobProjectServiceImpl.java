@@ -35,8 +35,8 @@ public class JobProjectServiceImpl extends ServiceImpl<JobProjectMapper, JobProj
     }
 
     @Override
-    public Boolean addUser(JobProject jobProject) {
-        return jobProjectUserService.addUser(jobProject);
+    public void addUser(JobProject jobProject) {
+        jobProjectUserService.addUser(jobProject);
     }
 
     @Override

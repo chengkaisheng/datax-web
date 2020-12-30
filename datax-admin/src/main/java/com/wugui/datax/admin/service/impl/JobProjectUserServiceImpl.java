@@ -19,13 +19,13 @@ import java.util.stream.Collectors;
 @Service
 public class JobProjectUserServiceImpl extends ServiceImpl<JobProjectUserMapper, JobProjectUserEntity> implements JobProjectUserService {
     @Override
-    public Boolean addUser(JobProject jobProject) {
+    public void addUser(JobProject jobProject) {
         int projectId = jobProject.getId();
         //先全部删除，再添加
         this.deleteBatch(new Integer[]{projectId});
         List<Integer> userIds = jobProject.getUserIds();
         if(userIds == null || userIds.size() == 0){
-            return false;
+            return;
         }
         for (Integer userId : userIds) {
             JobProjectUserEntity jobProjectUserEntity = new JobProjectUserEntity();
@@ -33,7 +33,6 @@ public class JobProjectUserServiceImpl extends ServiceImpl<JobProjectUserMapper,
             jobProjectUserEntity.setProjectId(projectId);
             this.save(jobProjectUserEntity);
         }
-        return true;
     }
 
     @Override

@@ -12,7 +12,7 @@ import java.util.List;
  * @creat 2020-12-14-17:28
  */
 public interface JobProjectUserService extends IService<JobProjectUserEntity> {
-    Boolean addUser(JobProject jobProject);
+    void addUser(JobProject jobProject);
     void deleteBatch(Integer[] integers);
     List<Integer> getUserIds(Serializable projectId);
 }
