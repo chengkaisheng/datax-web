@@ -178,6 +178,13 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
                     String sql=this.getDB2Sql(mySQLQueryTool,datasource,"mysql",hiveParameter).toString();
                     hiveSql.add(sql);
                 }
+            }else if (JdbcConstants.ORACLE.equals(datasource.getDatasource())){
+                OracleQueryTool oracleQueryTool=new OracleQueryTool(datasource);
+                for (TableInfo tableInfo:tableInfos){
+                    hiveParameter.setTableName(tableInfo.getName());
+                    String sql=this.getDB2Sql(oracleQueryTool,datasource,"oracle",hiveParameter).toString();
+                    hiveSql.add(sql);
+                }
             }
         }catch (Exception e){
             e.printStackTrace();

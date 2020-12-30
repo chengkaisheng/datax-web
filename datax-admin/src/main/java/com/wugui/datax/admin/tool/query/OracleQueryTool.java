@@ -31,6 +31,136 @@ public class OracleQueryTool extends BaseQueryTool implements QueryToolInterface
         super(jobDatasource);
     }
 
+    /**
+    * @Description: 根据schema和表名查询字段信息
+    * @Param: [tableName, databaseName]
+    * @return: java.lang.Object
+    * @Author: lxq
+    * @Date: 2020-12-28 15:28
+    */
+    public Object getTableColumns(String tableName,String databaseName) {
+        Statement stmt = null;
+        ResultSet rs = null;
+        Map<String, List<Map<String,String>>> result = new HashMap<>();
+        List<Map<String,String>> list = new ArrayList<>();
+        try {
+            String querySql="select t.tablespace_name,a.TABLE_NAME,a.COLUMN_NAME,a.DATA_TYPE,c.comments as COLUMN_COMMENT,b.comments " +
+                    "from user_tab_columns a LEFT JOIN user_tab_comments b ON a.table_name=b.table_name " +
+                    "LEFT JOIN user_tables t ON a.table_name=t.table_name LEFT JOIN user_col_comments c on t.table_name=c.table_name and a.COLUMN_name=c.COLUMN_name " +
+                    "where b.table_name='"+tableName+"' AND t.tablespace_name='"+databaseName+"'";
+            //获取查询指定表所有字段的sql语句
+            logger.info("querySql: {}", querySql);
+            //获取所有字段的名称，类型，comment
+            stmt = connection.createStatement();
+            rs = stmt.executeQuery(querySql);
+            while (rs.next()){
+                Map<String,String> map = new HashMap<>();
+                map.put("TABLENAME",rs.getString(2).trim());
+                map.put("COLUMN_NAME", rs.getString(3).trim());
+                map.put("DATA_TYPE", rs.getString(4).trim());
+                map.put("COLUMN_COMMENT", rs.getString(5)==null?"":rs.getString(5).trim());
+                map.put("TABSCHEMA", rs.getString(1).trim());
+                map.put("TABLE_COMMENT", rs.getString(6)==null?"":rs.getString(6).trim());
+                list.add(map);
+            }
+        } catch (SQLException e) {
+            logger.error("[getTableColumnNames Exception] --> "
+                    + "the exception message is:" + e.getMessage());
+        } finally {
+            JdbcUtils.close(rs);
+            JdbcUtils.close(stmt);
+        }
+        result.put("datas", list);
+        return result;
+    }
+
+    /** 
+    * @Description: 根据schema和表名查询主键信息 
+    * @Param: [tableName, databaseName] 
+    * @return: java.lang.Object 
+    * @Author: lxq
+    * @Date: 2020-12-29 9:58
+    */
+    public Object getPKColumns(String tableName,String databaseName) {
+        Statement stmt = null;
+        ResultSet rs = null;
+        Map<String, List<Map<String,String>>> result = new HashMap<>();
+        List<Map<String,String>> list = new ArrayList<>();
+        try {
+            String querySql="select con.constraint_name,b.tablespace_name,con.table_name,col.COLUMN_name from" +
+                    " user_constraints con,user_cons_columns col,user_tables b where con.constraint_name=col.constraint_name and " +
+                    "con.constraint_type='P' and con.table_name=b.table_name"+
+                    " con.table_name = '"+tableName+"' AND b.tablespace_name = '"+databaseName+"'";
+            //获取查询指定表所有字段的sql语句
+            logger.info("querySql: {}", querySql);
+
+            //获取所有字段的名称，类型，comment
+            stmt = connection.createStatement();
+            rs = stmt.executeQuery(querySql);
+
+            while (rs.next()){
+                Map<String,String> map = new HashMap<>();
+                map.put("TABLENAME",rs.getString(3).trim());
+                map.put("COLUMN_NAME", rs.getString(4).trim());
+                map.put("CONSTNAME", rs.getString(1).trim());
+                map.put("TABSCHEMA", rs.getString(2).trim());
+                list.add(map);
+            }
+        } catch (SQLException e) {
+            logger.error("[getTableColumnNames Exception] --> "
+                    + "the exception message is:" + e.getMessage());
+        } finally {
+            JdbcUtils.close(rs);
+            JdbcUtils.close(stmt);
+        }
+        result.put("datas", list);
+        return result;
+    }
+
+    /**
+    * @Description: 根据schema和表名查询外键信息
+    * @Param: [tableName, databaseName]
+    * @return: java.lang.Object
+    * @Author: 刘向前
+    * @Date: 2020-12-29 10:03
+    */
+    public Object getFKColumns(String tableName, String databaseName) {
+        Statement stmt = null;
+        ResultSet rs = null;
+        Map<String, List<Map<String,String>>> result = new HashMap<>();
+        List<Map<String,String>> list = new ArrayList<>();
+        try {
+            String querySql="select con.constraint_name,b.tablespace_name,con.table_name,col.COLUMN_name from" +
+                    " user_constraints con,user_cons_columns col,user_tables b where con.constraint_name=col.constraint_name and " +
+                    "con.constraint_type='R' and con.table_name=b.table_name"+
+                    " con.table_name = '"+tableName+"' AND b.tablespace_name = '"+databaseName+"'";
+            //获取查询指定表所有字段的sql语句
+            logger.info("querySql: {}", querySql);
+
+            //获取所有字段的名称，类型，comment
+            stmt = connection.createStatement();
+            rs = stmt.executeQuery(querySql);
+
+            while (rs.next()){
+                Map<String,String> map = new HashMap<>();
+                map.put("TABLENAME",rs.getString(1).trim());
+                map.put("FK_COLUMN_NAME", rs.getString(3).trim());
+                map.put("CONSTNAME", rs.getString(2).trim());
+                map.put("TABSCHEMA", rs.getString(6).trim());
+                map.put("reftabname", rs.getString(4).trim());
+                map.put("pk_colnames", rs.getString(5).trim());
+                list.add(map);
+            }
+        } catch (SQLException e) {
+            logger.error("[getTableColumnNames Exception] --> "
+                    + "the exception message is:" + e.getMessage());
+        } finally {
+            JdbcUtils.close(rs);
+            JdbcUtils.close(stmt);
+        }
+        result.put("datas", list);
+        return result;
+    }
 
     @Override
     public Map<String, Object> getSchemaMetadata(String schema) {
