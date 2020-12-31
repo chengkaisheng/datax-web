@@ -13,6 +13,36 @@
         </if>
         order by p.create_time desc
     </select>
+
+    <select id="getProjectListPagingByUserId" resultType="com.wugui.datax.admin.entity.vo.JobProjectVo">
+    SELECT a.* FROM
+    (
+        SELECT
+	        p.*,
+	        u.username,
+	        '创建' AS note
+        FROM
+	        job_project p
+	    JOIN job_user u ON p.user_id = u.id
+        WHERE
+	        p.flag = 1
+	        AND p.user_id = #{userId} UNION ALL
+        SELECT
+	        p.*,
+	        u.username,
+	        '参与' AS note
+        FROM
+	        job_project_user pu
+	    LEFT JOIN job_project p ON p.id = pu.project_id
+	    LEFT JOIN job_user u ON u.id = pu.user_id
+        WHERE
+	        pu.user_id = #{userId}) as a
+        <if test="searchName!=null and searchName != ''">
+            and a.name like concat('%', #{searchName}, '%')
+        </if>
+        GROUP BY a.id
+        order by a.create_time desc
+    </select>
     
     <select id="queryDataSourceCountByProject" resultType="int">
         select count(1) from job_jdbc_datasource where project_id in (select id from job_project)

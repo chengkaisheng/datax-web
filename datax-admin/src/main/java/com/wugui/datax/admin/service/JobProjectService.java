@@ -3,6 +3,7 @@ package com.wugui.datax.admin.service;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.wugui.datax.admin.entity.JobProject;
+import com.wugui.datax.admin.entity.vo.JobProjectVo;
 
 import java.io.Serializable;
 import java.util.List;
@@ -15,7 +16,6 @@ import java.util.List;
  * @since 2020-05-24
  */
 public interface JobProjectService extends IService<JobProject> {
-
     /**
      * project page
      * @param pageSize
@@ -25,6 +25,17 @@ public interface JobProjectService extends IService<JobProject> {
      */
 
     IPage<JobProject> getProjectListPaging(Integer pageSize, Integer pageNo, String searchName);
+
+    /**
+     * project page
+     * @param pageSize
+     * @param pageNo
+     * @param searchName
+     * @param userId
+     * @return
+     */
+
+    IPage<JobProjectVo> getJobProject(Integer pageSize, Integer pageNo, String searchName,int userId);
 
     /**
      * project page
