@@ -37,9 +37,11 @@
 	    LEFT JOIN job_user u ON u.id = pu.user_id
         WHERE
 	        pu.user_id = #{userId}) as a
-        <if test="searchName!=null and searchName != ''">
-            and a.name like concat('%', #{searchName}, '%')
-        </if>
+	        <where>
+                <if test="searchName!=null and searchName != ''">
+                    a.name like concat('%', #{searchName}, '%')
+                </if>
+            </where>
         GROUP BY a.id
         order by a.create_time desc
     </select>
