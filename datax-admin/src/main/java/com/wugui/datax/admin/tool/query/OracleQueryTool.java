@@ -91,10 +91,7 @@ public class OracleQueryTool extends BaseQueryTool implements QueryToolInterface
                     " user_constraints con,user_cons_columns col,user_tables b where con.constraint_name=col.constraint_name and " +
                     "con.constraint_type='P' and con.table_name=b.table_name"+
                     " con.table_name = '"+tableName+"' AND b.tablespace_name = '"+databaseName+"'";
-            //获取查询指定表所有字段的sql语句
             logger.info("querySql: {}", querySql);
-
-            //获取所有字段的名称，类型，comment
             stmt = connection.createStatement();
             rs = stmt.executeQuery(querySql);
 
@@ -107,7 +104,7 @@ public class OracleQueryTool extends BaseQueryTool implements QueryToolInterface
                 list.add(map);
             }
         } catch (SQLException e) {
-            logger.error("[getTableColumnNames Exception] --> "
+            logger.error("[getPKColumns Exception] --> "
                     + "the exception message is:" + e.getMessage());
         } finally {
             JdbcUtils.close(rs);
@@ -118,26 +115,27 @@ public class OracleQueryTool extends BaseQueryTool implements QueryToolInterface
     }
 
     /**
-    * @Description: 根据schema和表名查询外键信息
-    * @Param: [tableName, databaseName]
-    * @return: java.lang.Object
-    * @Author: 刘向前
-    * @Date: 2020-12-29 10:03
-    */
+     * @author: lxq
+     * @description: 根据schema和表名查询外键信息
+     * @date: 2021/1/4 11:03
+     * @param tableName
+     * @param databaseName
+     * @return: java.lang.Object
+     */
     public Object getFKColumns(String tableName, String databaseName) {
         Statement stmt = null;
         ResultSet rs = null;
         Map<String, List<Map<String,String>>> result = new HashMap<>();
         List<Map<String,String>> list = new ArrayList<>();
         try {
-            String querySql="select con.constraint_name,b.tablespace_name,con.table_name,col.COLUMN_name from" +
-                    " user_constraints con,user_cons_columns col,user_tables b where con.constraint_name=col.constraint_name and " +
-                    "con.constraint_type='R' and con.table_name=b.table_name"+
-                    " con.table_name = '"+tableName+"' AND b.tablespace_name = '"+databaseName+"'";
-            //获取查询指定表所有字段的sql语句
+            String querySql="select t1.table_name,t1.constraint_name,a1.column_name,ut.tablespace_name,t2.table_name," +
+                    "a2.column_name " +
+                    "from user_constraints t1, user_constraints t2, user_cons_columns a1, user_cons_columns a2," +
+                    "user_tables  ut " +
+                    "where t1.r_constraint_name = t2.constraint_name and t1.constraint_name = a1.constraint_name and " +
+                    "t1.r_constraint_name = a2.constraint_name and t1.table_name=ut.table_name"+
+                    " and t1.table_name = '"+tableName+"' AND ut.tablespace_name = '"+databaseName+"'";
             logger.info("querySql: {}", querySql);
-
-            //获取所有字段的名称，类型，comment
             stmt = connection.createStatement();
             rs = stmt.executeQuery(querySql);
 
@@ -152,7 +150,87 @@ public class OracleQueryTool extends BaseQueryTool implements QueryToolInterface
                 list.add(map);
             }
         } catch (SQLException e) {
-            logger.error("[getTableColumnNames Exception] --> "
+            logger.error("[getFKColumns Exception] --> "
+                    + "the exception message is:" + e.getMessage());
+        } finally {
+            JdbcUtils.close(rs);
+            JdbcUtils.close(stmt);
+        }
+        result.put("datas", list);
+        return result;
+    }
+
+    /**
+     * @author: lxq
+     * @description: 根据schema和表名查询唯一约束
+     * @date: 2021/1/4 10:31
+     * @param tableName
+     * @param databaseName
+     * @return: java.lang.Object
+     */
+    public Object getUKColumns(String tableName,String databaseName) {
+        Statement stmt = null;
+        ResultSet rs = null;
+        Map<String, List<Map<String,String>>> result = new HashMap<>();
+        List<Map<String,String>> list = new ArrayList<>();
+        try {
+            String querySql="select b.tablespace_name,con.table_name,con.constraint_name,col.COLUMN_name from user_constraints con,user_cons_columns col,user_tables b" +
+                    " where con.constraint_name=col.constraint_name and con.constraint_type='U' and con.table_name=b.table_name "+
+                    " and con.table_name = '"+tableName+"' AND b.tablespace_name = '"+databaseName+"'";
+            logger.info("querySql: {}", querySql);
+            stmt = connection.createStatement();
+            rs = stmt.executeQuery(querySql);
+
+            while (rs.next()){
+                Map<String,String> map = new HashMap<>();
+                map.put("TABSCHEMA",rs.getString(1).trim());
+                map.put("TABLENAME", rs.getString(2).trim());
+                map.put("COLUMN_NAME", rs.getString(4).trim());
+                map.put("CONSTNAME", rs.getString(3).trim());
+                list.add(map);
+            }
+        } catch (SQLException e) {
+            logger.error("[getUKColumns Exception] --> "
+                    + "the exception message is:" + e.getMessage());
+        } finally {
+            JdbcUtils.close(rs);
+            JdbcUtils.close(stmt);
+        }
+        result.put("datas", list);
+        return result;
+    }
+
+    /**
+     * @author: lxq
+     * @description: 根据schema和表名查询检查约束
+     * @date: 2021/1/4 10:34
+     * @param tableName
+     * @param databaseName
+     * @return: java.lang.Object
+     */
+    public Object getCKColumns(String tableName,String databaseName) {
+        Statement stmt = null;
+        ResultSet rs = null;
+        Map<String, List<Map<String,String>>> result = new HashMap<>();
+        List<Map<String,String>> list = new ArrayList<>();
+        try {
+            String querySql="select b.tablespace_name,con.table_name,con.constraint_name,con.search_condition from " +
+                    "user_constraints con,user_cons_columns col,user_tables b where con.constraint_name=col.constraint_name and con.constraint_type='C' and con.table_name=b.table_name "+
+                    " and con.table_name = '"+tableName+"' AND b.tablespace_name = '"+databaseName+"'";
+            logger.info("querySql: {}", querySql);
+            stmt = connection.createStatement();
+            rs = stmt.executeQuery(querySql);
+
+            while (rs.next()){
+                Map<String,String> map = new HashMap<>();
+                map.put("TABSCHEMA",rs.getString(1).trim());
+                map.put("TABLENAME", rs.getString(2).trim());
+                map.put("CONSTNAME", rs.getString(3).trim());
+                map.put("TEXT", rs.getString(4).trim());
+                list.add(map);
+            }
+        } catch (SQLException e) {
+            logger.error("[getCKColumns Exception] --> "
                     + "the exception message is:" + e.getMessage());
         } finally {
             JdbcUtils.close(rs);
