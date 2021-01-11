@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.api.R;
 import com.wugui.datax.admin.entity.JobProject;
 import com.wugui.datax.admin.entity.JobProjectUserEntity;
+import com.wugui.datax.admin.entity.vo.JobProjectVo;
 import com.wugui.datax.admin.service.JobProjectService;
 import com.wugui.datax.admin.service.JobProjectUserService;
 import io.swagger.annotations.Api;
@@ -33,7 +34,6 @@ public class JobProjectController extends BaseController {
     private JobProjectUserService jobProjectUserService;
 
 
-
     /**
      * 分页查询所有数据
      *
@@ -46,6 +46,21 @@ public class JobProjectController extends BaseController {
                                           @RequestParam("pageNo") Integer pageNo) {
 
         return success(jobProjectService.getProjectListPaging(pageSize, pageNo, searchVal));
+    }
+
+    /**
+     * 分页查询所有数据
+     *
+     * @return 所有数据
+     */
+    @GetMapping("/getJobProject")
+    @ApiOperation("分页查询所有数据")
+    public R<IPage<JobProjectVo>> getJobProject(@RequestParam(value = "searchVal", required = false) String searchVal,
+                                            @RequestParam("pageSize") Integer pageSize,
+                                            @RequestParam("pageNo") Integer pageNo,
+                                            @RequestParam("userId") Integer userId) {
+
+        return success(jobProjectService.getJobProject(pageSize, pageNo, searchVal,userId));
     }
 
     /**

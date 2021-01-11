@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wugui.datax.admin.entity.JobProject;
+import com.wugui.datax.admin.entity.vo.JobProjectVo;
 import com.wugui.datax.admin.mapper.JobProjectMapper;
 import com.wugui.datax.admin.service.JobProjectService;
 import com.wugui.datax.admin.service.JobProjectUserService;
@@ -32,6 +33,12 @@ public class JobProjectServiceImpl extends ServiceImpl<JobProjectMapper, JobProj
     public IPage<JobProject> getProjectListPaging(Integer pageSize, Integer pageNo, String searchName) {
         Page<JobProject> page = new Page(pageNo, pageSize);
         return jobProjectMapper.getProjectListPaging(page, searchName);
+    }
+
+    @Override
+    public IPage<JobProjectVo> getJobProject(Integer pageSize, Integer pageNo, String searchName,int userId) {
+        Page<JobProjectVo> page = new Page(pageNo, pageSize);
+        return jobProjectMapper.getProjectListPagingByUserId(page, searchName,userId);
     }
 
     @Override
