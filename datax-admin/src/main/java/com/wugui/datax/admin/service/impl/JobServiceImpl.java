@@ -125,6 +125,8 @@ public class JobServiceImpl implements JobService {
             jobJson = qualityJsonService.buildJobJson(qualityJsonBuildDto);
             jobInfo.setDatasourceId(qualityJsonBuildDto.getReaderDatasourceId().intValue());
 
+        } else if (jobType.equalsIgnoreCase("SHELL")){
+
         }else{
             //其他任务
             dataXJsonBuildDto = JSON.parseObject(jobParam,DataXJsonBuildDto.class);

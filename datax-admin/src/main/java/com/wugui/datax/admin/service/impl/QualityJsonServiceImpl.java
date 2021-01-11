@@ -105,15 +105,21 @@ public class QualityJsonServiceImpl implements QualityJsonService {
             for(int j = 0; j < ruleIdInfoDtoList.size(); j++){
                 String[] codeArray = ruleIdInfoDtoList.get(j).getCode().split("\\:");
                 String regular = null;
+                String code = null;
+                Integer type = null;
                 if(codeArray.length == 1){
                     //通用规则不需要关联个性化规则
                     UniversalRule universalRule = universalRuleMapper.selectByCode(codeArray[codeArray.length-1]);
                     regular = universalRule.getRegular();
+                    code = universalRule.getCode();
+                    type = universalRule.getType();
                 }else if (codeArray.length == 2){
                     //通用规则关联个性化规则
                     PersonaliseRule personaliseRule = personaliseRuleMapper.selectByCode(codeArray[codeArray.length-1]);
                     regular = personaliseRule.getRegular();
+                    code = personaliseRule.getCode();
                 }
+
                 //替换正则中的column
                 String temp = regular.replaceAll("column",columnName);
 

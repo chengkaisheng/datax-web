@@ -176,7 +176,7 @@ public class JobInfoController extends BaseController{
         List<List<Object>> list = (List<List<Object>>) map.get("list");
         data.setRows(list);
 
-        ExportExcelUtils.exportExcel(response,"异常数据.xlsx",data);
+        ExportExcelUtils.exportExcel(response,"异常数据.xls",data);
 
     }
 }
