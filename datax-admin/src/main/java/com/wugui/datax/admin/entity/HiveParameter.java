@@ -88,4 +88,13 @@ public class HiveParameter {
     private String schema;
 
     private String tableName;
+
+    @ApiModelProperty("转义字符替换")
+    private String escaped;
+
+    @ApiModelProperty("指定键值对")
+    private String withSerdeproperties;
+
+    @ApiModelProperty("指定元数据属性")
+    private String tblProperties;
 }

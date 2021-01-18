@@ -90,6 +90,9 @@ public class JobServiceImpl implements JobService {
     @Resource
     private JobRuleInfoMapper jobRuleInfoMapper;
 
+    @Resource
+    private JobInfoFileMapper jobInfoFileMapper;
+
     @Override
     public Map<String, Object> pageList(int start, int length, int jobGroup, int triggerStatus, String jobDesc, String glueType, int userId, Integer[] projectIds) {
 
@@ -240,7 +243,12 @@ public class JobServiceImpl implements JobService {
         if (jobInfo.getId() < 1) {
             return new ReturnT<>(ReturnT.FAIL_CODE, (I18nUtil.getString("jobinfo_field_add") + I18nUtil.getString("system_fail")));
         }
-
+        if(jobInfo.getId()>1){
+            JobInfoFile jobInfoFile=new JobInfoFile();
+            jobInfoFile.setJobFileId(jobInfo.getJobFileId());
+            jobInfoFile.setJobId(jobInfo.getId());
+            jobInfoFileMapper.save(jobInfoFile);
+        }
         return new ReturnT<>(String.valueOf(jobInfo.getId()));
     }
 
@@ -528,6 +536,78 @@ public class JobServiceImpl implements JobService {
         return new ReturnT<>(result);
     }
 
+    @Override
+    public ReturnT<Map<String, Object>> getTriggerCountReport() {
+        Map<String, Object> result = new HashMap<>();
+        int triggerCountRunningTotal = 0;
+        int triggerCountSucTotal = 0;
+        int triggerCountFailTotal = 0;
+
+        List<JobLogReport> logReportList = jobLogReportMapper.queryLogReport(DateUtil.addDays(new Date(), -7), new Date());
+
+        if (logReportList != null && logReportList.size() > 0) {
+            for (JobLogReport item : logReportList) {
+                int triggerDayCountRunning = item.getRunningCount();
+                int triggerDayCountSuc = item.getSucCount();
+                int triggerDayCountFail = item.getFailCount();
+                triggerCountRunningTotal += triggerDayCountRunning;
+                triggerCountSucTotal += triggerDayCountSuc;
+                triggerCountFailTotal += triggerDayCountFail;
+            }
+        }
+        result.put("triggerCountSucTotal", triggerCountSucTotal);
+        result.put("triggerCountFailTotal", triggerCountFailTotal);
+        result.put("triggerCountRunningTotal", triggerCountRunningTotal);
+        return new  ReturnT<>(result);
+    }
+
+    /**
+     * @author: lxq
+     * @description: TODO
+     * @date: 2021/1/12 17:20
+     * @param
+     * @return: com.wugui.datatx.core.biz.model.ReturnT<java.util.Map<java.lang.String,java.lang.Object>>
+     */
+    @Override
+    public ReturnT<Map<String, Object>> getTaskResultReport() {
+        Map<String, Object> result = new HashMap<>();
+        // process
+        List<String> triggerDayList = new ArrayList<String>();
+        List<Integer> triggerDayCountSucList = new ArrayList<Integer>();
+        List<Integer> triggerDayCountFailList = new ArrayList<Integer>();
+
+        List<JobLogReport> logReportList = jobLogReportMapper.queryLogReport(DateUtil.addDays(new Date(), -7), new Date());
+
+        if (logReportList != null && logReportList.size() > 0) {
+            for (JobLogReport item : logReportList) {
+                String day = DateUtil.formatDate(item.getTriggerDay());
+                int triggerDayCountSuc = item.getSucCount();
+                int triggerDayCountFail = item.getFailCount();
+
+                triggerDayList.add(day);
+                triggerDayCountSucList.add(triggerDayCountSuc);
+                triggerDayCountFailList.add(triggerDayCountFail);
+            }
+        } else {
+            for (int i = -6; i <= 0; i++) {
+                triggerDayList.add(DateUtil.formatDate(DateUtil.addDays(new Date(), i)));
+                triggerDayCountSucList.add(0);
+                triggerDayCountFailList.add(0);
+            }
+        }
+        result.put("triggerDayList", triggerDayList);
+        result.put("triggerDayCountSucList", triggerDayCountSucList);
+        result.put("triggerDayCountFailList", triggerDayCountFailList);
+        return new  ReturnT<>(result);
+    }
+
+    @Override
+    public ReturnT<Dashboard> getTaskTypeDistribution() {
+        Dashboard dashboard=new Dashboard();
+        dashboard.setTaskTypeDistribution(jobInfoMapper.getTaskTypeDistribution());
+        return new ReturnT<>(dashboard);
+    }
+
 
     @Override
     public ReturnT<String> batchAdd(DataXBatchJsonBuildDto dto) throws IOException {
@@ -632,6 +712,12 @@ public class JobServiceImpl implements JobService {
             jobInfo.setTriggerStatus(0);
             int n=jobInfoMapper.save(jobInfo);
             if(n>0){
+                if(jobInfo.getId()>1){
+                    JobInfoFile jobInfoFile=new JobInfoFile();
+                    jobInfoFile.setJobFileId(jobInfo.getJobFileId());
+                    jobInfoFile.setJobId(jobInfo.getId());
+                    jobInfoFileMapper.save(jobInfoFile);
+                }
                 result= new ReturnT<>(ReturnT.SUCCESS_CODE,"保存成功");
             }else {
                 result= new ReturnT<>(ReturnT.FAIL_CODE, "保存失败");
@@ -760,6 +846,142 @@ public class JobServiceImpl implements JobService {
         dashboard.setPassInterface(interfaceMapper.getPassInterfaceCount());
         dashboard.setRejectInterface(interfaceMapper.getRejectInterfaceCount());
         return new ReturnT<>(dashboard);
+    }
+
+
+    /**
+     * @author: lxq
+     * @description: 获取项目数量相关报表
+     * @date: 2021/1/12 16:34
+     * @param
+     * @return: com.wugui.datatx.core.biz.model.ReturnT<com.wugui.datax.admin.entity.Dashboard>
+     */
+    @Override
+    public ReturnT<Dashboard> getProjectCountReport() throws IOException {
+        Dashboard dashboard=new Dashboard();
+        dashboard.setItem(jobProjectService.count());
+        dashboard.setItemDataSource(jobProjectMapper.queryDataSourceCountByProject());
+        dashboard.setItemUser(jobProjectMapper.queryUserCountByProject());
+        dashboard.setItemTask(jobProjectMapper.queryTaskCountByProject());
+        return new  ReturnT<>(dashboard);
+    }
+
+
+    /**
+     * @author: lxq
+     * @description: 获取项目任务分布图表
+     * @date: 2021/1/12 16:37
+     * @param
+     * @return: com.wugui.datatx.core.biz.model.ReturnT<com.wugui.datax.admin.entity.Dashboard>
+     */
+    @Override
+    public ReturnT<Dashboard> getItemTaskDistribution() throws IOException {
+        Dashboard dashboard=new Dashboard();
+        List<Map<String,Object>> distributions=jobProjectMapper.getItemTaskDistribution();
+        dashboard.setItemTaskDistribution(distributions);
+        return new  ReturnT<>(dashboard);
+    }
+
+
+    /**
+     * @author: lxq
+     * @description: 项目类型分布
+     * @date: 2021/1/12 16:40
+     * @param
+     * @return: com.wugui.datatx.core.biz.model.ReturnT<com.wugui.datax.admin.entity.Dashboard>
+     */
+    @Override
+    public ReturnT<Dashboard> getItemTaskTypeDistribution() throws IOException {
+        Dashboard dashboard=new Dashboard();
+        dashboard.setItemTaskTypeDistribution(jobProjectMapper.getItemTaskTypeDistribution());
+        return new  ReturnT<>(dashboard);
+    }
+
+
+    /**
+     * @author: lxq
+     * @description: 项目任务运行状态分布
+     * @date: 2021/1/12 16:43
+     * @param
+     * @return: com.wugui.datatx.core.biz.model.ReturnT<com.wugui.datax.admin.entity.Dashboard>
+     */
+    @Override
+    public ReturnT<Dashboard> getItemTaskRunStateDistribution() throws IOException {
+        Dashboard dashboard=new Dashboard();
+        dashboard.setItemTaskRunStateDistribution(jobProjectMapper.getItemTaskRunStateDistribution());
+        return new  ReturnT<>(dashboard);
+    }
+
+
+    /**
+     * @author: lxq
+     * @description: 获取数据源相关报表
+     * @date: 2021/1/12 16:51
+     * @param
+     * @return: com.wugui.datatx.core.biz.model.ReturnT<com.wugui.datax.admin.entity.Dashboard>
+     */
+    @Override
+    public ReturnT<Dashboard> getDataSourceReport() throws IOException {
+        Dashboard dashboard=new Dashboard();
+        dashboard.setConnectDataSource(jobDatasourceMapper.selectCount(new QueryWrapper<>()));
+        List<JobDatasource> datasources=jobDatasourceMapper.selectList(new QueryWrapper<>());
+        Integer dbCount=0;
+        Integer tableCount=0;
+        for(JobDatasource jobDatasource:datasources){
+            //int dbRet=datasourceQueryService.getDBs(jobDatasource.getId()).size();
+            int tableRet = 0;
+            try {
+                tableRet = datasourceQueryService.getTables(jobDatasource.getId(),"").size();
+            } catch (Exception e) {
+                logger.error(jobDatasource.getDatasourceName() + "查询数据源异常");
+            }
+            //dbCount+=dbRet;
+            tableCount+=tableRet;
+        }
+        dashboard.setDatabase(dbCount);
+        dashboard.setTable(tableCount);
+        return new  ReturnT<>(dashboard);
+    }
+
+    @Override
+    public ReturnT<Dashboard> getTaskExecutorDistribution() throws IOException {
+        Dashboard dashboard=new Dashboard();
+        dashboard.setTaskExecutorDistribution(jobProjectMapper.getTaskExecutorDistribution());
+        return new  ReturnT<>(dashboard);
+    }
+
+    @Override
+    public ReturnT<Dashboard> getRuleReport() throws IOException {
+        Dashboard dashboard=new Dashboard();
+        dashboard.setGeneralRule(universalRuleMapper.pageListCount(""));
+        dashboard.setConfigedRule(jobInfoMapper.getConfigedRuleCount());
+        dashboard.setPersonalRule(personaliseRuleMapper.pageListCount(null,null,null));
+        return new  ReturnT<>(dashboard);
+    }
+
+    @Override
+    public ReturnT<Dashboard> getUsedRule() throws IOException {
+        Dashboard dashboard=new Dashboard();
+        dashboard.setUsedRule(universalRuleMapper.getUsedRuleDistribution());
+        return new  ReturnT<>(dashboard);
+    }
+
+    /**
+     * @author: lxq
+     * @description: 接口统计
+     * @date: 2021/1/12 17:28
+     * @param
+     * @return: com.wugui.datatx.core.biz.model.ReturnT<com.wugui.datax.admin.entity.Dashboard>
+     */
+    @Override
+    public ReturnT<Dashboard> getInterface() throws IOException {
+        Dashboard dashboard=new Dashboard();
+        TInterfaceExample example=new TInterfaceExample(TInterface.class);
+        dashboard.setInterfaceNum(interfaceMapper.countByExample(example));
+        dashboard.setApprovingInterface(interfaceMapper.getApprovingInterfaceCount());
+        dashboard.setPassInterface(interfaceMapper.getPassInterfaceCount());
+        dashboard.setRejectInterface(interfaceMapper.getRejectInterfaceCount());
+        return new  ReturnT<>(dashboard);
     }
 
     /**

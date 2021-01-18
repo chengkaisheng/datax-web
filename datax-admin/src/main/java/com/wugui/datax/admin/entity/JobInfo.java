@@ -129,4 +129,6 @@ public class JobInfo {
 
 	@ApiModelProperty("任务参数")
 	private String jobParam;
+
+	private int jobFileId;
 }

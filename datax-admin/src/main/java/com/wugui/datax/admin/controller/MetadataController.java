@@ -111,13 +111,13 @@ public class MetadataController extends BaseController {
     }
 
     /**
-     * 根据数据源id和表名获取字段的名称,类型，comment
+     * 将数据源转换成hive的ddl
      *
      * @param hiveParameter
      * @return
      */
     @PostMapping("/dbToHive")
-    @ApiOperation("根据数据源id和表名获取所有字段名称，类型，comment")
+    @ApiOperation("将数据源转换成hive的ddl")
     public R<Object> dbToHive(@RequestBody HiveParameter hiveParameter) throws IOException {
         Map map =new HashMap();
         if(UUIDUtils.isEmpty(hiveParameter.getSchema())){
@@ -131,6 +131,24 @@ public class MetadataController extends BaseController {
             return success(map);
         }
         return success(datasourceQueryService.dbToHive(hiveParameter));
+    }
+
+    /**
+     * 将数据源转换成impala的ddl
+     *
+     * @param hiveParameter
+     * @return
+     */
+    @PostMapping("/dbToImpala")
+    @ApiOperation("将数据源转换成impala的ddl")
+    public R<Object> dbToImpala(@RequestBody HiveParameter hiveParameter) throws IOException {
+        Map map =new HashMap();
+        if(UUIDUtils.isEmpty(hiveParameter.getSchema())){
+            map.put("code","500");
+            map.put("data","数据库schema不能为空");
+            return success(map);
+        }
+        return success(datasourceQueryService.dbToImpala(hiveParameter));
     }
 
     /**

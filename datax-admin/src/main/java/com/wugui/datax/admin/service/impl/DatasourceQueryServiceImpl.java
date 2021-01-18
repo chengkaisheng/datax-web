@@ -168,21 +168,21 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
                 DB2QueryTool db2QueryTool=new DB2QueryTool(datasource);
                 for (TableInfo tableInfo:tableInfos){
                     hiveParameter.setTableName(tableInfo.getName());
-                    String sql=this.getDB2Sql(db2QueryTool,datasource,"db2",hiveParameter).toString();
+                    String sql=this.getHiveSql(db2QueryTool,datasource,"db2",hiveParameter).toString();
                     hiveSql.add(sql);
                 }
             }else if(JdbcConstants.MYSQL.equals(datasource.getDatasource())){
                 MySQLQueryTool mySQLQueryTool=new MySQLQueryTool(datasource);
                 for (TableInfo tableInfo:tableInfos){
                     hiveParameter.setTableName(tableInfo.getName());
-                    String sql=this.getDB2Sql(mySQLQueryTool,datasource,"mysql",hiveParameter).toString();
+                    String sql=this.getHiveSql(mySQLQueryTool,datasource,"mysql",hiveParameter).toString();
                     hiveSql.add(sql);
                 }
             }else if (JdbcConstants.ORACLE.equals(datasource.getDatasource())){
                 OracleQueryTool oracleQueryTool=new OracleQueryTool(datasource);
                 for (TableInfo tableInfo:tableInfos){
                     hiveParameter.setTableName(tableInfo.getName());
-                    String sql=this.getDB2Sql(oracleQueryTool,datasource,"oracle",hiveParameter).toString();
+                    String sql=this.getHiveSql(oracleQueryTool,datasource,"oracle",hiveParameter).toString();
                     hiveSql.add(sql);
                 }
             }
@@ -193,7 +193,39 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
         return hiveSql;
     }
 
-    public Object getDB2Sql(Object o,JobDatasource datasource,String source,HiveParameter hiveParameter){
+    @Override
+    public Object dbToImpala(HiveParameter hiveParameter) throws IOException {
+        //获取数据源对象
+        JobDatasource datasource = jobDatasourceService.getById(hiveParameter.getDatasourceId());
+        //queryTool组装
+        if (ObjectUtil.isNull(datasource)) {
+            return Lists.newArrayList();
+        }
+        List<String> hiveSql=new ArrayList<>();
+        try {
+            List<TableInfo> tableInfos =  getTableInfos(hiveParameter.getDatasourceId(), hiveParameter.getSchema());
+            if(tableInfos.size()>0){
+                Set<TableInfo> tableInfoSet = new HashSet<>(tableInfos);
+                tableInfos.clear();
+                tableInfos.addAll(tableInfoSet);
+
+            }
+            if (JdbcConstants.DB2.equals(datasource.getDatasource())) {
+                DB2QueryTool db2QueryTool=new DB2QueryTool(datasource);
+                for (TableInfo tableInfo:tableInfos){
+                    hiveParameter.setTableName(tableInfo.getName());
+                    String sql=this.getImpalaSql(db2QueryTool,datasource,"db2",hiveParameter).toString();
+                    hiveSql.add(sql);
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        return hiveSql;
+    }
+
+    public Object getHiveSql(Object o,JobDatasource datasource,String source,HiveParameter hiveParameter){
         try {
             Class c = Class.forName(o.getClass().getName());//获取查询的类名
             Constructor con = c.getConstructor(JobDatasource.class);//对类进行有参构造方法的初始化
@@ -525,6 +557,314 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
             if(UUIDUtils.notEmpty(hiveParameter.getLocation())){
                 str.append("LOCATION '").append(hiveParameter.getLocation()).append("'\r");
             }
+            str=str.deleteCharAt(str.length()-1);
+            str.append(";\r\r");
+            return str.toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return e.getMessage();
+        }
+    }
+
+    /**
+     * @author: lxq
+     * @description: 数据源转换为impala的ddl语句
+     * @date: 2021/1/11 11:14
+     * @param o
+     * @param datasource
+     * @param source
+     * @param hiveParameter
+     * @return: java.lang.Object
+     */
+    public Object getImpalaSql(Object o,JobDatasource datasource,String source,HiveParameter hiveParameter){
+        try {
+            Class c = Class.forName(o.getClass().getName());//获取查询的类名
+            Constructor con = c.getConstructor(JobDatasource.class);//对类进行有参构造方法的初始化
+            // 通过带参构造方法对象创建对象
+            Object obj = con.newInstance(datasource);
+            Map<String, List<Map<String,String>>> wkResult=null;//主键，外键，唯一键表信息存放位置
+            List<Map<String,String>> wkList=null;
+            List<Map<String,String>> randomDate=new ArrayList<>();//表时间字段存放，作用于随机取值
+            List<Map<String,String>> columRandom=new ArrayList<>();//表除时间字段存放，作用于随机取值
+            StringBuilder str=new StringBuilder();//主sql拼接
+            StringBuilder sorted=new StringBuilder();//排序SQL拼接
+            StringBuilder patition=new StringBuilder();//分区SQL拼接
+            boolean isSorted=false;//判断是否进行排序
+            boolean isPatition=false;//判断是否进行分区
+            Random random = new Random();
+            Method method = c.getMethod("getTableColumns",String.class,String.class);
+            Map<String, List<Map<String,String>>> result=(Map<String, List<Map<String,String>>>) method.invoke(obj,hiveParameter.getTableName(),hiveParameter.getSchema());
+            List<Map<String,String>> list=result.get("datas");
+            patition.append("PARTITIONED BY (");
+            if(hiveParameter.isDropAdded()){
+                str.append("drop table if exists ");
+                if(UUIDUtils.notEmpty(hiveParameter.getDbNameType())){//获取数据库名
+                    str.append(hiveParameter.getDbNamePattern().replace("%s",list.get(0).get("TABSCHEMA"))).append(".");
+                }
+                if(UUIDUtils.notEmpty(hiveParameter.getTableNameType())){//获取表名
+                    str.append(hiveParameter.getTableNamePattern().replace("%s",list.get(0).get("TABLENAME")));
+                }
+                str.append("\r");
+            }
+            str.append("CREATE ");
+            if(hiveParameter.isExternal()){
+                str.append("EXTERNAL ");
+            }
+            str.append(" TABLE IF NOT EXISTS ");
+            sorted.append("(");
+            if(UUIDUtils.notEmpty(hiveParameter.getDbNameType())){//获取数据库名
+                str.append(hiveParameter.getDbNamePattern().replace("%s",list.get(0).get("TABSCHEMA"))).append(".");
+            }
+            if(UUIDUtils.notEmpty(hiveParameter.getTableNameType())){//获取表名
+                str.append(hiveParameter.getTableNamePattern().replace("%s",list.get(0).get("TABLENAME")));
+            }
+            str.append("(").append("\r");
+            for (Map<String,String> map:list){
+                if(map.get("DATA_TYPE").equals("DATE")){//获取所有为DATE类型的字段
+                    Map map1=new HashMap();
+                    map1.put("COLUMN_NAME", map.get("COLUMN_NAME"));
+                    map1.put("DATA_TYPE", map.get("DATA_TYPE"));
+                    randomDate.add(map1);
+                }else {//获取所有非时间字段
+                    Map map1=new HashMap();
+                    map1.put("COLUMN_NAME", map.get("COLUMN_NAME"));
+                    map1.put("DATA_TYPE", map.get("DATA_TYPE"));
+                    columRandom.add(map1);
+                }
+            }
+            //获取随机数
+            int n = (int)(Math.random()*columRandom.size());
+            int p = (int)(Math.random()*randomDate.size());
+            if("random".equals(hiveParameter.getPartitionKey())){//分区为random
+                patition.append(columRandom.get(n).get("COLUMN_NAME")).append(" ");
+                DimDDL dimDDL= dimDDLMapper.select(source,"impala",columRandom.get(n).get("DATA_TYPE").trim());
+                patition.append(dimDDL.getTargetType());
+                isPatition=true;
+            }
+            if("randomDate".equals(hiveParameter.getPartitionKey())&&randomDate.size()>0){//分区为randomDate
+                patition.append(randomDate.get(p).get("COLUMN_NAME")).append(" ");
+                DimDDL dimDDL= dimDDLMapper.select(source,"impala",randomDate.get(p).get("DATA_TYPE").trim());
+                patition.append(dimDDL.getTargetType());
+                isPatition=true;
+            }
+            for (Map<String,String> map:list){
+                //分区为随机时，当前列名不能与分区的列名相同
+                if("random".equals(hiveParameter.getPartitionKey())&& !map.get("COLUMN_NAME").equals(columRandom.get(n).get("COLUMN_NAME"))) {
+                    str.append(map.get("COLUMN_NAME")).append(" ");
+                    DimDDL dimDDL= dimDDLMapper.select(source,"impala",map.get("DATA_TYPE").trim());
+                    if(dimDDL.getTargetType().equals("CHAR")){
+                        str.append(dimDDL.getTargetType()).append("(255)");
+                    }else if(dimDDL.getTargetType().equals("VARCHAR")) {
+                        str.append(dimDDL.getTargetType()).append("(65530)");
+                    }else {
+                        str.append(dimDDL.getTargetType());
+                    }
+                    if(UUIDUtils.notEmpty(map.get("COLUMN_COMMENT"))){
+                        str.append(" comment '"+map.get("COLUMN_COMMENT")+"'");
+                    }
+                    str.append(",\r");
+                }
+                //当分区为时间字段且当前表存在时间字段，即randomDate>0时,当前列名不能与随机的时间字段相同
+                if("randomDate".equals(hiveParameter.getPartitionKey())&& randomDate.size()>0&&!map.get("COLUMN_NAME").equals(randomDate.get(p).get("COLUMN_NAME"))){
+                    str.append(map.get("COLUMN_NAME")).append(" ");
+                    DimDDL dimDDL= dimDDLMapper.select(source,"impala",map.get("DATA_TYPE").trim());
+                    if(dimDDL.getTargetType().equals("CHAR")){
+                        str.append(dimDDL.getTargetType()).append("(255)");
+                    }else if(dimDDL.getTargetType().equals("VARCHAR")) {
+                        str.append(dimDDL.getTargetType()).append("(65530)");
+                    }else {
+                        str.append(dimDDL.getTargetType());
+                    }
+                    if(UUIDUtils.notEmpty(map.get("COLUMN_COMMENT"))){
+                        str.append(" comment '"+map.get("COLUMN_COMMENT")+"'");
+                    }
+                    str.append(",\r");
+                }
+                if("randomDate".equals(hiveParameter.getPartitionKey())&& randomDate.size()<=0) {
+                    //当分区为时间字段且当前表不存在时间字段，即randomDate<0
+                    str.append(map.get("COLUMN_NAME")).append(" ");
+                    DimDDL dimDDL= dimDDLMapper.select(source,"impala",map.get("DATA_TYPE").trim());
+                    if(dimDDL.getTargetType().equals("CHAR")){
+                        str.append(dimDDL.getTargetType()).append("(255)");
+                    }else if(dimDDL.getTargetType().equals("VARCHAR")) {
+                        str.append(dimDDL.getTargetType()).append("(65530)");
+                    }else {
+                        str.append(dimDDL.getTargetType());
+                    }
+                    if(UUIDUtils.notEmpty(map.get("COLUMN_COMMENT"))){
+                        str.append(" comment '"+map.get("COLUMN_COMMENT")+"'");
+                    }
+                    str.append(",\r");
+                }
+                //不进行分区操作
+                if("none".equals(hiveParameter.getPartitionKey())){
+                    str.append(map.get("COLUMN_NAME")).append(" ");
+                    DimDDL dimDDL= dimDDLMapper.select(source,"impala",map.get("DATA_TYPE").trim());
+                    if(dimDDL.getTargetType().equals("CHAR")){
+                        str.append(dimDDL.getTargetType()).append("(255)");
+                    }else if(dimDDL.getTargetType().equals("VARCHAR")) {
+                        str.append(dimDDL.getTargetType()).append("(65530)");
+                    }else {
+                        str.append(dimDDL.getTargetType());
+                    }
+                    if(UUIDUtils.notEmpty(map.get("COLUMN_COMMENT"))){
+                        str.append(" comment '"+map.get("COLUMN_COMMENT")+"'");
+                    }
+                    str.append(",\r");
+                }
+                //排序为时间字段
+                if(map.get("DATA_TYPE").equals("DATE")&&"date".equals(hiveParameter.getBucketSortKey())&&!isSorted){
+                    //排序为date，分区为randomDate时，排序字段不能与分区字段相同
+                    if("randomDate".equals(hiveParameter.getPartitionKey())&&randomDate.size()>0&&!map.get("COLUMN_NAME").equals(randomDate.get(p).get("COLUMN_NAME"))){
+                        if(UUIDUtils.notEmpty(hiveParameter.getBucketSortOrder())){
+                            sorted.append(map.get("COLUMN_NAME")).append(" ").append(hiveParameter.getBucketSortOrder());
+                        }else {
+                            sorted.append(map.get("COLUMN_NAME"));
+                        }
+                        sorted.append(",");
+                        isSorted=true;
+                    }
+                    //排序为date，分区为random时，排序字段不能与分区字段相同
+                    if("random".equals(hiveParameter.getPartitionKey())&&randomDate.size()>0&&!map.get("COLUMN_NAME").equals(columRandom.get(n).get("COLUMN_NAME"))){
+                        if(UUIDUtils.notEmpty(hiveParameter.getBucketSortOrder())){
+                            sorted.append(map.get("COLUMN_NAME")).append(" ").append(hiveParameter.getBucketSortOrder());
+                        }else {
+                            sorted.append(map.get("COLUMN_NAME"));
+                        }
+                        sorted.append(",");
+                        isSorted=true;
+                    }
+                }
+                //排序为random
+                if("random".equals(hiveParameter.getBucketSortKey())&&!isSorted){
+                    //排序为random，分区为random时，排序字段不能与分区字段相同
+                    if("random".equals(hiveParameter.getPartitionKey())&&!map.get("COLUMN_NAME").equals(columRandom.get(n).get("COLUMN_NAME"))){
+                        if(UUIDUtils.notEmpty(hiveParameter.getBucketSortOrder())){
+                            sorted.append(map.get("COLUMN_NAME")).append(" ").append(hiveParameter.getBucketSortOrder());
+                        }else {
+                            sorted.append(map.get("COLUMN_NAME"));
+                        }
+                        sorted.append(",");
+                        isSorted=true;
+                    }
+                    //排序为random，分区为randomDate且存在时间字段时，排序字段不能与分区字段相同
+                    if("randomDate".equals(hiveParameter.getPartitionKey())&&randomDate.size()>0&&!map.get("COLUMN_NAME").equals(randomDate.get(p).get("COLUMN_NAME"))){
+                        if(UUIDUtils.notEmpty(hiveParameter.getBucketSortOrder())){
+                            sorted.append(map.get("COLUMN_NAME")).append(" ").append(hiveParameter.getBucketSortOrder());
+                        }else {
+                            sorted.append(map.get("COLUMN_NAME"));
+                        }
+                        sorted.append(",");
+                        isSorted=true;
+                    }
+
+                }
+            }
+            if(isSorted){//是否拼接排序，是的话将最后一个逗号去除
+                sorted=sorted.deleteCharAt(sorted.length()-1);
+            }
+            patition.append(")\r");
+            sorted.append(") ");
+            //查询db2主键信息并生成主键sql
+            if(UUIDUtils.StringToInteger(hiveParameter.getTargetVersion())>=210){
+                method = c.getMethod("getPKColumns",String.class,String.class);
+                wkResult=(Map<String, List<Map<String,String>>>) method.invoke(obj,hiveParameter.getTableName(),hiveParameter.getSchema());
+                if(wkResult.get("datas").size()>0){
+                    wkList=wkResult.get("datas");
+                    str.append(" PRIMARY KEY (");
+                    for (Map<String,String> map:wkList){
+                        str.append(map.get("COLUMN_NAME")).append(",");
+                    }
+                    str=str.deleteCharAt(str.length()-1);
+                    str.append(") ");
+                    str.append(" DISABLE NOVALIDATE RELY,");
+                }
+            }
+            //查询db2外键信息并生成外键sql
+            if(UUIDUtils.StringToInteger(hiveParameter.getTargetVersion())>=210){
+                method = c.getMethod("getFKColumns",String.class,String.class);
+                wkResult=(Map<String, List<Map<String,String>>>) method.invoke(obj,hiveParameter.getTableName(),hiveParameter.getSchema());
+                if(wkResult.get("datas").size()>0){
+                    wkList=wkResult.get("datas");
+                    for (Map<String,String> map:wkList){
+                        str.append(" CONSTRAINT ");
+                        str.append(map.get("TABLENAME")).append(" foreign key (");
+                        str.append(map.get("FK_COLUMN_NAME")).append(") ").append("references ");
+                        str.append(map.get("reftabname")).append("(").append(map.get("pk_colnames")).append(")");
+                        str.append(" disable novalidate,\r");
+                    }
+                }
+            }
+            //查询db2唯一键信息并生成唯一键sql
+            if(UUIDUtils.StringToInteger(hiveParameter.getTargetVersion())>=300){
+                method = c.getMethod("getUKColumns",String.class,String.class);
+                wkResult=(Map<String, List<Map<String,String>>>) method.invoke(obj,hiveParameter.getTableName(),hiveParameter.getSchema());
+                if(wkResult.get("datas").size()>0){
+                    wkList=wkResult.get("datas");
+                    str.append("CONSTRAINT ").append(wkList.get(0).get("CONSTNAME")).append(" UNIQUE (");
+                    for (Map<String,String> map:wkList){
+                        str.append(map.get("COLUMN_NAME")).append(",");
+                    }
+                    str=str.deleteCharAt(str.length()-1);
+                    str.append(") ");
+                    str.append(" DISABLE NOVALIDATE RELY,");
+                }
+            }
+            //查询db2检查约束信息并生成检查约束sql
+            if(UUIDUtils.StringToInteger(hiveParameter.getTargetVersion())>=300){
+                method = c.getMethod("getCKColumns",String.class,String.class);
+                wkResult=(Map<String, List<Map<String,String>>>) method.invoke(obj,hiveParameter.getTableName(),hiveParameter.getSchema());
+                if(wkResult.get("datas").size()>0){
+                    wkList=wkResult.get("datas");
+                    for (Map<String,String> map:wkList){
+                        str.append("CONSTRAINT ").append(map.get("CONSTNAME")).append(" CHECK (").append(map.get("TEXT")).append("),\r");
+                    }
+                }
+            }
+            str=str.deleteCharAt(str.length()-1);
+            str=str.deleteCharAt(str.length()-1);
+            str.append("\r)").append("\r");
+            if(UUIDUtils.notEmpty(list.get(0).get("TABLE_COMMENT"))){
+                str.append("comment ").append("'").append(list.get(0).get("TABLE_COMMENT")).append("'").append("\r");
+            }
+            //设置分区，临时表不能进行分区
+            if(isPatition){
+                str.append(patition.toString());
+            }
+            //是否排序--默认时间字段 desc
+            if(isSorted){
+                str.append(" SORT BY ").append(sorted.toString()).append("\r");
+            }
+            //设置自定义键值对
+            if(UUIDUtils.notEmpty(hiveParameter.getWithSerdeproperties())){
+                str.append("WITH SERDEPROPERTIES (").append(hiveParameter.getWithSerdeproperties()).append(")\r");
+            }
+            //设置数据分隔符，ROW FORMAT为DELIMITED
+            if("DELIMITED".equals(hiveParameter.getRowformat())){
+                str.append("ROW FORMAT ").append(hiveParameter.getRowformat()).append("\r");
+                if(UUIDUtils.notEmpty(hiveParameter.getFieldTerm())){
+                    str.append("FIELDS TERMINATED BY '").append(hiveParameter.getFieldTerm()).append("'\r");
+                }
+                if(UUIDUtils.notEmpty(hiveParameter.getEscaped())){
+                    str.append("ESCAPED  BY '").append(hiveParameter.getEscaped()).append("'\r");
+                }
+                if(UUIDUtils.notEmpty(hiveParameter.getRowformatLineTerm())){
+                    str.append("lines terminated by '").append(hiveParameter.getRowformatLineTerm()).append("'\r");
+                }
+            }
+            //设置文件格式
+            if(UUIDUtils.notEmpty(hiveParameter.getStoredAs())){
+                str.append("STORED AS ").append(hiveParameter.getStoredAs()).append("\r");
+            }
+            //设置hdfs文件位置
+            if(UUIDUtils.notEmpty(hiveParameter.getLocation())){
+                str.append("LOCATION '").append(hiveParameter.getLocation()).append("'\r");
+            }
+            //设置元数据属性
+            if(UUIDUtils.notEmpty(hiveParameter.getTblProperties())){
+                str.append("TBLPROPERTIES (").append(hiveParameter.getTblProperties()).append(")\r");
+            }
+
             str=str.deleteCharAt(str.length()-1);
             str.append(";\r\r");
             return str.toString();

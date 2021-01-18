@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wugui.datax.admin.mapper.JobFileMapper">
+    <resultMap id="JobFile" type="com.wugui.datax.admin.entity.JobFile">
+        <result column="job_file_id" property="jobFileId"/>
+        <result column="job_file_name" property="jobFileName"/>
+        <result column="job_file_path" property="jobFilePath"/>
+        <result column="project_id" property="projectId"/>
+        <result column="create_id" property="createId"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        t.job_file_id,
+        t.job_file_name,
+        t.job_file_path,
+        t.project_id,
+        t.create_id,
+        t.create_time
+    </sql>
+    <insert id="save" parameterType="com.wugui.datax.admin.entity.JobFile">
+        INSERT INTO job_file (
+        job_file_name,
+        job_file_path,
+        project_id,
+        create_id,
+        create_time
+        ) VALUES (
+        #{jobFileName},
+        #{jobFilePath},
+        #{projectId},
+        #{createId},
+        #{createTime}
+        );
+    </insert>
+
+    <select id="selectByProjectIdAndFileName" parameterType="java.util.Map" resultMap="JobFile">
+        select <include refid="Base_Column_List"/>
+        from job_file as t
+        where t.project_id=#{projectId} and  t.job_file_name=#{jobFileName}
+    </select>
+</mapper>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wugui.datax.admin.mapper.JobInfoFileMapper">
+    <insert id="save" parameterType="com.wugui.datax.admin.entity.JobInfoFile">
+        INSERT INTO job_info_file (
+        job_id,
+        job_file_id
+        ) VALUES (
+        #{jobId},
+        #{jobFileId}
+        );
+    </insert>
+</mapper>

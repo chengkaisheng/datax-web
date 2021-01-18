@@ -93,6 +93,26 @@ public interface JobService {
     ReturnT<Map<String, Object>> chartInfo();
 
     /**
+     * 获取任务成功，失败，正在执行的报表
+     *
+     * @return
+     */
+    ReturnT<Map<String, Object>> getTriggerCountReport();
+
+    /**
+     * 获取任务结果报表
+     *
+     * @return
+     */
+    ReturnT<Map<String, Object>> getTaskResultReport();
+
+    /**
+     * 任务类型分布统计
+     *
+     * @return
+     */
+    ReturnT<Dashboard> getTaskTypeDistribution();
+    /**
      * batch add
      * @param dto
      * @return
@@ -137,6 +157,87 @@ public interface JobService {
     ReturnT<LogResult> loadingVirtualLog(String log, JobLog jobLog);
 
     ReturnT<Dashboard> getRunReport() throws IOException;
+
+    /**
+     * @author: lxq
+     * @description: 获取项目计数报表
+     * @date: 2021/1/12 16:32
+     * @param
+     * @return: com.wugui.datatx.core.biz.model.ReturnT<com.wugui.datax.admin.entity.Dashboard>
+     */
+    ReturnT<Dashboard> getProjectCountReport() throws IOException;
+
+    /**
+     * @author: lxq
+     * @description: 获取项目任务分布图表
+     * @date: 2021/1/12 16:32
+     * @param
+     * @return: com.wugui.datatx.core.biz.model.ReturnT<com.wugui.datax.admin.entity.Dashboard>
+     */
+    ReturnT<Dashboard> getItemTaskDistribution() throws IOException;
+
+    /**
+     * @author: lxq
+     * @description: 项目任务类型分布
+     * @date: 2021/1/12 16:32
+     * @param
+     * @return: com.wugui.datatx.core.biz.model.ReturnT<com.wugui.datax.admin.entity.Dashboard>
+     */
+    ReturnT<Dashboard> getItemTaskTypeDistribution() throws IOException;
+
+    /**
+     * @author: lxq
+     * @description: 项目任务运行状态分布
+     * @date: 2021/1/12 16:32
+     * @param
+     * @return: com.wugui.datatx.core.biz.model.ReturnT<com.wugui.datax.admin.entity.Dashboard>
+     */
+    ReturnT<Dashboard> getItemTaskRunStateDistribution() throws IOException;
+
+    /**
+     * @author: lxq
+     * @description: 获取数据源相关报表
+     * @date: 2021/1/12 16:32
+     * @param
+     * @return: com.wugui.datatx.core.biz.model.ReturnT<com.wugui.datax.admin.entity.Dashboard>
+     */
+    ReturnT<Dashboard> getDataSourceReport() throws IOException;
+
+    /**
+     * @author: lxq
+     * @description: 任务统计分布(按照执行器)
+     * @date: 2021/1/12 16:32
+     * @param
+     * @return: com.wugui.datatx.core.biz.model.ReturnT<com.wugui.datax.admin.entity.Dashboard>
+     */
+    ReturnT<Dashboard> getTaskExecutorDistribution() throws IOException;
+
+    /**
+     * @author: lxq
+     * @description: 规则统计报表
+     * @date: 2021/1/12 16:32
+     * @param
+     * @return: com.wugui.datatx.core.biz.model.ReturnT<com.wugui.datax.admin.entity.Dashboard>
+     */
+    ReturnT<Dashboard> getRuleReport() throws IOException;
+
+    /**
+     * @author: lxq
+     * @description: 规则统计
+     * @date: 2021/1/12 16:32
+     * @param
+     * @return: com.wugui.datatx.core.biz.model.ReturnT<com.wugui.datax.admin.entity.Dashboard>
+     */
+    ReturnT<Dashboard> getUsedRule() throws IOException;
+
+    /**
+     * @author: lxq
+     * @description: 接口统计
+     * @date: 2021/1/12 16:32
+     * @param
+     * @return: com.wugui.datatx.core.biz.model.ReturnT<com.wugui.datax.admin.entity.Dashboard>
+     */
+    ReturnT<Dashboard> getInterface() throws IOException;
 
     /**
      * 查看任务结果

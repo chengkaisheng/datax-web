@@ -67,6 +67,14 @@ public interface DatasourceQueryService {
     Object dbToHive( HiveParameter hiveParameter) throws IOException;
 
     /**
+     * 根据数据源id，表名查询出该表所有字段
+     *
+     * @param hiveParameter
+     * @return
+     */
+    Object dbToImpala( HiveParameter hiveParameter) throws IOException;
+
+    /**
      * 根据 sql 语句获取字段
      *
      * @param datasourceId
