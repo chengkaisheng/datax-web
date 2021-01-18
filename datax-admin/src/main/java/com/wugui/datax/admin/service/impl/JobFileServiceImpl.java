@@ -25,9 +25,7 @@ public class JobFileServiceImpl implements JobFileService {
     private JobFileMapper jobFileMapper;
     @Resource
     private JobProjectMapper jobProjectMapper;
-    @Resource
-    @Value("${jobFilePath.path}")
-    private  String path;
+
 
     @Override
     public ReturnT<String> add(JobFile jobFile) {
