@@ -81,6 +81,8 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         Map<String, Object> maps = new HashMap<>();
         maps.put("data", JwtTokenUtils.TOKEN_PREFIX + token);
         maps.put("roles", role.split(SPLIT_COMMA));
+        maps.put("userId", jwtUser.getId());//2021-1-18添加，登录时返回用户id
+        maps.put("userName",jwtUser.getUsername());
         response.getWriter().write(JSON.toJSONString(new ReturnT<>(maps)));
     }
 

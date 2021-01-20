@@ -201,7 +201,7 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
         if (ObjectUtil.isNull(datasource)) {
             return Lists.newArrayList();
         }
-        List<String> hiveSql=new ArrayList<>();
+        List<String> impalaSql=new ArrayList<>();
         try {
             List<TableInfo> tableInfos =  getTableInfos(hiveParameter.getDatasourceId(), hiveParameter.getSchema());
             if(tableInfos.size()>0){
@@ -215,14 +215,22 @@ public class DatasourceQueryServiceImpl implements DatasourceQueryService {
                 for (TableInfo tableInfo:tableInfos){
                     hiveParameter.setTableName(tableInfo.getName());
                     String sql=this.getImpalaSql(db2QueryTool,datasource,"db2",hiveParameter).toString();
-                    hiveSql.add(sql);
+                    impalaSql.add(sql);
+                }
+            }
+            if(JdbcConstants.MYSQL.equals(datasource.getDatasource())){
+                MySQLQueryTool mySQLQueryTool=new MySQLQueryTool(datasource);
+                for (TableInfo tableInfo:tableInfos){
+                    hiveParameter.setTableName(tableInfo.getName());
+                    String sql=this.getImpalaSql(mySQLQueryTool,datasource,"mysql",hiveParameter).toString();
+                    impalaSql.add(sql);
                 }
             }
         }catch (Exception e){
             e.printStackTrace();
         }
 
-        return hiveSql;
+        return impalaSql;
     }
 
     public Object getHiveSql(Object o,JobDatasource datasource,String source,HiveParameter hiveParameter){
