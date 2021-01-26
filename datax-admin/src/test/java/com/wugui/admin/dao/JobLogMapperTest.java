@@ -20,8 +20,8 @@ public class JobLogMapperTest {
 
     @Test
     public void test(){
-        List<JobLog> list = jobLogMapper.pageList(0, 10, 1, 1, null, null, 1);
-        int list_count = jobLogMapper.pageListCount(0, 10, 1, 1, null, null, 1);
+        List<JobLog> list = jobLogMapper.pageList(0, 10, 1, 1, null, null, 1,null,0);
+        int list_count = jobLogMapper.pageListCount(0, 10, 1, 1, null, null, 1,null,0);
 
         JobLog log = new JobLog();
         log.setJobGroup(1);

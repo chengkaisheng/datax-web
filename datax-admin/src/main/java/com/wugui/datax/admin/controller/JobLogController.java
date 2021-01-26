@@ -45,7 +45,7 @@ public class JobLogController {
     public ReturnT<Map<String, Object>> pageList(
             @RequestParam(required = false, defaultValue = "0") int current,
             @RequestParam(required = false, defaultValue = "10") int size,
-            int jobGroup, int jobId, int logStatus, String filterTime) {
+            int jobGroup, int jobId, int logStatus, String filterTime,@RequestParam("jobName") String jobName,int userId) {
 
         // valid permission
         //JobInfoController.validPermission(request, jobGroup);	// 仅管理员支持查询全部；普通用户仅支持查询有权限的 jobGroup
@@ -62,8 +62,8 @@ public class JobLogController {
         }
 
         // page query
-        List<JobLog> data = jobLogMapper.pageList((current - 1) * size, size, jobGroup, jobId, triggerTimeStart, triggerTimeEnd, logStatus);
-        int cnt = jobLogMapper.pageListCount((current - 1) * size, size, jobGroup, jobId, triggerTimeStart, triggerTimeEnd, logStatus);
+        List<JobLog> data = jobLogMapper.pageList((current - 1) * size, size, jobGroup, jobId, triggerTimeStart, triggerTimeEnd, logStatus,jobName,userId);
+        int cnt = jobLogMapper.pageListCount((current - 1) * size, size, jobGroup, jobId, triggerTimeStart, triggerTimeEnd, logStatus,jobName,userId);
 
         // package result
         Map<String, Object> maps = new HashMap<>();

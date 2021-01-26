@@ -57,6 +57,7 @@
 	<select id="pageList" resultMap="JobLog">
 		SELECT <include refid="Base_Column_List" />
 		FROM job_log AS t
+		LEFT JOIN job_info b on t.job_id=b.id
 		<trim prefix="WHERE" prefixOverrides="AND | OR" >
 			<if test="jobId==0 and jobGroup gt 0">
 				AND t.job_group = #{jobGroup}
@@ -82,6 +83,12 @@
 			<if test="logStatus == 3" >
 				AND t.trigger_code = 200
 				AND t.handle_code = 0
+			</if>
+			<if test="jobName !=null and jobName!=''" >
+				AND t.job_desc like concat('%',#{jobName},'%')
+			</if>
+			<if test="userId gt 0">
+				AND b.user_id = #{userId}
 			</if>
 		</trim>
 		ORDER BY t.trigger_time DESC
@@ -91,6 +98,7 @@
 	<select id="pageListCount" resultType="int">
 		SELECT count(1)
 		FROM job_log AS t
+		LEFT JOIN job_info b on t.job_id=b.id
 		<trim prefix="WHERE" prefixOverrides="AND | OR" >
 			<if test="jobId==0 and jobGroup gt 0">
 				AND t.job_group = #{jobGroup}
@@ -116,6 +124,12 @@
 			<if test="logStatus == 3" >
 				AND t.trigger_code = 200
 				AND t.handle_code = 0
+			</if>
+			<if test="jobName !=null and jobName!=''" >
+				AND t.job_desc like concat('%',#{jobName},'%')
+			</if>
+			<if test="userId gt 0">
+				AND b.user_id = #{userId}
 			</if>
 		</trim>
 	</select>
