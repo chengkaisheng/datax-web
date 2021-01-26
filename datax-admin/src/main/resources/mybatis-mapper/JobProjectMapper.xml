@@ -36,7 +36,7 @@
 	    LEFT JOIN job_project p ON p.id = pu.project_id
 	    LEFT JOIN job_user u ON u.id = pu.user_id
         WHERE
-	        pu.user_id = #{userId}) as a
+	        u.id = #{userId}) as a
 	        <where>
                 <if test="searchName!=null and searchName != ''">
                     a.name like concat('%', #{searchName}, '%')
@@ -45,32 +45,234 @@
         GROUP BY a.id
         order by a.create_time desc
     </select>
-    
+
     <select id="queryDataSourceCountByProject" resultType="int">
-        select count(1) from job_jdbc_datasource where project_id in (select id from job_project)
+        select count(1) from job_jdbc_datasource where project_id in ( SELECT
+	        p.id
+        FROM
+	        job_project p
+	    JOIN job_user u ON p.user_id = u.id
+        WHERE
+	        p.flag = 1
+	        AND p.user_id = #{userId} UNION ALL
+        SELECT
+	       p.id
+        FROM
+	        job_project_user pu
+	    LEFT JOIN job_project p ON p.id = pu.project_id
+	    LEFT JOIN job_user u ON u.id = pu.user_id
+        WHERE
+	        u.id =#{userId})
     </select>
 
     <select id="queryUserCountByProject" resultType="int">
-        select count(1) from (select DISTINCT user_id from job_project LEFT JOIN job_user on user_id=job_user.id) a
+        SELECT COUNT(DISTINCT d.id)
+FROM
+	(
+	SELECT
+		p.id
+	FROM
+		job_project p
+		JOIN job_user u ON p.user_id = u.id
+	WHERE
+		p.flag = 1
+		AND p.user_id=#{userId}
+		 UNION ALL
+	SELECT
+		p.id
+	FROM
+		job_project_user pu
+		LEFT JOIN job_project p ON p.id = pu.project_id
+		LEFT JOIN job_user u ON u.id = pu.user_id
+		WHERE u.id=#{userId}
+	) as a
+	LEFT JOIN job_project_user as b ON a.id=b.project_id
+	LEFT JOIN job_user as d ON b.user_id = d.id
     </select>
 
     <select id="queryTaskCountByProject" resultType="int">
-        select count(1) from job_info where project_id in (select id from job_project)
+        SELECT
+	count( 1 )
+FROM
+	job_info
+WHERE
+	project_id IN (
+	SELECT
+	       p.id
+        FROM
+	        job_project p
+	    JOIN job_user u ON p.user_id = u.id
+        WHERE
+	        p.flag = 1
+	        AND p.user_id = #{userId} UNION ALL
+        SELECT
+	        p.id
+        FROM
+	        job_project_user pu
+	    LEFT JOIN job_project p ON p.id = pu.project_id
+	    LEFT JOIN job_user u ON u.id = pu.user_id
+        WHERE
+	        u.id = #{userId})
     </select>
 
     <select id="getItemTaskDistribution" resultType="map">
-        select p.name name,COUNT(1) num from job_project p LEFT JOIN job_info i on p.id=i.project_id GROUP BY p.id
+        SELECT
+	p.name,
+	COUNT( 1 ) num
+FROM
+	(
+	SELECT
+		p.*
+	FROM
+		job_project p
+		JOIN job_user u ON p.user_id = u.id
+	WHERE
+		p.flag = 1
+		AND p.user_id = #{userId} UNION ALL
+	SELECT
+		p.*
+	FROM
+		job_project_user pu
+		LEFT JOIN job_project p ON p.id = pu.project_id
+		LEFT JOIN job_user u ON u.id = pu.user_id
+	WHERE
+		u.id = #{userId}
+	)as p
+	LEFT JOIN job_info i ON p.id = i.project_id
+	WHERE `name` is not NULL
+ GROUP BY p.id
     </select>
 
     <select id="getItemTaskRunStateDistribution" resultType="map">
-        select p.name name,i.trigger_status status,DATE_FORMAT(add_time,'%Y-%m-%d') date,COUNT(1) num from job_project p LEFT JOIN job_info i on p.id=i.project_id GROUP BY p.name,i.trigger_status,date
+        SELECT
+	p.NAME name,
+	i.trigger_status STATUS,
+	DATE_FORMAT( add_time, '%Y-%m-%d' ) date,
+	COUNT( 1 ) num
+FROM
+	(
+	SELECT
+		p.*
+	FROM
+		job_project p
+		JOIN job_user u ON p.user_id = u.id
+	WHERE
+		p.flag = 1
+		AND p.user_id = #{userId} UNION ALL
+	SELECT
+		p.*
+	FROM
+		job_project_user pu
+		LEFT JOIN job_project p ON p.id = pu.project_id
+		LEFT JOIN job_user u ON u.id = pu.user_id
+	WHERE
+		u.id = #{userId}
+	)as p
+	LEFT JOIN job_info i ON p.id = i.project_id
+WHERE
+`name` IS NOT NULL
+	 GROUP BY p.name,i.trigger_status,date
     </select>
 
     <select id="getItemTaskTypeDistribution" resultType="map">
-        select p.name name,i.job_type type,COUNT(1) num from job_project p LEFT JOIN job_info i on p.id=i.project_id GROUP BY p.name,i.job_type
+        SELECT
+	p.NAME name,
+	i.job_type type,
+	COUNT( 1 ) num
+FROM
+	(
+	SELECT
+		p.*
+	FROM
+		job_project p
+		JOIN job_user u ON p.user_id = u.id
+	WHERE
+		p.flag = 1
+		AND p.user_id = #{userId} UNION ALL
+	SELECT
+		p.*
+	FROM
+		job_project_user pu
+		LEFT JOIN job_project p ON p.id = pu.project_id
+		LEFT JOIN job_user u ON u.id = pu.user_id
+	WHERE
+		u.id = #{userId}
+	)as p
+	LEFT JOIN job_info i ON p.id = i.project_id
+WHERE `name` is not NULL
+GROUP BY p.name,i.job_type
     </select>
 
     <select id="getTaskExecutorDistribution" resultType="map">
-        select i.executor_handler name,COUNT(1) num from job_project p LEFT JOIN job_info i on p.id=i.project_id GROUP BY i.executor_handler
+        SELECT
+	i.executor_handler name,
+	COUNT( 1 ) num
+FROM
+	(
+	SELECT
+		p.*
+	FROM
+		job_project p
+		JOIN job_user u ON p.user_id = u.id
+	WHERE
+		p.flag = 1
+		AND p.user_id = #{userId} UNION ALL
+	SELECT
+		p.*
+	FROM
+		job_project_user pu
+		LEFT JOIN job_project p ON p.id = pu.project_id
+		LEFT JOIN job_user u ON u.id = pu.user_id
+	WHERE
+		u.id = #{userId}
+	)as p
+	LEFT JOIN job_info i ON p.id = i.project_id
+GROUP BY
+	i.executor_handler
+    </select>
+
+    <select id="count" resultType="java.lang.Integer">
+          SELECT count(DISTINCT id) FROM
+    (
+        SELECT
+	        p.*
+        FROM
+	        job_project p
+	    JOIN job_user u ON p.user_id = u.id
+        WHERE
+	        p.flag = 1
+	        AND p.user_id = #{userId} UNION ALL
+        SELECT
+	        p.*
+        FROM
+	        job_project_user pu
+	    LEFT JOIN job_project p ON p.id = pu.project_id
+	    LEFT JOIN job_user u ON u.id = pu.user_id
+        WHERE
+	        u.id =#{userId}) as a
+					WHERE a.id is NOT NULL
+    </select>
+
+    <select id="projectIds" resultType="java.lang.Integer">
+		SELECT a.id FROM
+		(
+		SELECT
+		p.id
+		FROM
+		job_project p
+		JOIN job_user u ON p.user_id = u.id
+		WHERE
+		p.flag = 1
+		AND p.user_id = #{userId} UNION ALL
+		SELECT
+		p.id
+		FROM
+		job_project_user pu
+		LEFT JOIN job_project p ON p.id = pu.project_id
+		LEFT JOIN job_user u ON u.id = pu.user_id
+		WHERE
+		u.id = #{userId}) as a
+		WHERE a.id is NOT NULL
+		GROUP BY a.id
     </select>
 </mapper>

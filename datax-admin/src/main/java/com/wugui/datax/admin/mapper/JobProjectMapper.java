@@ -31,19 +31,21 @@ public interface JobProjectMapper extends BaseMapper<JobProject> {
     IPage<JobProjectVo> getProjectListPagingByUserId(IPage<JobProjectVo> page,
                                            @Param("searchName") String searchName,@Param("userId") int id);
 
-    Integer queryDataSourceCountByProject();
+    Integer queryDataSourceCountByProject(@Param("userId") Integer userId);
 
-    Integer queryUserCountByProject();
+    Integer queryUserCountByProject(@Param("userId") Integer userId);
 
-    Integer queryTaskCountByProject();
+    Integer queryTaskCountByProject(@Param("userId") Integer userId);
 
-    List<Map<String,Object>> getItemTaskDistribution();
+    List<Map<String,Object>> getItemTaskDistribution(@Param("userId") Integer userId);
 
-    List<Map<String,Object>> getItemTaskRunStateDistribution();
+    List<Map<String,Object>> getItemTaskRunStateDistribution(@Param("userId") Integer userId);
 
-    List<Map<String,Object>> getItemTaskTypeDistribution();
+    List<Map<String,Object>> getItemTaskTypeDistribution(@Param("userId") Integer userId);
 
-    List<Map<String,Object>> getTaskExecutorDistribution();
+    List<Map<String,Object>> getTaskExecutorDistribution(@Param("userId") Integer userId);
 
+    Integer count(@Param("userId") Integer userId);
 
+    List<Integer> projectIds(@Param("userId") Integer userId);
 }

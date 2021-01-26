@@ -29,6 +29,8 @@ public interface JobUserMapper extends BaseMapper<JobUser> {
 
     JobUser getUserById(@Param("id") int id);
 
+    JobUser getJobUserById(@Param("id") Integer id);
+
     List<JobUser> getUsersByIds(@Param("ids") String[] ids);
 
     /*int save(JobUser jobUser);

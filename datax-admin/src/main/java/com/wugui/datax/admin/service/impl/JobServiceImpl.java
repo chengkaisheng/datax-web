@@ -602,9 +602,9 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public ReturnT<Dashboard> getTaskTypeDistribution() {
+    public ReturnT<Dashboard> getTaskTypeDistribution(Integer userId) {
         Dashboard dashboard=new Dashboard();
-        dashboard.setTaskTypeDistribution(jobInfoMapper.getTaskTypeDistribution());
+        dashboard.setTaskTypeDistribution(jobInfoMapper.getTaskTypeDistribution(userId));
         return new ReturnT<>(dashboard);
     }
 
@@ -809,7 +809,7 @@ public class JobServiceImpl implements JobService {
     @Override
     public ReturnT<Dashboard> getRunReport() {
         Dashboard dashboard=new Dashboard();
-        dashboard.setItem(jobProjectService.count());
+        /*dashboard.setItem(jobProjectService.count());
         dashboard.setItemDataSource(jobProjectMapper.queryDataSourceCountByProject());
         dashboard.setItemUser(jobProjectMapper.queryUserCountByProject());
         dashboard.setItemTask(jobProjectMapper.queryTaskCountByProject());
@@ -844,7 +844,7 @@ public class JobServiceImpl implements JobService {
         dashboard.setInterfaceNum(interfaceMapper.countByExample(example));
         dashboard.setApprovingInterface(interfaceMapper.getApprovingInterfaceCount());
         dashboard.setPassInterface(interfaceMapper.getPassInterfaceCount());
-        dashboard.setRejectInterface(interfaceMapper.getRejectInterfaceCount());
+        dashboard.setRejectInterface(interfaceMapper.getRejectInterfaceCount());*/
         return new ReturnT<>(dashboard);
     }
 
@@ -857,12 +857,12 @@ public class JobServiceImpl implements JobService {
      * @return: com.wugui.datatx.core.biz.model.ReturnT<com.wugui.datax.admin.entity.Dashboard>
      */
     @Override
-    public ReturnT<Dashboard> getProjectCountReport() throws IOException {
+    public ReturnT<Dashboard> getProjectCountReport(Integer userId) throws IOException {
         Dashboard dashboard=new Dashboard();
-        dashboard.setItem(jobProjectService.count());
-        dashboard.setItemDataSource(jobProjectMapper.queryDataSourceCountByProject());
-        dashboard.setItemUser(jobProjectMapper.queryUserCountByProject());
-        dashboard.setItemTask(jobProjectMapper.queryTaskCountByProject());
+        dashboard.setItem(jobProjectMapper.count(userId));
+        dashboard.setItemDataSource(jobProjectMapper.queryDataSourceCountByProject(userId));
+        dashboard.setItemUser(jobProjectMapper.queryUserCountByProject(userId));
+        dashboard.setItemTask(jobProjectMapper.queryTaskCountByProject(userId));
         return new  ReturnT<>(dashboard);
     }
 
@@ -875,9 +875,9 @@ public class JobServiceImpl implements JobService {
      * @return: com.wugui.datatx.core.biz.model.ReturnT<com.wugui.datax.admin.entity.Dashboard>
      */
     @Override
-    public ReturnT<Dashboard> getItemTaskDistribution() throws IOException {
+    public ReturnT<Dashboard> getItemTaskDistribution(Integer userId) throws IOException {
         Dashboard dashboard=new Dashboard();
-        List<Map<String,Object>> distributions=jobProjectMapper.getItemTaskDistribution();
+        List<Map<String,Object>> distributions=jobProjectMapper.getItemTaskDistribution(userId);
         dashboard.setItemTaskDistribution(distributions);
         return new  ReturnT<>(dashboard);
     }
@@ -891,9 +891,9 @@ public class JobServiceImpl implements JobService {
      * @return: com.wugui.datatx.core.biz.model.ReturnT<com.wugui.datax.admin.entity.Dashboard>
      */
     @Override
-    public ReturnT<Dashboard> getItemTaskTypeDistribution() throws IOException {
+    public ReturnT<Dashboard> getItemTaskTypeDistribution(Integer userId) throws IOException {
         Dashboard dashboard=new Dashboard();
-        dashboard.setItemTaskTypeDistribution(jobProjectMapper.getItemTaskTypeDistribution());
+        dashboard.setItemTaskTypeDistribution(jobProjectMapper.getItemTaskTypeDistribution(userId));
         return new  ReturnT<>(dashboard);
     }
 
@@ -906,9 +906,9 @@ public class JobServiceImpl implements JobService {
      * @return: com.wugui.datatx.core.biz.model.ReturnT<com.wugui.datax.admin.entity.Dashboard>
      */
     @Override
-    public ReturnT<Dashboard> getItemTaskRunStateDistribution() throws IOException {
+    public ReturnT<Dashboard> getItemTaskRunStateDistribution(Integer userId) throws IOException {
         Dashboard dashboard=new Dashboard();
-        dashboard.setItemTaskRunStateDistribution(jobProjectMapper.getItemTaskRunStateDistribution());
+        dashboard.setItemTaskRunStateDistribution(jobProjectMapper.getItemTaskRunStateDistribution(userId));
         return new  ReturnT<>(dashboard);
     }
 
@@ -921,10 +921,13 @@ public class JobServiceImpl implements JobService {
      * @return: com.wugui.datatx.core.biz.model.ReturnT<com.wugui.datax.admin.entity.Dashboard>
      */
     @Override
-    public ReturnT<Dashboard> getDataSourceReport() throws IOException {
+    public ReturnT<Dashboard> getDataSourceReport(Integer userId) throws IOException {
         Dashboard dashboard=new Dashboard();
-        dashboard.setConnectDataSource(jobDatasourceMapper.selectCount(new QueryWrapper<>()));
-        List<JobDatasource> datasources=jobDatasourceMapper.selectList(new QueryWrapper<>());
+        List<Integer> ids=jobProjectMapper.projectIds(userId);
+        QueryWrapper queryWrapper=new QueryWrapper();
+        queryWrapper.in("project_id",ids);
+        dashboard.setConnectDataSource(jobDatasourceMapper.selectCount(queryWrapper));
+        List<JobDatasource> datasources=jobDatasourceMapper.selectList(queryWrapper);
         Integer dbCount=0;
         Integer tableCount=0;
         for(JobDatasource jobDatasource:datasources){
@@ -944,25 +947,25 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public ReturnT<Dashboard> getTaskExecutorDistribution() throws IOException {
+    public ReturnT<Dashboard> getTaskExecutorDistribution(Integer userId) throws IOException {
         Dashboard dashboard=new Dashboard();
-        dashboard.setTaskExecutorDistribution(jobProjectMapper.getTaskExecutorDistribution());
+        dashboard.setTaskExecutorDistribution(jobProjectMapper.getTaskExecutorDistribution(userId));
         return new  ReturnT<>(dashboard);
     }
 
     @Override
-    public ReturnT<Dashboard> getRuleReport() throws IOException {
+    public ReturnT<Dashboard> getRuleReport(Integer userId) throws IOException {
         Dashboard dashboard=new Dashboard();
-        dashboard.setGeneralRule(universalRuleMapper.pageListCount(""));
-        dashboard.setConfigedRule(jobInfoMapper.getConfigedRuleCount());
-        dashboard.setPersonalRule(personaliseRuleMapper.pageListCount(null,null,null));
+        dashboard.setGeneralRule(universalRuleMapper.getGeneralRule(userId));
+        dashboard.setConfigedRule(jobInfoMapper.getConfigedRuleCount(userId));
+        dashboard.setPersonalRule(personaliseRuleMapper.getPersonalRule(userId));
         return new  ReturnT<>(dashboard);
     }
 
     @Override
-    public ReturnT<Dashboard> getUsedRule() throws IOException {
+    public ReturnT<Dashboard> getUsedRule(Integer userId) throws IOException {
         Dashboard dashboard=new Dashboard();
-        dashboard.setUsedRule(universalRuleMapper.getUsedRuleDistribution());
+        dashboard.setUsedRule(universalRuleMapper.getUsedRuleDistribution(userId));
         return new  ReturnT<>(dashboard);
     }
 

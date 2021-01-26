@@ -55,32 +55,32 @@ public class IndexController {
 
     @RequestMapping("/getProjectCountReport")
     @ApiOperation("获取项目数量相关报表")
-    public ReturnT<Dashboard> getProjectCountReport() throws IOException {
-        return jobService.getProjectCountReport();
+    public ReturnT<Dashboard> getProjectCountReport(@RequestParam("userId") Integer userId) throws IOException {
+        return jobService.getProjectCountReport(userId);
     }
 
     @RequestMapping("/getItemTaskDistribution")
     @ApiOperation(" 项目任务数量分布")
-    public ReturnT<Dashboard> getItemTaskDistribution() throws IOException {
-        return jobService.getItemTaskDistribution();
+    public ReturnT<Dashboard> getItemTaskDistribution(@RequestParam("userId") Integer userId) throws IOException {
+        return jobService.getItemTaskDistribution(userId);
     }
 
     @RequestMapping("/getItemTaskTypeDistribution")
     @ApiOperation("项目任务类型分布")
-    public ReturnT<Dashboard> getItemTaskTypeDistribution() throws IOException {
-        return jobService.getItemTaskTypeDistribution();
+    public ReturnT<Dashboard> getItemTaskTypeDistribution(@RequestParam("userId") Integer userId) throws IOException {
+        return jobService.getItemTaskTypeDistribution(userId);
     }
 
     @RequestMapping("/getItemTaskRunStateDistribution")
     @ApiOperation("项目任务运行状态分布")
-    public ReturnT<Dashboard> getItemTaskRunStateDistribution() throws IOException {
-        return jobService.getItemTaskRunStateDistribution();
+    public ReturnT<Dashboard> getItemTaskRunStateDistribution(@RequestParam("userId") Integer userId) throws IOException {
+        return jobService.getItemTaskRunStateDistribution(userId);
     }
 
     @RequestMapping("/getDataSourceReport")
     @ApiOperation("获取数据源相关报表")
-    public ReturnT<Dashboard> getDataSourceReport() throws IOException {
-        return jobService.getDataSourceReport();
+    public ReturnT<Dashboard> getDataSourceReport(@RequestParam("userId") Integer userId) throws IOException {
+        return jobService.getDataSourceReport(userId);
     }
 
     @PostMapping("/getTriggerCountReport")
@@ -96,26 +96,26 @@ public class IndexController {
     }
     @PostMapping("/getTaskTypeDistribution")
     @ApiOperation("任务类型分布统计")
-    public ReturnT<Dashboard> getTaskTypeDistribution() {
-        return jobService.getTaskTypeDistribution();
+    public ReturnT<Dashboard> getTaskTypeDistribution(@RequestParam("userId") Integer userId) {
+        return jobService.getTaskTypeDistribution(userId);
     }
 
     @PostMapping("/getTaskExecutorDistribution")
     @ApiOperation(" 任务统计分布(按照执行器)")
-    public ReturnT<Dashboard> getTaskExecutorDistribution() throws IOException {
-        return jobService.getTaskExecutorDistribution();
+    public ReturnT<Dashboard> getTaskExecutorDistribution(@RequestParam("userId") Integer userId) throws IOException {
+        return jobService.getTaskExecutorDistribution(userId);
     }
 
     @RequestMapping("/getRuleReport")
     @ApiOperation("获取规则报表")
-    public ReturnT<Dashboard> getRuleReport() throws IOException {
-        return jobService.getRuleReport();
+    public ReturnT<Dashboard> getRuleReport(@RequestParam("userId") Integer userId) throws IOException {
+        return jobService.getRuleReport(userId);
     }
 
     @RequestMapping("/getUsedRule")
     @ApiOperation("规则统计")
-    public ReturnT<Dashboard> getUsedRule() throws IOException {
-        return jobService.getUsedRule();
+    public ReturnT<Dashboard> getUsedRule(@RequestParam("userId") Integer userId) throws IOException {
+        return jobService.getUsedRule(userId);
     }
 
     @RequestMapping("/getInterface")

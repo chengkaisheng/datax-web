@@ -111,7 +111,7 @@ public interface JobService {
      *
      * @return
      */
-    ReturnT<Dashboard> getTaskTypeDistribution();
+    ReturnT<Dashboard> getTaskTypeDistribution(Integer userId);
     /**
      * batch add
      * @param dto
@@ -165,7 +165,7 @@ public interface JobService {
      * @param
      * @return: com.wugui.datatx.core.biz.model.ReturnT<com.wugui.datax.admin.entity.Dashboard>
      */
-    ReturnT<Dashboard> getProjectCountReport() throws IOException;
+    ReturnT<Dashboard> getProjectCountReport(Integer userId) throws IOException;
 
     /**
      * @author: lxq
@@ -174,7 +174,7 @@ public interface JobService {
      * @param
      * @return: com.wugui.datatx.core.biz.model.ReturnT<com.wugui.datax.admin.entity.Dashboard>
      */
-    ReturnT<Dashboard> getItemTaskDistribution() throws IOException;
+    ReturnT<Dashboard> getItemTaskDistribution(Integer userId) throws IOException;
 
     /**
      * @author: lxq
@@ -183,7 +183,7 @@ public interface JobService {
      * @param
      * @return: com.wugui.datatx.core.biz.model.ReturnT<com.wugui.datax.admin.entity.Dashboard>
      */
-    ReturnT<Dashboard> getItemTaskTypeDistribution() throws IOException;
+    ReturnT<Dashboard> getItemTaskTypeDistribution(Integer userId) throws IOException;
 
     /**
      * @author: lxq
@@ -192,7 +192,7 @@ public interface JobService {
      * @param
      * @return: com.wugui.datatx.core.biz.model.ReturnT<com.wugui.datax.admin.entity.Dashboard>
      */
-    ReturnT<Dashboard> getItemTaskRunStateDistribution() throws IOException;
+    ReturnT<Dashboard> getItemTaskRunStateDistribution(Integer userId) throws IOException;
 
     /**
      * @author: lxq
@@ -201,7 +201,7 @@ public interface JobService {
      * @param
      * @return: com.wugui.datatx.core.biz.model.ReturnT<com.wugui.datax.admin.entity.Dashboard>
      */
-    ReturnT<Dashboard> getDataSourceReport() throws IOException;
+    ReturnT<Dashboard> getDataSourceReport(Integer userId) throws IOException;
 
     /**
      * @author: lxq
@@ -210,7 +210,7 @@ public interface JobService {
      * @param
      * @return: com.wugui.datatx.core.biz.model.ReturnT<com.wugui.datax.admin.entity.Dashboard>
      */
-    ReturnT<Dashboard> getTaskExecutorDistribution() throws IOException;
+    ReturnT<Dashboard> getTaskExecutorDistribution(Integer userId) throws IOException;
 
     /**
      * @author: lxq
@@ -219,7 +219,7 @@ public interface JobService {
      * @param
      * @return: com.wugui.datatx.core.biz.model.ReturnT<com.wugui.datax.admin.entity.Dashboard>
      */
-    ReturnT<Dashboard> getRuleReport() throws IOException;
+    ReturnT<Dashboard> getRuleReport(Integer userId) throws IOException;
 
     /**
      * @author: lxq
@@ -228,7 +228,7 @@ public interface JobService {
      * @param
      * @return: com.wugui.datatx.core.biz.model.ReturnT<com.wugui.datax.admin.entity.Dashboard>
      */
-    ReturnT<Dashboard> getUsedRule() throws IOException;
+    ReturnT<Dashboard> getUsedRule(Integer userId) throws IOException;
 
     /**
      * @author: lxq

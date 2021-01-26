@@ -203,4 +203,12 @@ public class UserController extends BaseController{
                                  Integer projectId){
         return R.ok(jobUserService. userListByProjectId(current, size,username, projectId));
     }
+
+    @PostMapping("/updatePassWorld")
+    @ApiOperation("修改密码")
+    public R updatePassWorld(@RequestParam("userId") Integer userId,
+                                                              @RequestParam(value = "passWorld", required = false) String pwd,
+                                                              @RequestParam(value = "newPassWorld", required = false) String newPassWorld) {
+        return  R.ok(jobUserService. updatePassword(userId, pwd,newPassWorld));
+    }
 }

@@ -32,7 +32,7 @@ public interface JobUserService extends IService<JobUser> {
 	 * @param userId  用户ID
 	 */
 	List<String> queryAllPerms(Long userId);
-	
+
 	/**
 	 * 查询用户的所有菜单ID
 	 */
@@ -47,12 +47,12 @@ public interface JobUserService extends IService<JobUser> {
 	 * 保存用户
 	 */
 	void saveUser(JobUser user);
-	
+
 	/**
 	 * 修改用户
 	 */
 	void update(JobUser user);
-	
+
 	/**
 	 * 删除用户
 	 */
@@ -64,7 +64,7 @@ public interface JobUserService extends IService<JobUser> {
 	 * @param password     原密码
 	 * @param newPassword  新密码
 	 */
-	boolean updatePassword(Long userId, String password, String newPassword);
+	Map updatePassword(Integer userId, String password, String newPassword);
 
 	IPage<JobUser>  userListByProjectId(Long current, Long size, String username, Integer projectId);
 

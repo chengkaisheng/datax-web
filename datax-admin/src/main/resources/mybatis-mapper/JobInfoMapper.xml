@@ -394,9 +394,45 @@
 
 
 	<select id="getConfigedRuleCount" resultType="int">
-		select count(1) from job_info where job_type='DQCJOB'
+		select count(1) from job_info where job_type='DQCJOB' and  project_id in(
+			SELECT
+		p.id
+	FROM
+		job_project p
+		JOIN job_user u ON p.user_id = u.id
+	WHERE
+		p.flag = 1
+		AND p.user_id = #{userId} UNION ALL
+	SELECT
+		p.id
+	FROM
+		job_project_user pu
+		LEFT JOIN job_project p ON p.id = pu.project_id
+		LEFT JOIN job_user u ON u.id = pu.user_id
+	WHERE
+		u.id = #{userId}
+		)
 	</select>
 	<select id="getTaskTypeDistribution" resultType="map">
-		select glue_type type,count(1) num from job_info group by glue_type;
+		select glue_type type,count(1) num from  job_info WHERE project_id IN(
+
+	SELECT
+		p.id
+	FROM
+		job_project p
+		JOIN job_user u ON p.user_id = u.id
+	WHERE
+		p.flag = 1
+		AND p.user_id = #{userId} UNION ALL
+	SELECT
+		p.id
+	FROM
+		job_project_user pu
+		LEFT JOIN job_project p ON p.id = pu.project_id
+		LEFT JOIN job_user u ON u.id = pu.user_id
+	WHERE
+		u.id = #{userId}
+
+) group by glue_type;
 	</select>
 </mapper>

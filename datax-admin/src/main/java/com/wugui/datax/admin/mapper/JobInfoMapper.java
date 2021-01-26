@@ -66,7 +66,7 @@ public interface JobInfoMapper {
 
     int selectConfCount(@Param("offset") int offset, @Param("pagesize") int pagesize, @Param("name") String name, @Param("jobType") String jobType);
 
-    Integer getConfigedRuleCount();
+    Integer getConfigedRuleCount(@Param("userId") Integer userId);
 
-    List<Map<String,Object>> getTaskTypeDistribution();
+    List<Map<String,Object>> getTaskTypeDistribution(@Param("userId") Integer userId);
 }

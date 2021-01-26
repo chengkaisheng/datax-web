@@ -80,6 +80,12 @@
         FROM job_user AS t
         WHERE t.id = #{id}
     </select>
+
+    <select id="getJobUserById" parameterType="java.util.HashMap" resultMap="JobUser">
+        SELECT <include refid="Base_Column_List" />
+        FROM job_user AS t
+        WHERE t.id = #{id}
+    </select>
     <select id="queryAllMenuId" resultType="java.lang.Long">
         select distinct srm.menu_id from job_user_role sur
         left join job_role_menu srm on sur.role_id = srm.role_id

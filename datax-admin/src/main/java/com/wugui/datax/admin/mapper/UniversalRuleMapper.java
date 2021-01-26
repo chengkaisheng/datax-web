@@ -10,7 +10,7 @@ import java.util.Map;
 
 /**
  * 通用规则表
- * 
+ *
  * @author chenshun
  * @email sunlightcs@gmail.com
  * @date 2020-09-11 14:30:02
@@ -22,6 +22,8 @@ public interface UniversalRuleMapper extends BaseMapper<UniversalRule> {
 
     int pageListCount(@Param("name") String name);
 
+    int getGeneralRule(@Param("userId") Integer userId);
+
     void updateIsDelete(@Param("id") Integer id);
 
     List<UniversalRule> selectUniversalNameByType(@Param("type")Integer type);
@@ -32,5 +34,5 @@ public interface UniversalRuleMapper extends BaseMapper<UniversalRule> {
 
     UniversalRule selectByCode(@Param("code")String code);
 
-    List<Map<String,Object>> getUsedRuleDistribution();
+    List<Map<String,Object>> getUsedRuleDistribution(@Param("userId") Integer userId);
 }

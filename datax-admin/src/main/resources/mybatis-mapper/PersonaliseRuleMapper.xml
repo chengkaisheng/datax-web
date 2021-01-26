@@ -47,6 +47,11 @@
             and name like CONCAT(CONCAT('%', #{name}), '%') or code like CONCAT(CONCAT('%', #{name}), '%')
         </if>
     </select>
+    <select id="getPersonalRule" resultType="java.lang.Integer">
+        select count(1) from personalise_rule
+        where is_delete=0
+        and create_user_id=#{userId}
+    </select>
     <select id="selectCountByCode" resultType="java.lang.Integer">
         select count(1) from personalise_rule
         where is_delete=0 and code = #{code}

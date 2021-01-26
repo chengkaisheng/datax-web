@@ -37,6 +37,11 @@
             and a.name like CONCAT(CONCAT('%', #{name}), '%')
         </if>
     </select>
+    <select id="getGeneralRule" resultType="java.lang.Integer">
+        select count(1) from universal_rule as a
+        where a.is_delete = 0
+         and create_user_id=#{userId}
+    </select>
     <select id="selectUniversalNameByType" resultType="com.wugui.datax.admin.entity.UniversalRule">
         select id,name from universal_rule
         where is_delete = 0
@@ -83,6 +88,6 @@
     </select>
 
     <select id="getUsedRuleDistribution" resultType="map">
-        select rule_code ruleCode,count(1) num from job_rule_info group by rule_code
+        select rule_code ruleCode,count(1) num from job_rule_info where create_user_id=#{userId} group by rule_code
     </select>
 </mapper>

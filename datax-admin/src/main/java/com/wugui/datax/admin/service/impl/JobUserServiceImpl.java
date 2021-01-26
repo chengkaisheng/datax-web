@@ -12,17 +12,17 @@ import com.wugui.datax.admin.service.JobProjectUserService;
 import com.wugui.datax.admin.service.JobRoleService;
 import com.wugui.datax.admin.service.JobUserRoleService;
 import com.wugui.datax.admin.service.JobUserService;
+import com.wugui.datax.admin.util.AESUtil;
 import com.wugui.datax.admin.util.DataXException;
 import com.wugui.datax.admin.util.Query;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import javax.annotation.Resource;
+import java.util.*;
 
 
 /**
@@ -40,6 +40,9 @@ public class JobUserServiceImpl extends ServiceImpl<JobUserMapper, JobUser> impl
 
 	@Autowired
 	private JobProjectUserService jobProjectUserService;
+
+	@Resource
+	private BCryptPasswordEncoder bCryptPasswordEncoder;
 
 	@Override
 	public IPage<JobUser> queryPage(Map<String, Object> params) {
@@ -92,10 +95,10 @@ public class JobUserServiceImpl extends ServiceImpl<JobUserMapper, JobUser> impl
 	public void saveUser(JobUser user) {
 
 		this.save(user);
-		
+
 		//检查角色是否越权
 		checkRole(user);
-		
+
 		//保存用户与角色关系
 		jobUserRoleService.saveOrUpdate((long) user.getId(), user.getRoleIdList());
 	}
@@ -116,11 +119,22 @@ public class JobUserServiceImpl extends ServiceImpl<JobUserMapper, JobUser> impl
 	}
 
 	@Override
-	public boolean updatePassword(Long userId, String password, String newPassword) {
+	public Map updatePassword(Integer userId, String password, String newPassword) {
+		Map<String,Object> map=new HashMap<>();
 		JobUser userEntity = new JobUser();
-		userEntity.setPassword(newPassword);
-		return this.update(userEntity,
-				new QueryWrapper<JobUser>().eq("user_id", userId).eq("password", password));
+		userEntity.setPassword(bCryptPasswordEncoder.encode(newPassword));
+		JobUser jobUser=this.getBaseMapper().getJobUserById(userId);
+		if(!bCryptPasswordEncoder.matches(password,jobUser.getPassword())){
+			map.put("message","原密码不正确!");
+			map.put("code","500");
+			return map;
+		}else {
+			this.update(userEntity,
+					new QueryWrapper<JobUser>().eq("id", userId));
+			map.put("message","修改成功");
+			map.put("code","200");
+			return map;
+		}
 	}
 
 	@Override
@@ -155,7 +169,7 @@ public class JobUserServiceImpl extends ServiceImpl<JobUserMapper, JobUser> impl
 		if(user.getCreateUserId() == Constant.SUPER_ADMIN){
 			return ;
 		}
-		
+
 		//查询用户创建的角色列表
 		List<Long> roleIdList = jobRoleService.queryRoleIdList(user.getCreateUserId());
 
