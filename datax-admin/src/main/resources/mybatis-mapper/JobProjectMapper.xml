@@ -118,7 +118,7 @@ WHERE
     <select id="getItemTaskDistribution" resultType="map">
         SELECT
 	p.name,
-	COUNT( 1 ) num
+	COUNT( DISTINCT p.id ) num
 FROM
 	(
 	SELECT
@@ -148,7 +148,7 @@ FROM
 	p.NAME name,
 	i.trigger_status STATUS,
 	DATE_FORMAT( add_time, '%Y-%m-%d' ) date,
-	COUNT( 1 ) num
+	COUNT( DISTINCT p.id) num
 FROM
 	(
 	SELECT
@@ -178,7 +178,7 @@ WHERE
         SELECT
 	p.NAME name,
 	i.job_type type,
-	COUNT( 1 ) num
+	COUNT( DISTINCT p.id ) num
 FROM
 	(
 	SELECT
@@ -206,7 +206,7 @@ GROUP BY p.name,i.job_type
     <select id="getTaskExecutorDistribution" resultType="map">
         SELECT
 	i.executor_handler name,
-	COUNT( 1 ) num
+	COUNT( DISTINCT i.id) num
 FROM
 	(
 	SELECT
