@@ -139,7 +139,7 @@ FROM
 		u.id = #{userId}
 	)as p
 	LEFT JOIN job_info i ON p.id = i.project_id
-	WHERE `name` is not NULL
+	WHERE `name` is not NULL AND i.id is not NULL
  GROUP BY p.id
     </select>
 
@@ -170,7 +170,7 @@ FROM
 	)as p
 	LEFT JOIN job_info i ON p.id = i.project_id
 WHERE
-`name` IS NOT NULL
+`name` IS NOT NULL AND i.id is not NULL
 	 GROUP BY p.name,i.trigger_status,date
     </select>
 
@@ -199,7 +199,7 @@ FROM
 		u.id = #{userId}
 	)as p
 	LEFT JOIN job_info i ON p.id = i.project_id
-WHERE `name` is not NULL
+WHERE `name` is not NULL  and i.id is not NULL
 GROUP BY p.name,i.job_type
     </select>
 
@@ -227,6 +227,7 @@ FROM
 		u.id = #{userId}
 	)as p
 	LEFT JOIN job_info i ON p.id = i.project_id
+	WHERE i.id is not NULL
 GROUP BY
 	i.executor_handler
     </select>

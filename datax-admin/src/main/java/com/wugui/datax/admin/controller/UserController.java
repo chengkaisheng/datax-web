@@ -211,4 +211,10 @@ public class UserController extends BaseController{
                                                               @RequestParam(value = "newPassWorld", required = false) String newPassWorld) {
         return  R.ok(jobUserService. updatePassword(userId, pwd,newPassWorld));
     }
+
+    @PostMapping("/resetPwd")
+    @ApiOperation("重置密码")
+    public R resetPwd(@RequestParam("userId") Integer userId) {
+        return  R.ok(jobUserService. resetPwd(userId));
+    }
 }

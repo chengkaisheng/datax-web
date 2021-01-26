@@ -66,6 +66,12 @@ public interface JobUserService extends IService<JobUser> {
 	 */
 	Map updatePassword(Integer userId, String password, String newPassword);
 
+	/**
+	 * 修改密码
+	 * @param userId       用户ID
+	 */
+	Map resetPwd(Integer userId);
+
 	IPage<JobUser>  userListByProjectId(Long current, Long size, String username, Integer projectId);
 
 }

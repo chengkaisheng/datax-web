@@ -138,6 +138,24 @@ public class JobUserServiceImpl extends ServiceImpl<JobUserMapper, JobUser> impl
 	}
 
 	@Override
+	public Map resetPwd(Integer userId) {
+		Map<String,Object> map=new HashMap<>();
+		JobUser jobUser=new JobUser();
+		jobUser.setPassword(bCryptPasswordEncoder.encode("123456"));
+		boolean b=this.update(jobUser,
+				new QueryWrapper<JobUser>().eq("id", userId));
+		if(b){
+			map.put("message","密码已重置");
+			map.put("code","200");
+			return  map;
+		}else {
+			map.put("message","重置密码错误");
+			map.put("code","500");
+			return map;
+		}
+	}
+
+	@Override
 	public IPage<JobUser> userListByProjectId(Long current, Long size, String username, Integer projectId) {
 		List<Integer> userIds = jobProjectUserService.getUserIds(projectId);
 		Page<JobUser> page = new Page<>(current, size);
