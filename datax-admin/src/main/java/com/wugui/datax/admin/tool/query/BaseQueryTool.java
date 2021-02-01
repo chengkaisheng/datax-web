@@ -8,6 +8,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.wugui.datatx.core.util.Constants;
 import com.wugui.datax.admin.core.util.LocalCacheUtil;
+import com.wugui.datax.admin.datashare.tools.ConnectUtil;
+import com.wugui.datax.admin.entity.Chart;
+import com.wugui.datax.admin.entity.ColumnMsg;
 import com.wugui.datax.admin.entity.JobDatasource;
 import com.wugui.datax.admin.tool.database.ColumnInfo;
 import com.wugui.datax.admin.tool.database.DasColumn;
@@ -20,17 +23,15 @@ import com.zaxxer.hikari.HikariDataSource;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.wugui.datax.admin.entity.Chart;
-import com.wugui.datax.admin.entity.ColumnMsg;
+
 import javax.sql.DataSource;
 import java.sql.*;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
 import java.util.Date;
+import java.util.*;
 
 import static com.wugui.datax.admin.datashare.tools.ResultToJsonUtil.resultSetToJSON;
-import com.wugui.datax.admin.datashare.tools.ConnectUtil;
 
 /**
  * 抽象查询工具
@@ -71,7 +72,7 @@ public abstract class BaseQueryTool implements QueryToolInterface {
                 LocalCacheUtil.remove(jobDatasource.getDatasourceName());
                 getDataSource(jobDatasource);
             }
-        }
+        }   
         sqlBuilder = DatabaseMetaFactory.getByDbType(jobDatasource.getDatasource());
         currentSchema = getSchema(jobDatasource.getJdbcUsername());
         currentDatabase = jobDatasource.getDatasource();

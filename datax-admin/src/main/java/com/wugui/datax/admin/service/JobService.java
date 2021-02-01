@@ -3,12 +3,9 @@ package com.wugui.datax.admin.service;
 
 import com.wugui.datatx.core.biz.model.LogResult;
 import com.wugui.datatx.core.biz.model.ReturnT;
-import com.wugui.datax.admin.core.trigger.TriggerTypeEnum;
 import com.wugui.datax.admin.dto.DataXBatchJsonBuildDto;
-import com.wugui.datax.admin.dto.TaskScheduleDto;
 import com.wugui.datax.admin.entity.Dashboard;
 import com.wugui.datax.admin.entity.JobInfo;
-import com.wugui.datax.admin.entity.JobInfoDetail;
 import com.wugui.datax.admin.entity.JobLog;
 
 import java.io.IOException;
@@ -245,4 +242,8 @@ public interface JobService {
      * @return
      */
     Map<String,Object> jobResult(Integer taskId);
+
+    JobInfo getJobInfo(Integer jobId);
+
+    void deleteById(Integer id);
 }

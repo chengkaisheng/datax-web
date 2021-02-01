@@ -2,13 +2,14 @@ package com.wugui.datax.admin.util;
 
 
 import com.alibaba.fastjson.JSONObject;
-
 import com.wugui.datax.admin.entity.JobDatasource;
 import com.wugui.datax.admin.entity.Property;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.methods.RequestEntity;
+import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -54,6 +55,8 @@ public class HttpClientHelper {
         postMethod.getParams().setParameter(HttpMethodParams.SO_TIMEOUT, 60000);
         postMethod.addRequestHeader("Content-Type", "application/json");
         postMethod.setRequestHeader("Connection", "keep-alive");
+        RequestEntity requestEntity = new StringRequestEntity(requestBody, "application/json", "utf-8");
+        postMethod.setRequestEntity(requestEntity);
         postMethod.setRequestBody(requestBody);
         httpClient.executeMethod(postMethod);
         String result = postMethod.getResponseBodyAsString();

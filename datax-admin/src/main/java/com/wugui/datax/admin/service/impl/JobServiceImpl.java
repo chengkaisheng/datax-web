@@ -212,6 +212,10 @@ public class JobServiceImpl implements JobService {
         jobInfo.setJobJson(jobJson);
         jobInfo.setJobParam(jobParam);
         jobInfoMapper.save(jobInfo);
+        //更新文件信息
+        System.out.println(jobInfo.getId());
+
+        //TODO 保存任务版本信息
 
         if(jobType.equals("DQCJOB")){
             //创建实体
@@ -1023,6 +1027,16 @@ public class JobServiceImpl implements JobService {
 
         BaseQueryTool queryTool = QueryToolFactory.getByDbType(jobDatasource);
         return queryTool.getResult(writerTable, writerColumns,jobDatasource);
+    }
+
+    @Override
+    public JobInfo getJobInfo(Integer jobId) {
+        return jobInfoMapper.loadById(jobId);
+    }
+
+    @Override
+    public void deleteById(Integer id) {
+        jobInfoMapper.delete(id);
     }
 
 }

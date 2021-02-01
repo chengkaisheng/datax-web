@@ -3,9 +3,12 @@ package com.wugui.datax.admin.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.api.R;
+import com.wugui.datax.admin.constans.Constant;
 import com.wugui.datax.admin.entity.JobProject;
+import com.wugui.datax.admin.entity.JobProjectGroup;
 import com.wugui.datax.admin.entity.JobProjectUserEntity;
 import com.wugui.datax.admin.entity.vo.JobProjectVo;
+import com.wugui.datax.admin.service.JobProjectGroupService;
 import com.wugui.datax.admin.service.JobProjectService;
 import com.wugui.datax.admin.service.JobProjectUserService;
 import io.swagger.annotations.Api;
@@ -32,6 +35,9 @@ public class JobProjectController extends BaseController {
 
     @Autowired
     private JobProjectUserService jobProjectUserService;
+
+    @Autowired
+    private JobProjectGroupService jobProjectGroupService;
 
 
     /**
@@ -99,6 +105,12 @@ public class JobProjectController extends BaseController {
     @PostMapping
     public R<Boolean> insert(HttpServletRequest request, @RequestBody JobProject entity) {
         entity.setUserId(getCurrentUserId(request));
+        JobProjectGroup jobProjectGroup = new JobProjectGroup();
+        jobProjectGroup.setJobType(Constant.DIR_TYPE);
+        jobProjectGroup.setName(entity.getName());
+        jobProjectGroup.setParentId(0);
+        jobProjectGroup.setType(1);
+        jobProjectGroupService.save(jobProjectGroup);
         return success(this.jobProjectService.save(entity));
     }
 

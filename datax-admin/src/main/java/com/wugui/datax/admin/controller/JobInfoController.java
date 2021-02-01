@@ -10,7 +10,6 @@ import com.wugui.datax.admin.core.util.I18nUtil;
 import com.wugui.datax.admin.dto.DataXBatchJsonBuildDto;
 import com.wugui.datax.admin.dto.TriggerJobDto;
 import com.wugui.datax.admin.entity.JobInfo;
-import com.wugui.datax.admin.entity.JobInfoDetail;
 import com.wugui.datax.admin.service.JobService;
 import com.wugui.datax.admin.util.ExcelData;
 import com.wugui.datax.admin.util.ExportExcelUtils;
@@ -178,5 +177,10 @@ public class JobInfoController extends BaseController{
 
         ExportExcelUtils.exportExcel(response,"异常数据.xls",data);
 
+    }
+
+    @GetMapping("/info")
+    public ReturnT<JobInfo> info(@RequestParam Integer jobId){
+        return new ReturnT<>(jobService.getJobInfo(jobId));
     }
 }

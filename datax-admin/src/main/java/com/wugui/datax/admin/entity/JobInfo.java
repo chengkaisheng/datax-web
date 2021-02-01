@@ -1,7 +1,6 @@
 package com.wugui.datax.admin.entity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.wugui.datax.admin.dto.QualityJsonBuildDto;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -131,4 +130,7 @@ public class JobInfo {
 	private String jobParam;
 
 	private int jobFileId;
+
+	@TableField(exist = false,select = false)
+	private Integer projectGroupId;
 }
