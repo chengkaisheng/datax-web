@@ -129,6 +129,7 @@ public class JobInfo {
 	@ApiModelProperty("任务参数")
 	private String jobParam;
 
+	@TableField(exist = false,select = false)
 	private int jobFileId;
 
 	@TableField(exist = false,select = false)

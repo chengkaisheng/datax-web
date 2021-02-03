@@ -9,6 +9,7 @@ import com.wugui.datatx.core.enums.ExecutorBlockStrategyEnum;
 import com.wugui.datatx.core.glue.GlueTypeEnum;
 import com.wugui.datatx.core.log.JobFileAppender;
 import com.wugui.datatx.core.util.DateUtil;
+import com.wugui.datax.admin.constans.OperationType;
 import com.wugui.datax.admin.core.cron.CronExpression;
 import com.wugui.datax.admin.core.route.ExecutorRouteStrategyEnum;
 import com.wugui.datax.admin.core.thread.JobScheduleHelper;
@@ -31,7 +32,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
@@ -93,6 +96,12 @@ public class JobServiceImpl implements JobService {
     @Resource
     private JobInfoFileMapper jobInfoFileMapper;
 
+    @Autowired
+    private JobProjectGroupService jobProjectGroupService;
+
+    @Autowired
+    private JobVersionService jobVersionService;
+
     @Override
     public Map<String, Object> pageList(int start, int length, int jobGroup, int triggerStatus, String jobDesc, String glueType, int userId, Integer[] projectIds) {
 
@@ -112,6 +121,7 @@ public class JobServiceImpl implements JobService {
         return jobInfoMapper.findAll();
     }
 
+    @Transactional
     @Override
     public ReturnT<String> add(JobInfo jobInfo) {
         //在添加任务之前 先构建json
@@ -212,10 +222,16 @@ public class JobServiceImpl implements JobService {
         jobInfo.setJobJson(jobJson);
         jobInfo.setJobParam(jobParam);
         jobInfoMapper.save(jobInfo);
-        //更新文件信息
+        //更新文件信息关联任务id
         System.out.println(jobInfo.getId());
+        JobProjectGroup jobProjectGroup = new JobProjectGroup();
+        jobProjectGroup.setId(jobInfo.getProjectGroupId());
+        jobProjectGroup.setJobId(jobInfo.getId());
+        jobProjectGroupService.updateById(jobProjectGroup);
 
         //TODO 保存任务版本信息
+        saveJobVersion(jobInfo, OperationType.CREATE_OPERATION);
+
 
         if(jobType.equals("DQCJOB")){
             //创建实体
@@ -256,6 +272,64 @@ public class JobServiceImpl implements JobService {
         return new ReturnT<>(String.valueOf(jobInfo.getId()));
     }
 
+    @Override
+    public void saveJobVersion(JobInfo jobInfo,String operation) {
+        JobVersion jobVersion = new JobVersion();
+        setProperties(jobInfo, jobVersion,operation);
+        jobVersionService.save(jobVersion);
+    }
+
+    @Override
+    public void setProperties(JobInfo jobInfo, JobVersion jobVersion, String operation) {
+        jobVersion.setJobId(jobInfo.getId());
+        jobVersion.setOperation(operation);
+        jobVersion.setVersionTime(new Date());
+        List<JobVersion> list = jobVersionService.list(new QueryWrapper<JobVersion>().eq("job_id", jobInfo.getId()).orderByDesc("version"));
+        if(list != null && list.size() != 0){
+            jobVersion.setVersion(list.get(0).getVersion() + 1);
+        }else {
+            jobVersion.setVersion(0);
+        }
+        jobVersion.setJobGroup(jobInfo.getJobGroup());
+        jobVersion.setJobCron(jobInfo.getJobCron());
+        jobVersion.setJobDesc(jobInfo.getJobDesc());
+        jobVersion.setProjectId(jobInfo.getProjectId());
+        jobVersion.setAddTime(jobInfo.getAddTime());
+        jobVersion.setUpdateTime(jobInfo.getUpdateTime());
+        jobVersion.setUserId(jobInfo.getUserId());
+        jobVersion.setAlarmEmail(jobInfo.getAlarmEmail());
+        jobVersion.setExecutorRouteStrategy(jobInfo.getExecutorRouteStrategy());
+        jobVersion.setExecutorHandler(jobInfo.getExecutorHandler());
+        jobVersion.setExecutorParam(jobInfo.getExecutorParam());
+        jobVersion.setExecutorBlockStrategy(jobInfo.getExecutorBlockStrategy());
+        jobVersion.setExecutorTimeout(jobInfo.getExecutorTimeout());
+        jobVersion.setExecutorFailRetryCount(jobInfo.getExecutorFailRetryCount());
+        jobVersion.setGlueType(jobInfo.getGlueType());
+        jobVersion.setGlueSource(jobInfo.getGlueSource());
+        jobVersion.setGlueRemark(jobInfo.getGlueRemark());
+        jobVersion.setGlueUpdatetime(jobInfo.getGlueUpdatetime());
+        jobVersion.setChildJobId(jobInfo.getChildJobId());
+        jobVersion.setJobJson(jobInfo.getJobJson());
+        jobVersion.setReplaceParam(jobInfo.getReplaceParam());
+        jobVersion.setJvmParam(jobInfo.getJvmParam());
+        jobVersion.setIncStartTime(jobInfo.getIncStartTime());
+        jobVersion.setPartitionInfo(jobInfo.getPartitionInfo());
+        jobVersion.setLastHandleCode(jobInfo.getLastHandleCode());
+        jobVersion.setReplaceParamType(jobInfo.getReplaceParamType());
+        jobVersion.setReaderTable(jobInfo.getReaderTable());
+        jobVersion.setPrimaryKey(jobInfo.getPrimaryKey());
+        jobVersion.setIncStartId(jobInfo.getIncStartId());
+        jobVersion.setIncrementType(jobInfo.getIncrementType());
+        jobVersion.setDatasourceId(jobInfo.getDatasourceId());
+        jobVersion.setJobType(jobInfo.getJobType());
+        jobVersion.setJobParam(jobInfo.getJobParam());
+    }
+
+    @Override
+    public void save(JobInfo jobInfo) {
+        jobInfoMapper.save(jobInfo);
+    }
+
     private ReturnT<String> checkParam(DataXJsonBuildDto dto){
         String key = "system_please_choose";
         //对入参的校验
@@ -284,6 +358,7 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
+    @Transactional
     public ReturnT<String> update(JobInfo jobInfo) {
 
         // valid
@@ -398,8 +473,7 @@ public class JobServiceImpl implements JobService {
         }
         exists_jobInfo.setGlueUpdatetime(new Date());
         jobInfoMapper.update(exists_jobInfo);
-
-
+        saveJobVersion(jobInfo, OperationType.UPDATE_OPERATION);
         return ReturnT.SUCCESS;
     }
 
@@ -1038,5 +1112,7 @@ public class JobServiceImpl implements JobService {
     public void deleteById(Integer id) {
         jobInfoMapper.delete(id);
     }
+
+
 
 }

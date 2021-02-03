@@ -38,9 +38,18 @@ public class ReturnT<T> implements Serializable {
 	public String getMsg() {
 		return msg;
 	}
-	public ReturnT setMsg(String msg) {
+	public ReturnT<String> setOkMsg(String msg) {
+		SUCCESS.setMsg(msg);
+		return SUCCESS;
+	}
+
+	public ReturnT<String> setFailMsg(String msg){
+		FAIL.setMsg(msg);
+		return FAIL;
+	}
+
+	public void setMsg(String msg){
 		this.msg = msg;
-		return this;
 	}
 	public T getContent() {
 		return content;

@@ -7,6 +7,7 @@ import com.wugui.datax.admin.dto.DataXBatchJsonBuildDto;
 import com.wugui.datax.admin.entity.Dashboard;
 import com.wugui.datax.admin.entity.JobInfo;
 import com.wugui.datax.admin.entity.JobLog;
+import com.wugui.datax.admin.entity.JobVersion;
 
 import java.io.IOException;
 import java.util.List;
@@ -246,4 +247,10 @@ public interface JobService {
     JobInfo getJobInfo(Integer jobId);
 
     void deleteById(Integer id);
+
+    void saveJobVersion(JobInfo jobInfo,String operation);
+
+    void setProperties(JobInfo jobInfo, JobVersion jobVersion, String operation);
+
+    void save(JobInfo jobInfo);
 }

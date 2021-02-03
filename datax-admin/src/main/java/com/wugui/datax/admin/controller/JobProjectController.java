@@ -3,7 +3,6 @@ package com.wugui.datax.admin.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.api.R;
-import com.wugui.datax.admin.constans.Constant;
 import com.wugui.datax.admin.entity.JobProject;
 import com.wugui.datax.admin.entity.JobProjectGroup;
 import com.wugui.datax.admin.entity.JobProjectUserEntity;
@@ -106,7 +105,6 @@ public class JobProjectController extends BaseController {
     public R<Boolean> insert(HttpServletRequest request, @RequestBody JobProject entity) {
         entity.setUserId(getCurrentUserId(request));
         JobProjectGroup jobProjectGroup = new JobProjectGroup();
-        jobProjectGroup.setJobType(Constant.DIR_TYPE);
         jobProjectGroup.setName(entity.getName());
         jobProjectGroup.setParentId(0);
         jobProjectGroup.setType(1);

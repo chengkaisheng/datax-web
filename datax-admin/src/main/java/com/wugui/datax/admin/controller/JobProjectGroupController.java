@@ -2,6 +2,7 @@ package com.wugui.datax.admin.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.wugui.datatx.core.biz.model.ReturnT;
+import com.wugui.datax.admin.constans.Constant;
 import com.wugui.datax.admin.entity.JobProjectGroup;
 import com.wugui.datax.admin.service.JobProjectGroupService;
 import com.wugui.datax.admin.service.JobService;
@@ -44,15 +45,18 @@ public class JobProjectGroupController {
                 eq("name", jobProjectGroup.getName()).
                 eq("parent_id", jobProjectGroup.getParentId()));
         if (listByName != null) {
-            return ReturnT.FAIL/*.setMsg("文件夹或文件已经存在")*/;
+            return ReturnT.FAIL.setFailMsg("文件夹或文件已经存在");
         }
         JobProjectGroup projectGroup = jobProjectGroupService.getById(jobProjectGroup.getParentId());
         if (projectGroup.getType().equals(FILE_TYPE)) {
             //如果是文件类型下新建文件或文件夹，那么就在当前目录下新建文件
             jobProjectGroup.setParentId(projectGroup.getParentId());
         }
+        if(Constant.DIR_TYPE.equals(jobProjectGroup.getType())){
+            jobProjectGroup.setJobType(Constant.DIR);
+        }
         jobProjectGroupService.save(jobProjectGroup);
-        return new ReturnT<>("保存成功");
+        return ReturnT.SUCCESS.setOkMsg("保存成功");
     }
 
 
@@ -76,11 +80,11 @@ public class JobProjectGroupController {
                     eq("name", jobProjectGroup.getName()).
                     eq("parent_id", projectGroupById.getParentId()));
             if (projectGroupByName != null && !projectGroupByName.getId().equals(jobProjectGroup.getId())) {
-                return ReturnT.FAIL/*.setMsg("文件夹或文件已经存在")*/;
+                return ReturnT.FAIL.setFailMsg("文件夹或文件已经存在");
             }
         }
         jobProjectGroupService.updateById(jobProjectGroup);
-        return ReturnT.SUCCESS/*.setMsg("成功")*/;
+        return ReturnT.SUCCESS.setOkMsg("成功");
     }
 
 
@@ -92,10 +96,10 @@ public class JobProjectGroupController {
                 eq("name", jobProjectGroup.getName()).
                 eq("parent_id", pid));
         if (projectGroupByName != null && !projectGroupByName.getId().equals(jobProjectGroup.getId())) {
-            return ReturnT.FAIL/*.setMsg("文件夹或文件已经存在")*/;
+            return ReturnT.FAIL.setFailMsg("文件夹或文件已经存在");
         }
 
         jobProjectGroupService.paste(jobProjectGroup, pid);
-        return ReturnT.SUCCESS/*.setMsg("复制成功")*/;
+        return ReturnT.SUCCESS.setOkMsg("复制成功");
     }
 }

@@ -2,10 +2,15 @@ package com.wugui.datax.admin.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.wugui.datax.admin.constans.Constant;
+import com.wugui.datax.admin.constans.OperationType;
+import com.wugui.datax.admin.entity.JobInfo;
 import com.wugui.datax.admin.entity.JobProjectGroup;
+import com.wugui.datax.admin.entity.JobVersion;
 import com.wugui.datax.admin.mapper.JobProjectGroupMapper;
 import com.wugui.datax.admin.service.JobProjectGroupService;
 import com.wugui.datax.admin.service.JobService;
+import com.wugui.datax.admin.service.JobVersionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +29,9 @@ public class JobProjectGroupServiceImpl extends ServiceImpl<JobProjectGroupMappe
 
     @Autowired
     private JobProjectGroupMapper jobProjectGroupMapper;
+
+    @Autowired
+    private JobVersionService jobVersionService;
 
     @Override
     public List<JobProjectGroup> getTree(Integer projectId) {
@@ -59,10 +67,16 @@ public class JobProjectGroupServiceImpl extends ServiceImpl<JobProjectGroupMappe
         jobProjectGroup.setParentId(pid);
         jobProjectGroup.setId(null);
         List<JobProjectGroup> childrenList = jobProjectGroup.getChildren();
-        this.save(jobProjectGroup);
-        if(jobProjectGroup.getJobId() != null){
-            //TODO 如果是文件类型为任务，则需要根据job_id去新创建一个任务，并且创建一个版本
+        if(jobProjectGroup.getType().equals(Constant.FILE_TYPE) && jobProjectGroup.getJobId() != null){
+            JobInfo jobInfo = jobService.getJobInfo(jobProjectGroup.getJobId());
+            jobInfo.setId(0);
+            jobService.save(jobInfo);
+            jobProjectGroup.setJobId(jobInfo.getId());
+            //创建版本
+            jobService.saveJobVersion(jobInfo, OperationType.PASTE_OPERATION);
         }
+        save(jobProjectGroup);
+        //递归粘贴
         if(childrenList != null && childrenList.size() != 0){
             childrenList.forEach(children->paste(children, jobProjectGroup.getId()));
         }
@@ -73,11 +87,14 @@ public class JobProjectGroupServiceImpl extends ServiceImpl<JobProjectGroupMappe
             return;
         }
         jobProjectGroupList.forEach(item->{
-            if(item.getType().equals(1)){
+            if(item.getType().equals(Constant.DIR_TYPE)){
                 //删除文件
                 this.removeById(item.getId());
+                //递归删除文件夹下的文件
                 List<JobProjectGroup> childrenList = jobProjectGroupMapper.selectList(new QueryWrapper<JobProjectGroup>().eq("parent_id", item.getId()));
-                deleteRecursion(childrenList);
+                if(childrenList != null && childrenList.size() != 0) {
+                    deleteRecursion(childrenList);
+                }
             }else {
                 //删除文件
                 this.removeById(item.getId());
@@ -85,6 +102,8 @@ public class JobProjectGroupServiceImpl extends ServiceImpl<JobProjectGroupMappe
                 Integer jobId = item.getJobId();
                 if(jobId != null){
                     jobService.deleteById(jobId);
+                    //删除版本
+                    jobVersionService.remove(new QueryWrapper<JobVersion>().eq("job_id", jobId));
                 }
             }
         });

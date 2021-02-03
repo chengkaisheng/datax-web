@@ -26,8 +26,10 @@ public class Constant {
      */
     public static final String ASC = "asc";
 
-    public static final String DIR_TYPE = "wenjianjia";
+    public static final Integer DIR_TYPE = 1;
 
     public static final Integer FILE_TYPE = 2;
+
+    public static final String DIR = "wenjianjia";
 
 }

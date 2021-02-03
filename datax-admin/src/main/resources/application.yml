@@ -4,12 +4,12 @@ server:
 spring:
   #数据源
   datasource:
-    #username: root
-    #password: root
-    #url: jdbc:mysql://localhost:3306/datax_web?serverTimezone=Asia/Shanghai&useLegacyDatetimeCode=false&useSSL=false&nullNamePatternMatchesAll=true&useUnicode=true&characterEncoding=UTF-8
-    password: 1QAZ@wsxdataxweb
-    username: dataxweb
-    url: jdbc:mysql://47.103.79.104:3307/datax_web?serverTimezone=Asia/Shanghai&useLegacyDatetimeCode=false&useSSL=false&nullNamePatternMatchesAll=true&useUnicode=true&characterEncoding=UTF-8
+    username: root
+    password: 1QAZ@wsx_zhejin
+    url: jdbc:mysql://183.194.64.166:3308/datax_web?serverTimezone=Asia/Shanghai&useLegacyDatetimeCode=false&useSSL=false&nullNamePatternMatchesAll=true&useUnicode=true&characterEncoding=UTF-8
+    #password: 1QAZ@wsxdataxweb
+    #username: dataxweb
+    #url: jdbc:mysql://47.103.79.104:3307/datax_web?serverTimezone=Asia/Shanghai&useLegacyDatetimeCode=false&useSSL=false&nullNamePatternMatchesAll=true&useUnicode=true&characterEncoding=UTF-8
     driver-class-name: com.mysql.jdbc.Driver
 
 
