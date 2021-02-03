@@ -11,6 +11,7 @@ import com.wugui.datax.admin.mapper.JobProjectGroupMapper;
 import com.wugui.datax.admin.service.JobProjectGroupService;
 import com.wugui.datax.admin.service.JobService;
 import com.wugui.datax.admin.service.JobVersionService;
+import com.wugui.datax.admin.util.UUIDUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,8 +59,12 @@ public class JobProjectGroupServiceImpl extends ServiceImpl<JobProjectGroupMappe
             List<Integer> ids = jobProjectGroupList.stream().map(JobProjectGroup::getId).collect(Collectors.toList());
             this.removeByIds(ids);
         }
-        this.removeById(id);
+        JobProjectGroup jobProjectGroup= this.getById(id);
+        boolean succDelete= this.removeById(id);
         //删除任务
+        if(succDelete && UUIDUtils.notEmpty(jobProjectGroup)){
+            jobService.deleteById(jobProjectGroup.getJobId());
+        }
     }
 
     @Override

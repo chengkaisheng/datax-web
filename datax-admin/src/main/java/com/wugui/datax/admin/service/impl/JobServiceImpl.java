@@ -282,12 +282,6 @@ public class JobServiceImpl implements JobService {
         if (jobInfo.getId() < 1) {
             return new ReturnT<>(ReturnT.FAIL_CODE, (I18nUtil.getString("jobinfo_field_add") + I18nUtil.getString("system_fail")));
         }
-        if(jobInfo.getId()>1){
-            JobInfoFile jobInfoFile=new JobInfoFile();
-            jobInfoFile.setJobFileId(jobInfo.getJobFileId());
-            jobInfoFile.setJobId(jobInfo.getId());
-            jobInfoFileMapper.save(jobInfoFile);
-        }
         return new ReturnT<>(String.valueOf(jobInfo.getId()));
     }
 
@@ -809,12 +803,15 @@ public class JobServiceImpl implements JobService {
             jobInfo.setTriggerStatus(0);
             int n=jobInfoMapper.save(jobInfo);
             if(n>0){
-                if(jobInfo.getId()>1){
-                    JobInfoFile jobInfoFile=new JobInfoFile();
-                    jobInfoFile.setJobFileId(jobInfo.getJobFileId());
-                    jobInfoFile.setJobId(jobInfo.getId());
-                    jobInfoFileMapper.save(jobInfoFile);
-                }
+                //更新文件信息关联任务id
+                System.out.println(jobInfo.getId());
+                JobProjectGroup jobProjectGroup = new JobProjectGroup();
+                jobProjectGroup.setId(jobInfo.getProjectGroupId());
+                jobProjectGroup.setJobId(jobInfo.getId());
+                jobProjectGroupService.updateById(jobProjectGroup);
+
+                //TODO 保存任务版本信息
+                saveJobVersion(jobInfo, OperationType.CREATE_OPERATION);
                 result= new ReturnT<>(ReturnT.SUCCESS_CODE,"保存成功");
             }else {
                 result= new ReturnT<>(ReturnT.FAIL_CODE, "保存失败");
