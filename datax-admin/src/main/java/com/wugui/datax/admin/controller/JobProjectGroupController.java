@@ -56,7 +56,7 @@ public class JobProjectGroupController {
             jobProjectGroup.setJobType(Constant.DIR);
         }
         jobProjectGroupService.save(jobProjectGroup);
-        return ReturnT.SUCCESS.setOkMsg("保存成功");
+        return new ReturnT<>(String.valueOf(jobProjectGroup.getId()));
     }
 
 

@@ -7,8 +7,10 @@ import com.wugui.datatx.core.biz.model.RegistryParam;
 import com.wugui.datatx.core.biz.model.ReturnT;
 import com.wugui.datatx.core.enums.IncrementTypeEnum;
 import com.wugui.datatx.core.handler.IJobHandler;
+import com.wugui.datatx.core.log.JobLogger;
 import com.wugui.datax.admin.core.kill.KillJob;
 import com.wugui.datax.admin.core.thread.JobTriggerPoolHelper;
+import com.wugui.datax.admin.core.trigger.ImportTrigger;
 import com.wugui.datax.admin.core.trigger.TriggerTypeEnum;
 import com.wugui.datax.admin.core.util.I18nUtil;
 import com.wugui.datax.admin.entity.JobInfo;
@@ -192,7 +194,11 @@ public class AdminBizImpl implements AdminBiz {
         log.setHandleTime(new Date());
         log.setHandleCode(resultCode);
         log.setHandleMsg(handleMsg.toString());
-
+        JobInfo jobInfo = jobInfoMapper.loadById(log.getJobId());
+        if("IMPORT".equals(jobInfo.getJobType())&&resultCode==200){//datax任务执行完成后,执行insert操作
+            ImportTrigger.triggerImportInsert(jobInfo);
+            JobLogger.log("dataElit IMPORT任务正在执行insert操作");
+        }
         jobLogMapper.updateHandleInfo(log);
         jobInfoMapper.updateLastHandleCode(log.getJobId(), resultCode);
         return ReturnT.SUCCESS;

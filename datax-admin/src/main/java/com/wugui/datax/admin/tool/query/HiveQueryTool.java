@@ -8,6 +8,7 @@ import com.wugui.datax.admin.util.JdbcUtils;
 import org.apache.commons.lang.StringUtils;
 
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -65,5 +66,53 @@ public class HiveQueryTool extends BaseQueryTool implements QueryToolInterface {
         }
         result.put("datas", list);
         return result;
+    }
+
+    public String getLocation(String tableName) {
+        Statement stmt = null;
+        ResultSet rs = null;
+         StringBuilder str=new StringBuilder();
+        try {
+            //获取查询指定表所有字段的sql语句
+            String querySql = "show create table "+tableName;
+            logger.info("querySql: {}", querySql);
+
+            //获取所有字段
+            stmt = connection.createStatement();
+            rs = stmt.executeQuery(querySql);
+            ResultSetMetaData metaData = rs.getMetaData();
+            while (rs.next()){
+                str.append(rs.getString("createtab_stmt")).append("\n");
+            }
+
+        } catch (SQLException e) {
+            logger.error("[getColumnNames Exception] --> "
+                    + "the exception message is:" + e.getMessage());
+        } finally {
+            JdbcUtils.close(rs);
+            JdbcUtils.close(stmt);
+        }
+        return str.toString();
+    }
+
+    public int executeUpdate(String sql) {
+        Statement stmt = null;
+        ResultSet rs = null;
+        int count=0;
+        try {
+            logger.info("querySql: {}", sql);
+
+            //获取所有字段
+            stmt = connection.createStatement();
+            count = stmt.executeUpdate(sql);
+
+        } catch (SQLException e) {
+            logger.error("[createTable Exception] --> "
+                    + "the exception message is:" + e.getMessage());
+        } finally {
+            JdbcUtils.close(rs);
+            JdbcUtils.close(stmt);
+        }
+        return count;
     }
 }

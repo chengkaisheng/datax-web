@@ -14,14 +14,20 @@ import com.wugui.datax.admin.tool.pojo.DataxHbasePojo;
 import com.wugui.datax.admin.tool.pojo.DataxHivePojo;
 import com.wugui.datax.admin.tool.pojo.DataxMongoDBPojo;
 import com.wugui.datax.admin.tool.pojo.DataxRdbmsPojo;
+import com.wugui.datax.admin.tool.query.HiveQueryTool;
+import com.wugui.datax.admin.tool.query.ImpalaQueryTool;
+import com.wugui.datax.admin.util.DateFormatUtils;
 import com.wugui.datax.admin.util.JdbcConstants;
+import com.wugui.datax.admin.util.UUIDUtils;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.sql.SQLException;
+import java.util.*;
 
 import static com.wugui.datax.admin.util.JdbcConstants.*;
 
@@ -87,6 +93,13 @@ public class DataxJsonHelper implements DataxJsonInterface {
 
     private MongoDBWriterDto mongoDBWriterDto;
 
+    private ReaderSync readerSync;
+
+    private WriterPartition writerPartition;
+
+    private String impalaHdfs;
+
+    private String hiveHdfs;
 
     //用于保存额外参数
     private Map<String, Object> extraParams = Maps.newHashMap();
@@ -180,6 +193,53 @@ public class DataxJsonHelper implements DataxJsonInterface {
         }
     }
 
+    public void initImportReader(ImportJsonDto importJsonDto, JobDatasource readerDatasource) {
+
+        this.readerDatasource = readerDatasource;
+        this.readerTables = importJsonDto.getReaderTables();
+        this.readerColumns = importJsonDto.getReaderColumns();
+        this.hiveReaderDto = importJsonDto.getHiveReader();
+        this.rdbmsReaderDto = importJsonDto.getRdbmsReader();
+        this.hbaseReaderDto = importJsonDto.getHbaseReader();
+        this.readerSync=importJsonDto.getReaderSync();
+        this.writerPartition=importJsonDto.getWriterPartition();
+        // reader 插件
+//        this.importJsonBuildDto=new ImportJsonBuildDto();
+//        this.importJsonBuildDto.setIncExtract("id");
+        String datasource = readerDatasource.getDatasource();
+
+        this.readerColumns = convertKeywordsColumns(datasource, this.readerColumns);
+        if (MYSQL.equals(datasource)) {
+            readerPlugin = new MysqlReader();
+            buildReader = buildReader();
+        } else if (ORACLE.equals(datasource)) {
+            readerPlugin = new OracleReader();
+            buildReader = buildReader();
+        } else if (SQL_SERVER.equals(datasource)) {
+            readerPlugin = new SqlServerReader();
+            buildReader = buildReader();
+        } else if (POSTGRESQL.equals(datasource) || GREENPLUM.equals(datasource)) {
+            readerPlugin = new PostgresqlReader();
+            buildReader = buildReader();
+        } else if (CLICKHOUSE.equals(datasource)) {
+            readerPlugin = new ClickHouseReader();
+            buildReader = buildReader();
+        } else if (HIVE.equals(datasource) || IMPALA.equals(datasource) || DB2.equals(datasource)) {
+            String username = readerDatasource.getJdbcUsername();
+            String password = readerDatasource.getJdbcPassword();
+            readerDatasource.setJdbcUsername((username != null && !"".equals(username)) ? username : "default");
+            readerDatasource.setJdbcPassword((password != null && !"".equals(password)) ? password : "default");
+            readerPlugin = new RdbmsReader();
+            buildReader = buildReader();
+        } else if (HBASE.equals(datasource)) {
+            readerPlugin = new HBaseReader();
+            buildReader = buildHBaseReader();
+        } else if (MONGODB.equals(datasource)) {
+            readerPlugin = new MongoDBReader();
+            buildReader = buildMongoDBReader();
+        }
+    }
+
     public void initWriter(DataXJsonBuildDto dataxJsonDto, JobDatasource readerDatasource) {
         this.writerDatasource = readerDatasource;
         this.writerTables = dataxJsonDto.getWriterTables();
@@ -221,7 +281,145 @@ public class DataxJsonHelper implements DataxJsonInterface {
             readerDatasource.setJdbcUsername((username != null && !"".equals(username)) ? username : "default");
             readerDatasource.setJdbcPassword((password != null && !"".equals(password)) ? password : "default");
             writerPlugin = new ImpalaWriter();
-            buildWriter = this.buildWriter();
+            buildWriter = this.buildHiveWriter();
+        }
+    }
+    public void initImportWriter(ImportJsonDto importJsonDto, JobDatasource writerDatasource) {
+        try {
+            this.writerDatasource = writerDatasource;
+            this.writerTables = importJsonDto.getWriterTables();
+            this.writerColumns = importJsonDto.getWriterColumns();
+            this.hiveWriterDto = importJsonDto.getHiveWriter();
+            this.rdbmsWriterDto = importJsonDto.getRdbmsWriter();
+            this.hbaseWriterDto = importJsonDto.getHbaseWriter();
+            this.mongoDBWriterDto = importJsonDto.getMongoDBWriter();
+            this.impalaHdfs=importJsonDto.getImpalaHdfs();
+            this.hiveHdfs=importJsonDto.getHiveHdfs();
+            // writer
+            String datasource = writerDatasource.getDatasource();
+            this.writerColumns = convertKeywordsColumns(datasource, this.writerColumns);
+            if (MYSQL.equals(datasource)) {
+                writerPlugin = new MysqlWriter();
+                buildWriter = this.buildWriter();
+            } else if (ORACLE.equals(datasource)) {
+                writerPlugin = new OraclelWriter();
+                buildWriter = this.buildWriter();
+            } else if (JdbcConstants.SQL_SERVER.equals(datasource)) {
+                writerPlugin = new SqlServerlWriter();
+                buildWriter = this.buildWriter();
+            } else if (POSTGRESQL.equals(datasource) || GREENPLUM.equals(datasource)) {
+                writerPlugin = new PostgresqllWriter();
+                buildWriter = this.buildWriter();
+            } else if (JdbcConstants.CLICKHOUSE.equals(datasource)) {
+                writerPlugin = new ClickHouseWriter();
+                buildWriter = buildWriter();
+            } else if (JdbcConstants.HIVE.equals(datasource)) {
+                writerPlugin = new HiveWriter();
+                HiveQueryTool queryTool=new HiveQueryTool(writerDatasource);
+                this.getLocation(queryTool,writerDatasource,this.writerTables.get(0));
+                buildWriter = this.buildHiveWriter();
+            } else if (JdbcConstants.HBASE.equals(datasource)) {
+                writerPlugin = new HBaseWriter();
+                buildWriter = this.buildHBaseWriter();
+            } else if (JdbcConstants.MONGODB.equals(datasource)) {
+                writerPlugin = new MongoDBWriter();
+                buildWriter = this.buildMongoDBWriter();
+            }else if(IMPALA.equals(datasource)){
+                String username = writerDatasource.getJdbcUsername();
+                String password = writerDatasource.getJdbcPassword();
+                writerDatasource.setJdbcUsername((username != null && !"".equals(username)) ? username : "default");
+                writerDatasource.setJdbcPassword((password != null && !"".equals(password)) ? password : "default");
+                List<String> columns=this.getImpalaCol(writerDatasource,this.writerTables.get(0));
+                if(UUIDUtils.notEmpty(columns)){
+                    this.setWriterColumns(columns);
+                }
+                ImpalaQueryTool queryTool=new ImpalaQueryTool(writerDatasource);
+                this.getLocation(queryTool,writerDatasource,this.writerTables.get(0));
+                writerPlugin = new HiveWriter();
+                buildWriter = this.buildHiveWriter();
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+    }
+
+    public List<String> getImpalaCol(JobDatasource jobDatasource,String table) {
+        try {
+            return new ImpalaQueryTool(jobDatasource).getImpalaColumnNames(table,jobDatasource.getDatasource());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * @author: lxq
+     * @description: 获取hivewrite的参数
+     * @date: 2021/2/1 10:59
+     * @param jobDatasource
+     * @param table
+     * @return: void
+     */
+    public void getLocation(Object o,JobDatasource jobDatasource,String table) {
+        String str=null;
+        try {
+            this.hiveWriterDto.setId(jobDatasource.getId());
+            Class c = Class.forName(o.getClass().getName());//获取查询的类名
+            Constructor con = c.getConstructor(JobDatasource.class);//对类进行有参构造方法的初始化
+            // 通过带参构造方法对象创建对象
+            Object obj = con.newInstance(jobDatasource);
+            //获取执行的方法和参数
+            Method method = c.getMethod("getLocation",String.class);
+            str=(String) method.invoke(obj,table);//执行方法
+            String str1 = str.substring(0, str.indexOf("/"));
+            String str2 = str.substring(str1.length()+1, str.length());
+            String str3 = str2.substring(0, str2.indexOf("'"));
+            int index=str3.indexOf("/");
+            index=str3.indexOf("/",index+1);
+            String path=str3.substring(index+1);
+            String str5=str3.substring(0,index);
+            StringBuilder stringBuilder=new StringBuilder();
+            if(IMPALA.equals(jobDatasource.getDatasource())){
+                stringBuilder.append(this.impalaHdfs);
+            }
+            if(HIVE.equals(jobDatasource.getDatasource())){
+                stringBuilder.append(this.hiveHdfs);
+            }
+            this.hiveWriterDto.setWriteMode("append");
+            this.hiveWriterDto.setWriteFieldDelimiter(",");
+            this.hiveWriterDto.setWriterDefaultFS(stringBuilder.toString());
+            this.hiveWriterDto.setWriterFileName(table+"_temp");
+            this.hiveWriterDto.setWriterFileType("text");
+            path=path.replace(table,table+"_temp");
+            this.hiveWriterDto.setWriterPath("/"+path);
+            StringBuilder preSql=new StringBuilder();//datax任务执行前执行的sql
+            StringBuilder postSql=new StringBuilder();//datax任务执行后执行的sql
+            postSql.append("INSERT INTO "+table);
+            if(UUIDUtils.notEmpty(writerPartition)&& writerPartition.getPartition()==0){
+                if(UUIDUtils.notEmpty(writerPartition.getPartitionText())){
+                    postSql.append("PARTITION (").append(writerPartition.getPartitionText()).append(") ");
+                }
+            }
+            postSql.append(" SELECT ");
+            preSql.append("CREATE TABLE IF NOT EXISTS ");
+            preSql.append(table+"_temp").append("(");
+            for (String c1: writerColumns) {
+                preSql.append(c1.split(Constants.SPLIT_SCOLON)[1]).append(" ");
+                preSql.append(c1.split(Constants.SPLIT_SCOLON)[2]).append(",");
+                postSql.append(c1.split(Constants.SPLIT_SCOLON)[1]).append(",");
+            };
+            postSql=postSql.deleteCharAt(postSql.length()-1);
+            postSql.append(" FROM "+table+"_temp");
+            preSql=preSql.deleteCharAt(preSql.length()-1);
+            preSql.append(") ");
+            preSql.append(" ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' ");
+            preSql.append("LOCATION '").append(stringBuilder.toString()+"/"+path).append("'");
+            preSql.append(" STORED AS TEXTFILE;");
+            this.hiveWriterDto.setPreSql(preSql.toString());
+            this.hiveWriterDto.setPostSql(postSql.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -307,6 +505,22 @@ public class DataxJsonHelper implements DataxJsonInterface {
         if (StringUtils.isNotBlank(rdbmsReaderDto.getWhereParams())) {
             dataxPluginPojo.setWhereParam(rdbmsReaderDto.getWhereParams());
         }
+        //同步方式为每日增量
+        if(UUIDUtils.notEmpty(readerSync)&& readerSync.getSyncType()==0){
+            //每日增量,选取时间字段
+            if(UUIDUtils.notEmpty(readerSync)&& StringUtils.isNotBlank(readerSync.getIncExtract())){
+                Date date= DateFormatUtils.addTime(new Date(),Calendar.DATE,-2);
+                dataxPluginPojo.setWhereParam(readerSync.getIncExtract()+"> '"+DateFormatUtils.formatDateTime(date)+"'");
+            }
+            //每日增量,自定义条件
+            if(UUIDUtils.notEmpty(readerSync)&&StringUtils.isNotBlank(readerSync.getIncExtractText())){
+                dataxPluginPojo.setWhereParam(readerSync.getIncExtractText());
+            }
+        }else {
+            //每日全量
+            dataxPluginPojo.setWhereParam("1=1");
+        }
+
         return readerPlugin.build(dataxPluginPojo);
     }
 
@@ -393,6 +607,9 @@ public class DataxJsonHelper implements DataxJsonInterface {
         dataxHivePojo.setWriterPath(hiveWriterDto.getWriterPath());
         dataxHivePojo.setWriteMode(hiveWriterDto.getWriteMode());
         dataxHivePojo.setWriterFileName(hiveWriterDto.getWriterFileName());
+        dataxHivePojo.setPreSql(hiveWriterDto.getPreSql());
+        dataxHivePojo.setPostSql(hiveWriterDto.getPostSql());
+        dataxHivePojo.setId(hiveWriterDto.getId());
         return writerPlugin.buildHive(dataxHivePojo);
     }
 

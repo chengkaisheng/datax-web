@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -75,6 +76,8 @@ public class JobServiceImpl implements JobService {
     @Resource
     private QualityJsonService qualityJsonService;
     @Resource
+    private ImportJsonService importJsonService;
+    @Resource
     private JobProjectService jobProjectService;
     @Resource
     private JobProjectMapper jobProjectMapper;
@@ -101,6 +104,12 @@ public class JobServiceImpl implements JobService {
 
     @Autowired
     private JobVersionService jobVersionService;
+
+    @Value("${hdfs.impala}")
+    private String impalaHdfs;
+
+    @Value("${hdfs.hive}")
+    private String hiveHdfs;
 
     @Override
     public Map<String, Object> pageList(int start, int length, int jobGroup, int triggerStatus, String jobDesc, String glueType, int userId, Integer[] projectIds) {
@@ -130,6 +139,7 @@ public class JobServiceImpl implements JobService {
         String jobJson = null;
         QualityJsonBuildDto qualityJsonBuildDto = null;
         DataXJsonBuildDto dataXJsonBuildDto = null;
+        ImportJsonDto importJsonDto=null;
         if(jobType.equals("DQCJOB")){
             //质量任务
 
@@ -140,7 +150,15 @@ public class JobServiceImpl implements JobService {
 
         } else if (jobType.equalsIgnoreCase("SHELL")){
 
-        }else{
+        }else if("IMPORT".equals(jobType)){
+            //引入任务
+            importJsonDto=JSON.parseObject(jobParam,ImportJsonDto.class);
+            importJsonDto.setHiveHdfs(hiveHdfs);
+            importJsonDto.setImpalaHdfs(impalaHdfs);
+            checkParam(importJsonDto);
+            jobJson = importJsonService.buildJobJson(importJsonDto);
+            jobInfo.setDatasourceId(importJsonDto.getReaderDatasourceId().intValue());
+        } else{
             //其他任务
             dataXJsonBuildDto = JSON.parseObject(jobParam,DataXJsonBuildDto.class);
             checkParam(dataXJsonBuildDto);
@@ -149,6 +167,7 @@ public class JobServiceImpl implements JobService {
         }
 
         // valid
+        jobInfo.setJobJson(jobJson);
         JobGroup group = jobGroupMapper.load(jobInfo.getJobGroup());
         if (group == null) {
             return new ReturnT<>(ReturnT.FAIL_CODE, (I18nUtil.getString("system_please_choose") + I18nUtil.getString("jobinfo_field_jobgroup")));
@@ -156,9 +175,9 @@ public class JobServiceImpl implements JobService {
         if (!CronExpression.isValidExpression(jobInfo.getJobCron())) {
             return new ReturnT<>(ReturnT.FAIL_CODE, I18nUtil.getString("jobinfo_field_cron_invalid"));
         }
-        /*if (jobInfo.getGlueType().equals(GlueTypeEnum.BEAN.getDesc()) && jobInfo.getJobJson().trim().length() <= 2) {
+        if (jobInfo.getGlueType().equals(GlueTypeEnum.BEAN.getDesc()) && jobInfo.getJobJson().trim().length() <= 2) {
             return new ReturnT<>(ReturnT.FAIL_CODE, (I18nUtil.getString("system_please_input") + I18nUtil.getString("jobinfo_field_jobjson")));
-        }*/
+        }
         if (jobInfo.getJobDesc() == null || jobInfo.getJobDesc().trim().length() == 0) {
             return new ReturnT<>(ReturnT.FAIL_CODE, (I18nUtil.getString("system_please_input") + I18nUtil.getString("jobinfo_field_jobdesc")));
         }

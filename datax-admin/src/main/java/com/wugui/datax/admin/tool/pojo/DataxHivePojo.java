@@ -48,4 +48,16 @@ public class DataxHivePojo {
     private String writeFieldDelimiter;
 
     private Boolean skipHeader;
+
+    /**
+     * preSql 属性
+     */
+    private String preSql;
+
+    /**
+     * postSql 属性
+     */
+    private String postSql;
+
+    private Long id;
 }

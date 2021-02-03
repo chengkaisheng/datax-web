@@ -26,4 +26,16 @@ public class HiveWriterDto implements Serializable {
     private String writeMode;
 
     private String writeFieldDelimiter;
+
+    /**
+     * preSql 属性
+     */
+    private String preSql;
+
+    /**
+     * postSql 属性
+     */
+    private String postSql;
+
+    private Long id;
 }

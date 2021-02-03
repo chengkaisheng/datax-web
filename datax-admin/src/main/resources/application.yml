@@ -114,3 +114,7 @@ datasource:
 upload:
   url: /tmp/img/
   service-url: http://127.0.0.1:8080/image
+
+hdfs:
+  impala: hdfs://183.194.64.166:9001
+  hive: hdfs://183.194.64.166:50070
