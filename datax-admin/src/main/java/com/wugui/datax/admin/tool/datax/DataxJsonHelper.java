@@ -415,7 +415,6 @@ public class DataxJsonHelper implements DataxJsonInterface {
             preSql.append(") ");
             preSql.append(" ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' ");
             preSql.append("LOCATION '").append(stringBuilder.toString()+"/"+path).append("'");
-            preSql.append(" STORED AS TEXTFILE;");
             this.hiveWriterDto.setPreSql(preSql.toString());
             this.hiveWriterDto.setPostSql(postSql.toString());
         } catch (Exception e) {

@@ -3,9 +3,11 @@ package com.wugui.datax.admin.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.wugui.datatx.core.biz.model.ReturnT;
 import com.wugui.datax.admin.constans.Constant;
+import com.wugui.datax.admin.entity.JobInfo;
 import com.wugui.datax.admin.entity.JobProjectGroup;
 import com.wugui.datax.admin.service.JobProjectGroupService;
 import com.wugui.datax.admin.service.JobService;
+import com.wugui.datax.admin.util.UUIDUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -84,6 +86,11 @@ public class JobProjectGroupController {
             }
         }
         jobProjectGroupService.updateById(jobProjectGroup);
+        JobInfo jobInfo=jobService.getJobInfo(jobProjectGroup.getJobId());
+        if(UUIDUtils.notEmpty(jobInfo)){
+            jobInfo.setJobDesc(jobProjectGroup.getName());
+            jobService.update(jobInfo);
+        }
         return ReturnT.SUCCESS.setOkMsg("成功");
     }
 

@@ -1,6 +1,7 @@
 package com.wugui.datax.admin.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.wugui.datax.admin.entity.JobVersion;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -10,4 +11,5 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface JobVersionMapper extends BaseMapper<JobVersion> {
+    IPage<JobVersion> pageList(IPage<JobVersion> page);
 }
