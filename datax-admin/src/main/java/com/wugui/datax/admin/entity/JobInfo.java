@@ -1,6 +1,7 @@
 package com.wugui.datax.admin.entity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -26,8 +27,10 @@ public class JobInfo {
 	@ApiModelProperty("排序")
 	private String jobDesc;
 
+	@JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
 	private Date addTime;
 
+	@JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
 	private Date updateTime;
 
 	@ApiModelProperty("修改用户")
@@ -64,6 +67,7 @@ public class JobInfo {
 	private String glueRemark;
 
 	@ApiModelProperty("GLUE更新时间")
+	@JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
 	private Date glueUpdatetime;
 
 	@ApiModelProperty("子任务ID")
@@ -91,6 +95,7 @@ public class JobInfo {
 	private String jvmParam;
 
 	@ApiModelProperty("增量初始时间")
+	@JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
 	private Date incStartTime;
 
 	@ApiModelProperty("分区信息")

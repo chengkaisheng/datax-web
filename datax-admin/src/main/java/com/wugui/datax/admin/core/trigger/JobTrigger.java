@@ -50,6 +50,9 @@ public class JobTrigger {
             logger.warn(">>>>>>>>>>>> trigger fail, jobId invalid，jobId={}", jobId);
             return;
         }
+        if("IMPORT".equals(jobInfo.getJobType())){
+            ImportTrigger.triggerImportCreateTable(jobInfo);//执行任务之前创建临时表
+        }
         if (GlueTypeEnum.BEAN.getDesc().equals(jobInfo.getGlueType()) && "executorJobHandler".equals(jobInfo.getExecutorHandler())) {
             //解密账密
             String json = JSONUtils.changeJson(jobInfo.getJobJson(), JSONUtils.decrypt);
@@ -183,9 +186,7 @@ public class JobTrigger {
         } else {
             routeAddressResult = new ReturnT<String>(ReturnT.FAIL_CODE, I18nUtil.getString("jobconf_trigger_address_empty"));
         }
-        if("IMPORT".equals(jobInfo.getJobType())){
-            ImportTrigger.triggerImportCreateTable(triggerParam);//执行任务之前创建临时表
-        }
+
         // 4、trigger remote executor
         ReturnT<String> triggerResult = null;
         if (address != null) {

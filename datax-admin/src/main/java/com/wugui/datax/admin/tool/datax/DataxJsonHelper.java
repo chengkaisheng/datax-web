@@ -281,7 +281,7 @@ public class DataxJsonHelper implements DataxJsonInterface {
             readerDatasource.setJdbcUsername((username != null && !"".equals(username)) ? username : "default");
             readerDatasource.setJdbcPassword((password != null && !"".equals(password)) ? password : "default");
             writerPlugin = new ImpalaWriter();
-            buildWriter = this.buildHiveWriter();
+            buildWriter = this.buildWriter();
         }
     }
     public void initImportWriter(ImportJsonDto importJsonDto, JobDatasource writerDatasource) {

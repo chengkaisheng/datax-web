@@ -31,15 +31,15 @@ public class ImportTrigger {
      * @author: lxq
      * @description: 执行创建临时表
      * @date: 2021/2/2 11:11
-     * @param triggerParam
+     * @param jobInfo
      * @return: void
      */
-    public static void triggerImportCreateTable(TriggerParam triggerParam){
+    public static void triggerImportCreateTable(JobInfo jobInfo){
         try {
-            JobInfo jobInfo = JobAdminConfig.getAdminConfig().getJobInfoMapper().loadById(triggerParam.getJobId());
+//            JobInfo jobInfo = JobAdminConfig.getAdminConfig().getJobInfoMapper().loadById(triggerParam.getJobId());
             if("IMPORT".equals(jobInfo.getJobType())){
                 int count=0;
-                JSONObject jsonObject = JSON.parseObject(triggerParam.getJobJson());
+                JSONObject jsonObject = JSON.parseObject(jobInfo.getJobJson());
                 JSONObject jsonObject1=null;
                 String content = jsonObject.getJSONObject("job").getJSONArray("content").get(0).toString();
                 jsonObject1=JSON.parseObject(content);
