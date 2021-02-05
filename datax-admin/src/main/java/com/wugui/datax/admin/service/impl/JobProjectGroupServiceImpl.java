@@ -5,9 +5,11 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wugui.datax.admin.constans.Constant;
 import com.wugui.datax.admin.constans.OperationType;
 import com.wugui.datax.admin.entity.JobInfo;
+import com.wugui.datax.admin.entity.JobProject;
 import com.wugui.datax.admin.entity.JobProjectGroup;
 import com.wugui.datax.admin.entity.JobVersion;
 import com.wugui.datax.admin.mapper.JobProjectGroupMapper;
+import com.wugui.datax.admin.mapper.JobProjectMapper;
 import com.wugui.datax.admin.service.JobProjectGroupService;
 import com.wugui.datax.admin.service.JobService;
 import com.wugui.datax.admin.service.JobVersionService;
@@ -16,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,16 +37,37 @@ public class JobProjectGroupServiceImpl extends ServiceImpl<JobProjectGroupMappe
     @Autowired
     private JobVersionService jobVersionService;
 
+    @Autowired
+    private JobProjectMapper jobProjectMapper;
+
     @Override
     public List<JobProjectGroup> getTree(Integer projectId) {
+        List<JobProjectGroup> parentList=new ArrayList<>();
+        JobProject jobProject=jobProjectMapper.selectById(projectId);
+        parentList=getTrees(projectId);
+        if(parentList.size()==0){
+            JobProjectGroup jobProjectGroup=new JobProjectGroup();
+            jobProjectGroup.setProjectId(projectId);
+            jobProjectGroup.setName(jobProject.getName());
+            jobProjectGroup.setParentId(0);
+            jobProjectGroup.setType(1);
+            jobProjectGroup.setJobType("wenjianjia");
+            this.save(jobProjectGroup);
+            parentList=getTrees(projectId);
+        }
+        return parentList;
+    }
+
+    public List<JobProjectGroup> getTrees(Integer projectId){
+        List<JobProjectGroup> jobProjectGroupList=new ArrayList<>();
+        List<JobProjectGroup> parentList=new ArrayList<>();
         //先查出该项目下的所有记录
-        List<JobProjectGroup> jobProjectGroupList = this.list(new QueryWrapper<JobProjectGroup>().eq("project_id", projectId));
+        jobProjectGroupList = this.list(new QueryWrapper<JobProjectGroup>().eq("project_id", projectId));
         //再使用递归对list设置层级结构
         //先拿到最顶级结构
-        List<JobProjectGroup> parentList = jobProjectGroupList.stream().filter(item -> item.getParentId() == 0).collect(Collectors.toList());
+        parentList = jobProjectGroupList.stream().filter(item -> item.getParentId() == 0).collect(Collectors.toList());
 
         setChildren(jobProjectGroupList,parentList);
-
         return parentList;
     }
 
