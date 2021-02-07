@@ -40,7 +40,7 @@ public class JobProjectGroupController {
     @PostMapping("save")
     public ReturnT<String> save(@RequestBody JobProjectGroup jobProjectGroup) {
         if (jobProjectGroup.getParentId() == null || jobProjectGroup.getProjectId() == null) {
-            return ReturnT.FAIL;
+            return new ReturnT<>("请选择父级目录");
         }
         JobProjectGroup listByName = jobProjectGroupService.getOne(new QueryWrapper<JobProjectGroup>().
                 eq("project_id", jobProjectGroup.getProjectId()).
@@ -86,10 +86,12 @@ public class JobProjectGroupController {
             }
         }
         jobProjectGroupService.updateById(jobProjectGroup);
-        JobInfo jobInfo=jobService.getJobInfo(jobProjectGroup.getJobId());
-        if(UUIDUtils.notEmpty(jobInfo)){
-            jobInfo.setJobDesc(jobProjectGroup.getName());
-            jobService.update(jobInfo);
+        if(UUIDUtils.notEmpty(jobProjectGroup.getJobId())){
+            JobInfo jobInfo=jobService.getJobInfo(jobProjectGroup.getJobId());
+            if(UUIDUtils.notEmpty(jobInfo)){
+                jobInfo.setJobDesc(jobProjectGroup.getName());
+                jobService.update(jobInfo);
+            }
         }
         return ReturnT.SUCCESS.setOkMsg("成功");
     }

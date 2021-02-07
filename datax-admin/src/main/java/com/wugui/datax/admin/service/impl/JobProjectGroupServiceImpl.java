@@ -86,7 +86,7 @@ public class JobProjectGroupServiceImpl extends ServiceImpl<JobProjectGroupMappe
         JobProjectGroup jobProjectGroup= this.getById(id);
         boolean succDelete= this.removeById(id);
         //删除任务
-        if(succDelete && UUIDUtils.notEmpty(jobProjectGroup)){
+        if(succDelete && UUIDUtils.notEmpty(jobProjectGroup) && UUIDUtils.notEmpty(jobProjectGroup.getJobId())){
             jobService.deleteById(jobProjectGroup.getJobId());
         }
     }
