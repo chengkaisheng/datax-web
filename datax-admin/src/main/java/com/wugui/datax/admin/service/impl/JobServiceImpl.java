@@ -847,6 +847,8 @@ public class JobServiceImpl implements JobService {
         exists_jobInfo.setTriggerNextTime(nextTriggerTime);
         int n=jobInfoMapper.update(exists_jobInfo);
         if(n>0){
+            //TODO 保存任务版本信息
+            saveJobVersion(jobInfo, OperationType.CREATE_OPERATION);
             return new ReturnT<>(ReturnT.SUCCESS_CODE,"保存成功");
         }else {
             return new ReturnT<>(ReturnT.FAIL_CODE, "保存失败");

@@ -36,12 +36,13 @@ public class BuildCommand {
         // command process
         //"--loglevel=debug"
         List<String> cmdArr = new ArrayList<>();
-        cmdArr.add("sudo -u impala python");
+        cmdArr.add("python");
         String dataXHomePath = SystemUtils.getDataXHomePath();
         if (StringUtils.isNotEmpty(dataXHomePath)) {
             dataXPyPath = dataXHomePath.contains("bin") ? dataXHomePath + DEFAULT_DATAX_PY : dataXHomePath + "bin" + File.separator + DEFAULT_DATAX_PY;
         }
         cmdArr.add(dataXPyPath);
+        cmdArr.add("-p \"-DHADOOP_USER_NAME=impala\"");
         String doc = buildDataXParam(tgParam);
         if (StringUtils.isNotBlank(doc)) {
             cmdArr.add(doc.replaceAll(SPLIT_SPACE, TRANSFORM_SPLIT_SPACE));
