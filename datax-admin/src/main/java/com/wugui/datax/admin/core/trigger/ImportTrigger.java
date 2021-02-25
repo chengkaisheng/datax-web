@@ -101,4 +101,36 @@ public class ImportTrigger {
             JobLogger.log("<br>----------- DataElit IMPORT job insert error info:"+e.getMessage());
         }
     }
+
+    /**
+     * @author: lxq
+     * @description: TODO
+     * @date: 2021/2/25 9:57
+     * @param jobInfo
+     * @return: void
+     */
+    public static void refreshTable(JobInfo jobInfo){
+        try {
+            if("IMPORT".equals(jobInfo.getJobType())){
+                int count=0;
+                JSONObject jsonObject = JSON.parseObject(jobInfo.getJobJson());
+                JSONObject jsonObject1=null;
+                String content = jsonObject.getJSONObject("job").getJSONArray("content").get(0).toString();
+                jsonObject1=JSON.parseObject(content);
+                String dataSourceId=jsonObject1.getJSONObject("writer").get("id").toString();
+                JobDatasource jobDatasource=JobAdminConfig.getAdminConfig().getJobDatasourceMapper().selectById(dataSourceId);
+                if(JdbcConstants.HIVE.equals(jobDatasource.getDatasource())){
+                    HiveQueryTool hiveQueryTool=new HiveQueryTool(jobDatasource);
+                    hiveQueryTool.refreshTable();
+                }
+                if(JdbcConstants.IMPALA.equals(jobDatasource.getDatasource())){
+                    ImpalaQueryTool impalaQueryTool=new ImpalaQueryTool(jobDatasource);
+                    impalaQueryTool.refreshTable();
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            JobLogger.log("<br>----------- DataElit IMPORT job refreshTable error:"+e.getMessage());
+        }
+    }
 }
