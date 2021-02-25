@@ -161,17 +161,16 @@ public class ImpalaQueryTool extends BaseQueryTool implements QueryToolInterface
     public void refreshTable() {
         Statement stmt = null;
         ResultSet rs = null;
-        StringBuilder str=new StringBuilder();
         try {
             //获取查询指定表所有字段的sql语句
-            String querySql = "invalidate metadata;";
+            String querySql = "invalidate metadata";
             logger.info("querySql: {}", querySql);
 
             //获取所有字段
             stmt = connection.createStatement();
-            rs = stmt.executeQuery(querySql);
+            stmt.executeUpdate(querySql);
         } catch (SQLException e) {
-            logger.error("[getColumnNames Exception] --> "
+            logger.error("[refreshTable Exception] --> "
                     + "the exception message is:" + e.getMessage());
         } finally {
             JdbcUtils.close(rs);
