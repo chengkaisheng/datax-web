@@ -148,7 +148,7 @@ public class JobServiceImpl implements JobService {
             jobJson = qualityJsonService.buildJobJson(qualityJsonBuildDto);
             jobInfo.setDatasourceId(qualityJsonBuildDto.getReaderDatasourceId().intValue());
 
-        } else if (jobType.equalsIgnoreCase("SHELL")){
+        }else if (jobType.equalsIgnoreCase("SHELL")){
 
         }else if("IMPORT".equals(jobType)){
             //引入任务
@@ -158,7 +158,15 @@ public class JobServiceImpl implements JobService {
             checkParam(importJsonDto);
             jobJson = importJsonService.buildJobJson(importJsonDto);
             jobInfo.setDatasourceId(importJsonDto.getReaderDatasourceId().intValue());
-        } else{
+        }else if("SPARK".equals(jobType)){
+
+        }else if("SQLJOB".equals(jobType)){
+            jobJson=jobInfo.getJobJson();
+        }else if("POWERSHELL".equals(jobType)){
+
+        }else if("PYTHON".equals(jobType)){
+
+        }else{
             //其他任务
             dataXJsonBuildDto = JSON.parseObject(jobParam,DataXJsonBuildDto.class);
             checkParam(dataXJsonBuildDto);
@@ -433,6 +441,22 @@ public class JobServiceImpl implements JobService {
             QualityJsonBuildDto qualityJsonBuildDto = JSON.parseObject(jobParam,QualityJsonBuildDto.class);
             checkParam(qualityJsonBuildDto);
             jobJson = qualityJsonService.buildJobJson(qualityJsonBuildDto);
+
+        }else if("IMPORT".equals(jobType)){
+            //引入任务
+            ImportJsonDto importJsonDto=JSON.parseObject(jobParam,ImportJsonDto.class);
+            importJsonDto.setHiveHdfs(hiveHdfs);
+            importJsonDto.setImpalaHdfs(impalaHdfs);
+            checkParam(importJsonDto);
+            jobJson = importJsonService.buildJobJson(importJsonDto);
+            jobInfo.setDatasourceId(importJsonDto.getReaderDatasourceId().intValue());
+        }else if("SPARK".equals(jobType)){
+
+        }else if("SQLJOB".equals(jobType)){
+            jobJson=jobInfo.getJobJson();
+        }else if("POWERSHELL".equals(jobType)){
+
+        }else if("PYTHON".equals(jobType)){
 
         }else{
             //其他任务

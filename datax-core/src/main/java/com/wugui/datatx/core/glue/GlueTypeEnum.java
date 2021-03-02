@@ -4,7 +4,7 @@ package com.wugui.datatx.core.glue;
  * Created by xuxueli on 17/4/26.
  */
 public enum GlueTypeEnum {
-
+    GLUE_SPARK("GLUE(Spark)",true,null,null),
     BEAN("BEAN", false, null, null),
     GLUE_GROOVY("GLUE(Java)", false, null, null),
     GLUE_SHELL("GLUE(Shell)", true, "bash", ".sh"),
