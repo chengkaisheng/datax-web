@@ -364,7 +364,6 @@ public class DataxJsonHelper implements DataxJsonInterface {
     public void getLocation(Object o,JobDatasource jobDatasource,String table) {
         String str=null;
         try {
-            boolean isPatition=false;
             this.hiveWriterDto.setId(jobDatasource.getId());
             Class c = Class.forName(o.getClass().getName());//获取查询的类名
             Constructor con = c.getConstructor(JobDatasource.class);//对类进行有参构造方法的初始化
@@ -396,10 +395,7 @@ public class DataxJsonHelper implements DataxJsonInterface {
             this.hiveWriterDto.setWriterPath("/"+path);
             StringBuilder preSql=new StringBuilder();//datax任务执行前执行的sql
             StringBuilder postSql=new StringBuilder();//datax任务执行后执行的sql
-            StringBuilder patition=new StringBuilder();//分区信息
             String[] strings=null;
-            StringBuilder patitionWhere=new StringBuilder();//分区insert的where
-            patition.append(" PARTITIONED BY (");
             postSql.append("INSERT INTO "+table);
             if(UUIDUtils.notEmpty(writerPartition)&& writerPartition.getPartition()==0){
                 if(UUIDUtils.notEmpty(writerPartition.getPartitionText())){
@@ -416,46 +412,14 @@ public class DataxJsonHelper implements DataxJsonInterface {
             preSql.append("CREATE TABLE IF NOT EXISTS ");
             preSql.append(table+"_temp").append("(");
             for (String c1: writerColumns) {
-                if(this.writerPartition.getPartition()==0){//判断目标表是否分区
-                    if(!UUIDUtils.notEmpty(strings)){//判断目标表分区后是否选择分区字段
-                        preSql.append(c1.split(Constants.SPLIT_SCOLON)[1]).append(" ");
-                        preSql.append(c1.split(Constants.SPLIT_SCOLON)[2]).append(",");
-                        postSql.append(c1.split(Constants.SPLIT_SCOLON)[1]).append(",");
-                    }else{
-                        boolean patitionCol=false;//用于判断字段是否是分区字段，如果是则不加入到select中
-                        for (String s:strings){//循环判断目标表选择的分区字段
-                            if(c1.split(Constants.SPLIT_SCOLON)[1].equals(s)){//判断当前字段是否是分区字段
-                                patition.append(c1.split(Constants.SPLIT_SCOLON)[1]).append(" ").append(c1.split(Constants.SPLIT_SCOLON)[2]).append(",");
-                                patitionWhere.append(c1.split(Constants.SPLIT_SCOLON)[1]).append(" and ");
-                                isPatition=true;
-                                patitionCol=true;
-                                break;
-                            }
-                        }
-                        if(!patitionCol){//非分区字段直接加入到select查询中
-                            preSql.append(c1.split(Constants.SPLIT_SCOLON)[1]).append(" ");
-                            preSql.append(c1.split(Constants.SPLIT_SCOLON)[2]).append(",");
-                            postSql.append(c1.split(Constants.SPLIT_SCOLON)[1]).append(",");
-                        }
-                    }
-                }else {
-                    preSql.append(c1.split(Constants.SPLIT_SCOLON)[1]).append(" ");
-                    preSql.append(c1.split(Constants.SPLIT_SCOLON)[2]).append(",");
-                    postSql.append(c1.split(Constants.SPLIT_SCOLON)[1]).append(",");
-                }
-
+                preSql.append(c1.split(Constants.SPLIT_SCOLON)[1]).append(" ");
+                preSql.append(c1.split(Constants.SPLIT_SCOLON)[2]).append(",");
+                postSql.append(c1.split(Constants.SPLIT_SCOLON)[1]).append(",");
             };
             postSql=postSql.deleteCharAt(postSql.length()-1);
-            postSql.append(" FROM "+table+"_temp ");
+            postSql.append(" FROM "+table+"_temp");
             preSql=preSql.deleteCharAt(preSql.length()-1);
             preSql.append(") ");
-            if(isPatition){
-                postSql.append(" where ");
-                postSql.append(patitionWhere.substring(0,patitionWhere.length()-4));
-                patition=patition.deleteCharAt(patition.length()-1);
-                patition.append(")");
-                preSql.append(patition);
-            }
             preSql.append(" ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' ");
             preSql.append("LOCATION '").append("hdfs://"+str5.substring(1)+"/"+path).append("'");
             this.hiveWriterDto.setPreSql(preSql.toString());
