@@ -118,14 +118,15 @@ public class ImportTrigger {
                 String content = jsonObject.getJSONObject("job").getJSONArray("content").get(0).toString();
                 jsonObject1=JSON.parseObject(content);
                 String dataSourceId=jsonObject1.getJSONObject("writer").get("id").toString();
+                String tableName=jsonObject1.getJSONObject("writer").get("fileName").toString();
                 JobDatasource jobDatasource=JobAdminConfig.getAdminConfig().getJobDatasourceMapper().selectById(dataSourceId);
                 if(JdbcConstants.HIVE.equals(jobDatasource.getDatasource())){
                     HiveQueryTool hiveQueryTool=new HiveQueryTool(jobDatasource);
-                    hiveQueryTool.refreshTable();
+                    hiveQueryTool.refreshTable(tableName);
                 }
                 if(JdbcConstants.IMPALA.equals(jobDatasource.getDatasource())){
                     ImpalaQueryTool impalaQueryTool=new ImpalaQueryTool(jobDatasource);
-                    impalaQueryTool.refreshTable();
+                    impalaQueryTool.refreshTable(tableName);
                 }
             }
         }catch (Exception e){
