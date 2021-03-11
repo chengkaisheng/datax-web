@@ -115,10 +115,12 @@ public class ImportTrigger {
                 int count=0;
                 JSONObject jsonObject = JSON.parseObject(jobInfo.getJobJson());
                 JSONObject jsonObject1=null;
+                JSONObject jsonObject2=null;
                 String content = jsonObject.getJSONObject("job").getJSONArray("content").get(0).toString();
                 jsonObject1=JSON.parseObject(content);
                 String dataSourceId=jsonObject1.getJSONObject("writer").get("id").toString();
-                String tableName=jsonObject1.getJSONObject("writer").get("fileName").toString();
+                jsonObject2=jsonObject1.getJSONObject("writer");
+                String tableName=jsonObject2.getJSONObject("parameter").get("fileName").toString();
                 JobDatasource jobDatasource=JobAdminConfig.getAdminConfig().getJobDatasourceMapper().selectById(dataSourceId);
                 if(JdbcConstants.HIVE.equals(jobDatasource.getDatasource())){
                     HiveQueryTool hiveQueryTool=new HiveQueryTool(jobDatasource);
@@ -132,6 +134,41 @@ public class ImportTrigger {
         }catch (Exception e){
             e.printStackTrace();
             JobLogger.log("<br>----------- DataElit IMPORT job refreshTable error:"+e.getMessage());
+        }
+    }
+
+    /**
+     * @author: lxq
+     * @description: TODO
+     * @date: 2021/3/11 10:40
+     * @param jobInfo
+     * @return: void
+     */
+    public static void dropTable(JobInfo jobInfo){
+        try {
+            if("IMPORT".equals(jobInfo.getJobType())){
+                int count=0;
+                JSONObject jsonObject = JSON.parseObject(jobInfo.getJobJson());
+                JSONObject jsonObject1=null;
+                JSONObject jsonObject2=null;
+                String content = jsonObject.getJSONObject("job").getJSONArray("content").get(0).toString();
+                jsonObject1=JSON.parseObject(content);
+                String dataSourceId=jsonObject1.getJSONObject("writer").get("id").toString();
+                jsonObject2=jsonObject1.getJSONObject("writer");
+                String tableName=jsonObject2.getJSONObject("parameter").get("fileName").toString();
+                JobDatasource jobDatasource=JobAdminConfig.getAdminConfig().getJobDatasourceMapper().selectById(dataSourceId);
+                if(JdbcConstants.HIVE.equals(jobDatasource.getDatasource())){
+                    HiveQueryTool hiveQueryTool=new HiveQueryTool(jobDatasource);
+                    hiveQueryTool.dropTable(tableName);
+                }
+                if(JdbcConstants.IMPALA.equals(jobDatasource.getDatasource())){
+                    ImpalaQueryTool impalaQueryTool=new ImpalaQueryTool(jobDatasource);
+                    impalaQueryTool.dropTable(tableName);
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            JobLogger.log("<br>----------- DataElit IMPORT job dropTable error:"+e.getMessage());
         }
     }
 }

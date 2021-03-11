@@ -197,7 +197,8 @@ public class AdminBizImpl implements AdminBiz {
         JobInfo jobInfo = jobInfoMapper.loadById(log.getJobId());
         if("IMPORT".equals(jobInfo.getJobType())&&resultCode==200){//datax任务执行完成后,执行insert操作
             ImportTrigger.refreshTable(jobInfo);//insert操作之前刷新元数据
-            ImportTrigger.triggerImportInsert(jobInfo);
+            ImportTrigger.triggerImportInsert(jobInfo);//执行insert
+            ImportTrigger.dropTable(jobInfo);//执行inset后删除临时表
             JobLogger.log("dataElit IMPORT任务正在执行insert操作");
         }
         jobLogMapper.updateHandleInfo(log);

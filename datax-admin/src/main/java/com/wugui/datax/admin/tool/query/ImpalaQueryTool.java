@@ -177,4 +177,24 @@ public class ImpalaQueryTool extends BaseQueryTool implements QueryToolInterface
             JdbcUtils.close(stmt);
         }
     }
+
+    public int dropTable(String tableName) {
+        Statement stmt = null;
+        ResultSet rs = null;
+        int count=0;
+        try {
+            String sql="drop table "+tableName;
+            logger.info("querySql: {}", sql);
+            stmt = connection.createStatement();
+            count = stmt.executeUpdate(sql);
+
+        } catch (SQLException e) {
+            logger.error("[createTable Exception] --> "
+                    + "the exception message is:" + e.getMessage());
+        } finally {
+            JdbcUtils.close(rs);
+            JdbcUtils.close(stmt);
+        }
+        return count;
+    }
 }
