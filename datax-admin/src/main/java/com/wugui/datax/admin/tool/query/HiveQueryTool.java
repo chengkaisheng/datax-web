@@ -116,12 +116,12 @@ public class HiveQueryTool extends BaseQueryTool implements QueryToolInterface {
         return count;
     }
 
-    public void refreshTable() {
+    public void refreshTable(String tableName) {
         Statement stmt = null;
         ResultSet rs = null;
         try {
             //获取查询指定表所有字段的sql语句
-            String querySql = "invalidate metadata";
+            String querySql = "invalidate metadata "+tableName;
             logger.info("querySql: {}", querySql);
 
             //获取所有字段
@@ -134,5 +134,25 @@ public class HiveQueryTool extends BaseQueryTool implements QueryToolInterface {
             JdbcUtils.close(rs);
             JdbcUtils.close(stmt);
         }
+    }
+
+    public int dropTable(String tableName) {
+        Statement stmt = null;
+        ResultSet rs = null;
+        int count=0;
+        try {
+            String sql="drop table "+tableName;
+            logger.info("querySql: {}", sql);
+            stmt = connection.createStatement();
+            count = stmt.executeUpdate(sql);
+
+        } catch (SQLException e) {
+            logger.error("[createTable Exception] --> "
+                    + "the exception message is:" + e.getMessage());
+        } finally {
+            JdbcUtils.close(rs);
+            JdbcUtils.close(stmt);
+        }
+        return count;
     }
 }

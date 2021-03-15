@@ -396,7 +396,7 @@ public class DataxJsonHelper implements DataxJsonInterface {
             StringBuilder preSql=new StringBuilder();//datax任务执行前执行的sql
             StringBuilder postSql=new StringBuilder();//datax任务执行后执行的sql
             String[] strings=null;
-            postSql.append("INSERT INTO "+table);
+            postSql.append("INSERT OVERWRITE TABLE "+table);
             if(UUIDUtils.notEmpty(writerPartition)&& writerPartition.getPartition()==0){
                 if(UUIDUtils.notEmpty(writerPartition.getPartitionText())){
                     postSql.append(" PARTITION (");
